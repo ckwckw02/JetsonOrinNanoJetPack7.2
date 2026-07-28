@@ -1,0 +1,719 @@
+------ 2026-07-27 20:46:28 ------
+------ SDK: JetPack_7.2_Linux ------
+20:46:28.674 - Info: exec_command: ssh   jetson@192.168.55.1 "df -B1 / | tail -1 | awk '{ printf \$4 }'"20:46:29.074 - Info: NV_L4T_CUPVA_RUNTIME_SBSA_TARGET_POST_INSTALL_COMP include 2 package20:46:29.074 - Info: [ Package Install Started ]20:46:29.074 - Info: target deb installer start to install20:46:29.074 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+sudo mkdir -p /opt/nvidia/deb_repos
+sudo chmod 777 /opt/nvidia/deb_repos
+sudo rm -f /opt/nvidia/deb_repos/pva-sdk-2.9-l4t_2.9.1_arm64.deb
+**********************20:46:30.551 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+
+exec 3>&1
+exec 1>&2
+exec 2>&3
+function safe_apt_install {
+    export DEBIAN_FRONTEND=noninteractive
+    echo "*begin $1, $2"
+    tmp_log=/tmp/sdkm_apt_install_log.ckw.txt
+    sudo rm -f $tmp_log
+    set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+    MAX_RETRY=3
+    TIMES=1
+    while [ ${CMD_STATUS} -ne 0 ]; do
+        cat $tmp_log > /dev/stderr
+        if [ $TIMES -gt $MAX_RETRY ]; then
+            echo "Unhandled error when running $1: `tr '\n' '; ' <$tmp_log`" 1>&2; exit 1
+        fi
+        if grep -q -e "is locked by another process" -e "E: Could not get lock /var/" -e "Could not open lock" $tmp_log; then
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting $2 seconds for apt to be available"; sleep ${2}
+        elif grep -q -e "apt --fix-broken install" $tmp_log; then
+            echo "safe apt install failed, need to run apt --fix-broken install"
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; sudo apt-get -f -y --allow-downgrades install 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting 5 seconds for apt"; sleep 5
+        else
+            echo "safe apt install failed: $1, exit code: $CMD_STATUS, retry number: $TIMES"
+            echo "will sleep $[ $TIMES*10 ] seconds before next attempt"
+            sleep $[ $TIMES*10 ]
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+        fi
+    done
+    if [ $CMD_STATUS -eq 0 ] && [ $TIMES -ne 1 ]; then
+        echo "safe apt install succeed. retry number: $TIMES."
+    fi
+}
+safe_apt_install "sudo apt-get -y update" 5
+sleep 0.5
+safe_apt_install "sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/pva-sdk-2.9-l4t_2.9.1_arm64.deb" 5
+sleep 5
+sudo rm -f /opt/nvidia/deb_repos/pva-sdk-2.9-l4t_2.9.1_arm64.deb
+**********************20:46:31.331 - Info: *begin sudo apt-get -y update, 5
+20:46:31.331 - Info: 
+20:46:31.593 - Info: 
+20:46:31.670 - Info: 0% [Working]
+20:46:31.671 - Info:             
+20:46:31.671 - Info: Hit:1 https://download.docker.com/linux/ubuntu noble InRelease
+20:46:31.671 - Info: 
+20:46:31.671 - Info: 
+20:46:31.671 - Info: 0% [Waiting for headers] [Connecting to ports.ubuntu.com]
+20:46:31.671 - Info:                                                          
+20:46:31.671 - Info: Hit:2 https://repo.download.nvidia.com/jetson/common r39.2 InRelease
+20:46:31.671 - Info: 
+20:46:31.671 - Info: 
+20:46:31.722 - Info: 0% [Connected to repo.download.nvidia.com (23.205.151.188)] [Connecting to ports.ubuntu.com]
+20:46:31.722 - Info:                                                                                             
+20:46:31.722 - Info: Hit:3 https://repo.download.nvidia.com/jetson/som r39.2 InRelease
+20:46:31.722 - Info: 
+20:46:31.722 - Info: 
+20:46:31.722 - Info:                                                                                             
+20:46:31.778 - Info: 0% [Connecting to ports.ubuntu.com]
+20:46:31.778 - Info:                                    
+20:46:31.778 - Info: Hit:4 https://repo.download.nvidia.com/jetson/ffmpeg r39.2 InRelease
+20:46:31.778 - Info: 
+20:46:31.778 - Info: 
+20:46:31.794 - Info: 0% [Connecting to ports.ubuntu.com]
+20:46:32.148 - Info: 0% [Connecting to ports.ubuntu.com (91.189.92.19)]
+20:46:32.148 - Info:                                                   
+20:46:32.320 - Info: 0% [Waiting for headers]
+20:46:32.339 - Info:                         
+20:46:32.339 - Info: Hit:5 http://ports.ubuntu.com/ubuntu-ports noble InRelease
+20:46:32.339 - Info: 
+20:46:32.339 - Info: 
+20:46:32.339 - Info:                         
+20:46:32.474 - Info: 0% [Working]
+20:46:32.564 - Info: 0% [Waiting for headers]
+20:46:32.564 - Info:                         
+20:46:32.564 - Info: Hit:6 http://ports.ubuntu.com/ubuntu-ports noble-updates InRelease
+20:46:32.564 - Info: 
+20:46:32.564 - Info: 
+20:46:32.564 - Info:                         
+20:46:32.680 - Info: 0% [Working]
+20:46:32.787 - Info: 0% [Waiting for headers]
+20:46:32.787 - Info:                         
+20:46:32.787 - Info: Hit:7 http://ports.ubuntu.com/ubuntu-ports noble-backports InRelease
+20:46:32.787 - Info: 
+20:46:32.787 - Info: 
+20:46:32.787 - Info:                         
+20:46:32.906 - Info: 0% [Working]
+20:46:33.011 - Info: 0% [Waiting for headers]
+20:46:33.011 - Info:                         
+20:46:33.011 - Info: Hit:8 http://ports.ubuntu.com/ubuntu-ports noble-security InRelease
+20:46:33.011 - Info: 
+20:46:33.011 - Info: 
+20:46:33.011 - Info:                         
+20:46:33.134 - Info: 0% [Working]
+20:46:33.134 - Info: 20% [Working]
+20:46:33.134 - Info:              
+20:46:33.372 - Info: 
+20:46:33.372 - Info: Reading package lists... 0%
+20:46:33.389 - Info: 
+20:46:33.389 - Info: Reading package lists... 0%
+20:46:33.394 - Info: 
+20:46:33.394 - Info: Reading package lists... 0%
+20:46:33.394 - Info: 
+20:46:33.394 - Info: Reading package lists... 0%
+20:46:33.398 - Info: 
+20:46:33.398 - Info: Reading package lists... 0%
+20:46:33.398 - Info: 
+20:46:33.398 - Info: Reading package lists... 0%
+20:46:33.399 - Info: 
+20:46:33.399 - Info: Reading package lists... 0%
+20:46:33.399 - Info: 
+20:46:33.399 - Info: Reading package lists... 0%
+20:46:33.401 - Info: 
+20:46:33.401 - Info: Reading package lists... 0%
+20:46:33.401 - Info: 
+20:46:33.401 - Info: Reading package lists... 0%
+20:46:33.406 - Info: 
+20:46:33.406 - Info: Reading package lists... 0%
+20:46:33.479 - Info: 
+20:46:33.479 - Info: Reading package lists... 3%
+20:46:33.479 - Info: 
+20:46:33.479 - Info: Reading package lists... 3%
+20:46:33.493 - Info: 
+20:46:33.493 - Info: Reading package lists... 5%
+20:46:33.493 - Info: 
+20:46:33.493 - Info: Reading package lists... 5%
+20:46:34.127 - Info: 
+20:46:34.127 - Info: Reading package lists... 26%
+20:46:34.650 - Info: 
+20:46:34.650 - Info: Reading package lists... 41%
+20:46:34.650 - Info: 
+20:46:34.650 - Info: Reading package lists... 41%
+20:46:34.817 - Info: 
+20:46:34.817 - Info: Reading package lists... 57%
+20:46:34.817 - Info: 
+20:46:34.817 - Info: Reading package lists... 57%
+20:46:34.823 - Info: 
+20:46:34.823 - Info: Reading package lists... 58%
+20:46:34.823 - Info: 
+20:46:34.823 - Info: Reading package lists... 58%
+20:46:34.824 - Info: 
+20:46:34.824 - Info: Reading package lists... 58%
+20:46:34.824 - Info: 
+20:46:34.824 - Info: Reading package lists... 58%
+20:46:34.834 - Info: 
+20:46:34.834 - Info: Reading package lists... 58%
+20:46:34.844 - Info: 
+20:46:34.844 - Info: Reading package lists... 58%
+20:46:34.844 - Info: 
+20:46:34.844 - Info: Reading package lists... 58%
+20:46:34.847 - Info: 
+20:46:34.847 - Info: Reading package lists... 59%
+20:46:34.847 - Info: 
+20:46:34.847 - Info: Reading package lists... 59%
+20:46:34.943 - Info: 
+20:46:34.943 - Info: Reading package lists... 62%
+20:46:34.943 - Info: 
+20:46:34.943 - Info: Reading package lists... 62%
+20:46:34.961 - Info: 
+20:46:34.961 - Info: Reading package lists... 64%
+20:46:34.961 - Info: 
+20:46:34.961 - Info: Reading package lists... 64%
+20:46:35.107 - Info: 
+20:46:35.107 - Info: Reading package lists... 69%
+20:46:35.107 - Info: 
+20:46:35.107 - Info: Reading package lists... 69%
+20:46:35.129 - Info: 
+20:46:35.129 - Info: Reading package lists... 71%
+20:46:35.129 - Info: 
+20:46:35.129 - Info: Reading package lists... 71%
+20:46:35.260 - Info: 
+20:46:35.260 - Info: Reading package lists... 77%
+20:46:35.260 - Info: 
+20:46:35.260 - Info: Reading package lists... 77%
+20:46:35.293 - Info: 
+20:46:35.294 - Info: Reading package lists... 80%
+20:46:35.294 - Info: 
+20:46:35.294 - Info: Reading package lists... 80%
+20:46:35.298 - Info: 
+20:46:35.298 - Info: Reading package lists... 80%
+20:46:35.298 - Info: 
+20:46:35.298 - Info: Reading package lists... 80%
+20:46:35.301 - Info: 
+20:46:35.301 - Info: Reading package lists... 80%
+20:46:35.301 - Info: 
+20:46:35.301 - Info: Reading package lists... 80%
+20:46:35.305 - Info: 
+20:46:35.305 - Info: Reading package lists... 80%
+20:46:35.305 - Info: 
+20:46:35.305 - Info: Reading package lists... 80%
+20:46:35.305 - Info: 
+20:46:35.305 - Info: Reading package lists... 80%
+20:46:35.305 - Info: 
+20:46:35.305 - Info: Reading package lists... 80%
+20:46:35.309 - Info: 
+20:46:35.309 - Info: Reading package lists... 80%
+20:46:35.309 - Info: 
+20:46:35.309 - Info: Reading package lists... 80%
+20:46:35.310 - Info: 
+20:46:35.310 - Info: Reading package lists... 80%
+20:46:35.310 - Info: 
+20:46:35.310 - Info: Reading package lists... 80%
+20:46:35.310 - Info: 
+20:46:35.310 - Info: Reading package lists... 80%
+20:46:35.310 - Info: 
+20:46:35.310 - Info: Reading package lists... 80%
+20:46:35.311 - Info: 
+20:46:35.311 - Info: Reading package lists... 80%
+20:46:35.311 - Info: 
+20:46:35.311 - Info: Reading package lists... 80%
+20:46:35.342 - Info: 
+20:46:35.342 - Info: Reading package lists... 83%
+20:46:35.342 - Info: 
+20:46:35.342 - Info: Reading package lists... 83%
+20:46:35.357 - Info: 
+20:46:35.357 - Info: Reading package lists... 84%
+20:46:35.357 - Info: 
+20:46:35.357 - Info: Reading package lists... 84%
+20:46:35.399 - Info: 
+20:46:35.399 - Info: Reading package lists... 88%
+20:46:35.399 - Info: 
+20:46:35.399 - Info: Reading package lists... 88%
+20:46:35.416 - Info: 
+20:46:35.416 - Info: Reading package lists... 90%
+20:46:35.416 - Info: 
+20:46:35.416 - Info: Reading package lists... 90%
+20:46:35.476 - Info: 
+20:46:35.476 - Info: Reading package lists... 95%
+20:46:35.476 - Info: 
+20:46:35.476 - Info: Reading package lists... 95%
+20:46:35.507 - Info: 
+20:46:35.507 - Info: Reading package lists... 98%
+20:46:35.507 - Info: 
+20:46:35.507 - Info: Reading package lists... 98%
+20:46:35.510 - Info: 
+20:46:35.510 - Info: Reading package lists... 98%
+20:46:35.510 - Info: 
+20:46:35.510 - Info: Reading package lists... 98%
+20:46:35.592 - Info: 
+20:46:35.592 - Info: Reading package lists... 98%
+20:46:35.592 - Info: 
+20:46:35.592 - Info: Reading package lists... 98%
+20:46:35.603 - Info: 
+20:46:35.603 - Info: Reading package lists... 99%
+20:46:35.717 - Info: 
+20:46:35.717 - Info: Reading package lists... Done
+20:46:35.717 - Info: 
+20:46:35.717 - Info: 
+20:46:36.286 - Info: *begin sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/pva-sdk-2.9-l4t_2.9.1_arm64.deb, 5
+20:46:36.286 - Info: 
+20:46:36.461 - Info: 
+20:46:36.461 - Info: Reading package lists... 0%
+20:46:36.576 - Info: 
+20:46:36.576 - Info: Reading package lists... 0%
+20:46:36.588 - Info: 
+20:46:36.588 - Info: Reading package lists... Done
+20:46:36.588 - Info: 
+20:46:36.588 - Info: 
+20:46:36.610 - Info: 
+20:46:36.611 - Info: Building dependency tree... 0%
+20:46:36.611 - Info: 
+20:46:36.611 - Info: Building dependency tree... 0%
+20:46:36.612 - Info: 
+20:46:36.612 - Info: Building dependency tree... 0%
+20:46:36.834 - Info: 
+20:46:36.834 - Info: Building dependency tree... 50%
+20:46:36.834 - Info: 
+20:46:36.834 - Info: Building dependency tree... 50%
+20:46:37.315 - Info: 
+20:46:37.316 - Info: Building dependency tree... 85%
+20:46:37.502 - Info: 
+20:46:37.502 - Info: Building dependency tree... Done
+20:46:37.502 - Info: 
+20:46:37.502 - Info: 
+20:46:37.502 - Info: 
+20:46:37.502 - Info: Reading state information... 0% 
+20:46:37.502 - Info: 
+20:46:37.502 - Info: Reading state information... 0%
+20:46:37.508 - Info: 
+20:46:37.508 - Info: Reading state information... Done
+20:46:37.508 - Info: 
+20:46:37.508 - Info: 
+20:46:37.642 - Info: Note, selecting 'pva-sdk-2.9-l4t' instead of '/opt/nvidia/deb_repos/pva-sdk-2.9-l4t_2.9.1_arm64.deb'
+20:46:37.642 - Info: 
+20:46:39.192 - Info: The following NEW packages will be installed:
+20:46:39.192 - Info: 
+20:46:39.192 - Info:   pva-sdk-2.9-l4t
+20:46:39.192 - Info: 
+20:46:39.265 - Info: 0 upgraded, 1 newly installed, 0 to remove and 285 not upgraded.
+20:46:39.265 - Info: 
+20:46:39.271 - Info: Need to get 380 kB of archives.
+20:46:39.271 - Info: 
+20:46:39.271 - Info: After this operation, 2,178 kB of additional disk space will be used.
+20:46:39.271 - Info: 
+20:46:39.283 - Info: 
+20:46:39.350 - Info: 0% [Working]
+20:46:39.350 - Info:             
+20:46:39.350 - Info: Get:1 https://repo.download.nvidia.com/jetson/common r39.2/main arm64 pva-sdk-2.9-l4t arm64 2.9.1 [380 kB]
+20:46:39.350 - Info: 
+20:46:39.350 - Info: 
+20:46:39.367 - Info: 3% [1 pva-sdk-2.9-l4t 15.7 kB/380 kB 4%]
+20:46:39.367 - Info:                                         
+20:46:39.367 - Info: 100% [Working]
+20:46:39.367 - Info:               
+20:46:39.367 - Info: Fetched 380 kB in 0s (3,986 kB/s)
+20:46:39.367 - Info: 
+20:46:40.823 - Info: Selecting previously unselected package pva-sdk-2.9-l4t.
+20:46:40.823 - Info: 
+20:46:40.823 - Info: (Reading database ... 
+20:46:40.850 - Info: (Reading database ... 5%
+20:46:40.850 - Info: (Reading database ... 10%
+20:46:40.850 - Info: (Reading database ... 15%
+20:46:40.850 - Info: (Reading database ... 20%
+20:46:40.850 - Info: (Reading database ... 25%
+20:46:40.850 - Info: (Reading database ... 30%
+20:46:40.850 - Info: (Reading database ... 35%
+20:46:40.850 - Info: (Reading database ... 40%
+20:46:40.850 - Info: (Reading database ... 45%
+20:46:40.850 - Info: (Reading database ... 50%
+20:46:40.856 - Info: (Reading database ... 55%
+20:46:40.867 - Info: (Reading database ... 60%
+20:46:40.879 - Info: (Reading database ... 65%
+20:46:40.896 - Info: (Reading database ... 70%
+20:46:40.932 - Info: (Reading database ... 75%
+20:46:40.943 - Info: (Reading database ... 80%
+20:46:40.960 - Info: (Reading database ... 85%
+20:46:40.976 - Info: (Reading database ... 90%
+20:46:40.987 - Info: (Reading database ... 95%
+20:46:41.039 - Info: (Reading database ... 100%
+20:46:41.039 - Info: (Reading database ... 190406 files and directories currently installed.)
+20:46:41.039 - Info: 
+20:46:41.057 - Info: Preparing to unpack .../pva-sdk-2.9-l4t_2.9.1_arm64.deb ...
+20:46:41.057 - Info: 
+20:46:41.066 - Info: Unpacking pva-sdk-2.9-l4t (2.9.1) ...
+20:46:41.066 - Info: 
+20:46:41.284 - Info: Setting up pva-sdk-2.9-l4t (2.9.1) ...
+20:46:41.284 - Info: 
+20:46:41.337 - Info: Processing triggers for libc-bin (2.39-0ubuntu8.7) ...
+20:46:41.337 - Info: 
+20:46:52.336 - Info: change working directory to /tmp20:46:52.336 - Info: exec_command: ssh jetson@192.168.55.1 "dpkg-query -W -f='\${db:Status-abbrev} \${Version}' pva-sdk-2.9-l4t"20:46:52.755 - Info: [ Package Install Finished Successfully ]20:46:52.755 - Info: [ Package Install Started ]20:46:52.755 - Info: target deb installer start to install20:46:52.755 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+sudo mkdir -p /opt/nvidia/deb_repos
+sudo chmod 777 /opt/nvidia/deb_repos
+sudo rm -f /opt/nvidia/deb_repos/pva-allow-2_2.0.5_all.deb
+**********************20:46:54.189 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+
+exec 3>&1
+exec 1>&2
+exec 2>&3
+function safe_apt_install {
+    export DEBIAN_FRONTEND=noninteractive
+    echo "*begin $1, $2"
+    tmp_log=/tmp/sdkm_apt_install_log.ckw.txt
+    sudo rm -f $tmp_log
+    set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+    MAX_RETRY=3
+    TIMES=1
+    while [ ${CMD_STATUS} -ne 0 ]; do
+        cat $tmp_log > /dev/stderr
+        if [ $TIMES -gt $MAX_RETRY ]; then
+            echo "Unhandled error when running $1: `tr '\n' '; ' <$tmp_log`" 1>&2; exit 1
+        fi
+        if grep -q -e "is locked by another process" -e "E: Could not get lock /var/" -e "Could not open lock" $tmp_log; then
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting $2 seconds for apt to be available"; sleep ${2}
+        elif grep -q -e "apt --fix-broken install" $tmp_log; then
+            echo "safe apt install failed, need to run apt --fix-broken install"
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; sudo apt-get -f -y --allow-downgrades install 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting 5 seconds for apt"; sleep 5
+        else
+            echo "safe apt install failed: $1, exit code: $CMD_STATUS, retry number: $TIMES"
+            echo "will sleep $[ $TIMES*10 ] seconds before next attempt"
+            sleep $[ $TIMES*10 ]
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+        fi
+    done
+    if [ $CMD_STATUS -eq 0 ] && [ $TIMES -ne 1 ]; then
+        echo "safe apt install succeed. retry number: $TIMES."
+    fi
+}
+safe_apt_install "sudo apt-get -y update" 5
+sleep 0.5
+safe_apt_install "sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/pva-allow-2_2.0.5_all.deb" 5
+sleep 5
+sudo rm -f /opt/nvidia/deb_repos/pva-allow-2_2.0.5_all.deb
+**********************20:46:54.972 - Info: *begin sudo apt-get -y update, 5
+20:46:54.972 - Info: 
+20:46:55.257 - Info: 
+20:46:55.320 - Info: 0% [Working]
+20:46:55.320 - Info:             
+20:46:55.320 - Info: Hit:1 https://download.docker.com/linux/ubuntu noble InRelease
+20:46:55.320 - Info: 
+20:46:55.320 - Info: 
+20:46:55.327 - Info: 0% [Connected to repo.download.nvidia.com (23.205.151.187)] [Connecting to ports.ubuntu.com (91.189.91.104)]
+20:46:55.327 - Info:                                                                                                             
+20:46:55.327 - Info: Hit:2 https://repo.download.nvidia.com/jetson/common r39.2 InRelease
+20:46:55.327 - Info: 
+20:46:55.327 - Info: 
+20:46:55.327 - Info:                                                                                                             
+20:46:55.420 - Info: 0% [Connecting to ports.ubuntu.com (91.189.91.104)]
+20:46:55.420 - Info:                                                    
+20:46:55.420 - Info: Hit:3 https://repo.download.nvidia.com/jetson/som r39.2 InRelease
+20:46:55.420 - Info: 
+20:46:55.420 - Info: 
+20:46:55.451 - Info: 0% [Connecting to ports.ubuntu.com (91.189.91.104)]
+20:46:55.510 - Info: 0% [Connected to repo.download.nvidia.com (23.205.151.187)] [Connecting to ports.ubuntu.com (91.189.91.104)]
+20:46:55.510 - Info:                                                                                                             
+20:46:55.510 - Info: Hit:4 https://repo.download.nvidia.com/jetson/ffmpeg r39.2 InRelease
+20:46:55.510 - Info: 
+20:46:55.510 - Info: 
+20:46:55.510 - Info:                                                                                                             
+20:46:55.642 - Info: 0% [Waiting for headers]
+20:46:55.733 - Info:                         
+20:46:55.733 - Info: Hit:5 http://ports.ubuntu.com/ubuntu-ports noble InRelease
+20:46:55.733 - Info: 
+20:46:55.733 - Info: 
+20:46:55.733 - Info:                         
+20:46:55.808 - Info: 0% [Working]
+20:46:55.969 - Info: 0% [Waiting for headers]
+20:46:55.969 - Info:                         
+20:46:55.969 - Info: Hit:6 http://ports.ubuntu.com/ubuntu-ports noble-updates InRelease
+20:46:55.969 - Info: 
+20:46:55.969 - Info: 
+20:46:55.969 - Info:                         
+20:46:55.985 - Info: 0% [Working]
+20:46:56.106 - Info: 0% [Waiting for headers]
+20:46:56.203 - Info:                         
+20:46:56.204 - Info: Hit:7 http://ports.ubuntu.com/ubuntu-ports noble-backports InRelease
+20:46:56.204 - Info: 
+20:46:56.204 - Info: 
+20:46:56.204 - Info:                         
+20:46:56.223 - Info: 0% [Working]
+20:46:56.340 - Info: 0% [Waiting for headers]
+20:46:56.441 - Info:                         
+20:46:56.441 - Info: Hit:8 http://ports.ubuntu.com/ubuntu-ports noble-security InRelease
+20:46:56.441 - Info: 
+20:46:56.441 - Info: 
+20:46:56.441 - Info:                         
+20:46:56.559 - Info: 0% [Working]
+20:46:56.559 - Info: 20% [Working]
+20:46:56.559 - Info:              
+20:46:56.807 - Info: 
+20:46:56.807 - Info: Reading package lists... 0%
+20:46:56.824 - Info: 
+20:46:56.824 - Info: Reading package lists... 0%
+20:46:56.828 - Info: 
+20:46:56.828 - Info: Reading package lists... 0%
+20:46:56.828 - Info: 
+20:46:56.828 - Info: Reading package lists... 0%
+20:46:56.832 - Info: 
+20:46:56.832 - Info: Reading package lists... 0%
+20:46:56.832 - Info: 
+20:46:56.832 - Info: Reading package lists... 0%
+20:46:56.833 - Info: 
+20:46:56.833 - Info: Reading package lists... 0%
+20:46:56.833 - Info: 
+20:46:56.833 - Info: Reading package lists... 0%
+20:46:56.835 - Info: 
+20:46:56.835 - Info: Reading package lists... 0%
+20:46:56.835 - Info: 
+20:46:56.835 - Info: Reading package lists... 0%
+20:46:56.842 - Info: 
+20:46:56.842 - Info: Reading package lists... 0%
+20:46:56.922 - Info: 
+20:46:56.922 - Info: Reading package lists... 3%
+20:46:56.922 - Info: 
+20:46:56.922 - Info: Reading package lists... 3%
+20:46:56.934 - Info: 
+20:46:56.934 - Info: Reading package lists... 5%
+20:46:56.934 - Info: 
+20:46:56.934 - Info: Reading package lists... 5%
+20:46:57.551 - Info: 
+20:46:57.551 - Info: Reading package lists... 26%
+20:46:58.074 - Info: 
+20:46:58.074 - Info: Reading package lists... 41%
+20:46:58.074 - Info: 
+20:46:58.074 - Info: Reading package lists... 41%
+20:46:58.242 - Info: 
+20:46:58.242 - Info: Reading package lists... 57%
+20:46:58.242 - Info: 
+20:46:58.242 - Info: Reading package lists... 57%
+20:46:58.248 - Info: 
+20:46:58.248 - Info: Reading package lists... 58%
+20:46:58.248 - Info: 
+20:46:58.248 - Info: Reading package lists... 58%
+20:46:58.249 - Info: 
+20:46:58.249 - Info: Reading package lists... 58%
+20:46:58.249 - Info: 
+20:46:58.249 - Info: Reading package lists... 58%
+20:46:58.258 - Info: 
+20:46:58.258 - Info: Reading package lists... 58%
+20:46:58.269 - Info: 
+20:46:58.269 - Info: Reading package lists... 58%
+20:46:58.269 - Info: 
+20:46:58.269 - Info: Reading package lists... 58%
+20:46:58.273 - Info: 
+20:46:58.273 - Info: Reading package lists... 59%
+20:46:58.273 - Info: 
+20:46:58.273 - Info: Reading package lists... 59%
+20:46:58.367 - Info: 
+20:46:58.367 - Info: Reading package lists... 62%
+20:46:58.367 - Info: 
+20:46:58.367 - Info: Reading package lists... 62%
+20:46:58.385 - Info: 
+20:46:58.385 - Info: Reading package lists... 64%
+20:46:58.385 - Info: 
+20:46:58.385 - Info: Reading package lists... 64%
+20:46:58.530 - Info: 
+20:46:58.530 - Info: Reading package lists... 69%
+20:46:58.530 - Info: 
+20:46:58.530 - Info: Reading package lists... 69%
+20:46:58.553 - Info: 
+20:46:58.553 - Info: Reading package lists... 71%
+20:46:58.553 - Info: 
+20:46:58.553 - Info: Reading package lists... 71%
+20:46:58.682 - Info: 
+20:46:58.682 - Info: Reading package lists... 77%
+20:46:58.682 - Info: 
+20:46:58.682 - Info: Reading package lists... 77%
+20:46:58.716 - Info: 
+20:46:58.716 - Info: Reading package lists... 80%
+20:46:58.716 - Info: 
+20:46:58.716 - Info: Reading package lists... 80%
+20:46:58.722 - Info: 
+20:46:58.722 - Info: Reading package lists... 80%
+20:46:58.722 - Info: 
+20:46:58.722 - Info: Reading package lists... 80%
+20:46:58.724 - Info: 
+20:46:58.724 - Info: Reading package lists... 80%
+20:46:58.724 - Info: 
+20:46:58.724 - Info: Reading package lists... 80%
+20:46:58.729 - Info: 
+20:46:58.729 - Info: Reading package lists... 80%
+20:46:58.729 - Info: 
+20:46:58.729 - Info: Reading package lists... 80%
+20:46:58.729 - Info: 
+20:46:58.729 - Info: Reading package lists... 80%
+20:46:58.729 - Info: 
+20:46:58.729 - Info: Reading package lists... 80%
+20:46:58.734 - Info: 
+20:46:58.734 - Info: Reading package lists... 80%
+20:46:58.734 - Info: 
+20:46:58.734 - Info: Reading package lists... 80%
+20:46:58.734 - Info: 
+20:46:58.734 - Info: Reading package lists... 80%
+20:46:58.734 - Info: 
+20:46:58.734 - Info: Reading package lists... 80%
+20:46:58.734 - Info: 
+20:46:58.734 - Info: Reading package lists... 80%
+20:46:58.734 - Info: 
+20:46:58.734 - Info: Reading package lists... 80%
+20:46:58.735 - Info: 
+20:46:58.736 - Info: Reading package lists... 80%
+20:46:58.736 - Info: 
+20:46:58.736 - Info: Reading package lists... 80%
+20:46:58.766 - Info: 
+20:46:58.766 - Info: Reading package lists... 83%
+20:46:58.766 - Info: 
+20:46:58.766 - Info: Reading package lists... 83%
+20:46:58.781 - Info: 
+20:46:58.782 - Info: Reading package lists... 84%
+20:46:58.782 - Info: 
+20:46:58.782 - Info: Reading package lists... 84%
+20:46:58.825 - Info: 
+20:46:58.825 - Info: Reading package lists... 88%
+20:46:58.825 - Info: 
+20:46:58.825 - Info: Reading package lists... 88%
+20:46:58.841 - Info: 
+20:46:58.841 - Info: Reading package lists... 90%
+20:46:58.841 - Info: 
+20:46:58.842 - Info: Reading package lists... 90%
+20:46:58.904 - Info: 
+20:46:58.904 - Info: Reading package lists... 95%
+20:46:58.904 - Info: 
+20:46:58.904 - Info: Reading package lists... 95%
+20:46:58.936 - Info: 
+20:46:58.936 - Info: Reading package lists... 98%
+20:46:58.936 - Info: 
+20:46:58.936 - Info: Reading package lists... 98%
+20:46:58.939 - Info: 
+20:46:58.939 - Info: Reading package lists... 98%
+20:46:58.939 - Info: 
+20:46:58.939 - Info: Reading package lists... 98%
+20:46:59.022 - Info: 
+20:46:59.022 - Info: Reading package lists... 98%
+20:46:59.022 - Info: 
+20:46:59.022 - Info: Reading package lists... 98%
+20:46:59.031 - Info: 
+20:46:59.031 - Info: Reading package lists... 99%
+20:46:59.144 - Info: 
+20:46:59.144 - Info: Reading package lists... Done
+20:46:59.144 - Info: 
+20:46:59.144 - Info: 
+20:46:59.710 - Info: *begin sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/pva-allow-2_2.0.5_all.deb, 5
+20:46:59.710 - Info: 
+20:46:59.869 - Info: 
+20:46:59.869 - Info: Reading package lists... 0%
+20:46:59.971 - Info: 
+20:46:59.971 - Info: Reading package lists... 0%
+20:46:59.982 - Info: 
+20:46:59.982 - Info: Reading package lists... Done
+20:46:59.982 - Info: 
+20:46:59.982 - Info: 
+20:47:00.005 - Info: 
+20:47:00.005 - Info: Building dependency tree... 0%
+20:47:00.005 - Info: 
+20:47:00.005 - Info: Building dependency tree... 0%
+20:47:00.008 - Info: 
+20:47:00.008 - Info: Building dependency tree... 0%
+20:47:00.227 - Info: 
+20:47:00.227 - Info: Building dependency tree... 50%
+20:47:00.227 - Info: 
+20:47:00.227 - Info: Building dependency tree... 50%
+20:47:00.715 - Info: 
+20:47:00.716 - Info: Building dependency tree... 86%
+20:47:00.888 - Info: 
+20:47:00.888 - Info: Building dependency tree... Done
+20:47:00.888 - Info: 
+20:47:00.888 - Info: 
+20:47:00.888 - Info: 
+20:47:00.888 - Info: Reading state information... 0% 
+20:47:00.888 - Info: 
+20:47:00.888 - Info: Reading state information... 0%
+20:47:00.892 - Info: 
+20:47:00.892 - Info: Reading state information... Done
+20:47:00.892 - Info: 
+20:47:00.892 - Info: 
+20:47:01.027 - Info: Note, selecting 'pva-allow-2' instead of '/opt/nvidia/deb_repos/pva-allow-2_2.0.5_all.deb'
+20:47:01.027 - Info: 
+20:47:02.570 - Info: The following NEW packages will be installed:
+20:47:02.570 - Info: 
+20:47:02.571 - Info:   pva-allow-2
+20:47:02.571 - Info: 
+20:47:02.642 - Info: 0 upgraded, 1 newly installed, 0 to remove and 285 not upgraded.
+20:47:02.642 - Info: 
+20:47:02.649 - Info: Need to get 15.4 kB of archives.
+20:47:02.649 - Info: 
+20:47:02.649 - Info: After this operation, 94.2 kB of additional disk space will be used.
+20:47:02.649 - Info: 
+20:47:02.661 - Info: 
+20:47:02.764 - Info: 0% [Working]
+20:47:02.764 - Info:             
+20:47:02.764 - Info: Get:1 https://repo.download.nvidia.com/jetson/common r39.2/main arm64 pva-allow-2 all 2.0.5 [15.4 kB]
+20:47:02.764 - Info: 
+20:47:02.764 - Info: 
+20:47:02.765 - Info: 80% [1 pva-allow-2 15.4 kB/15.4 kB 100%]
+20:47:02.765 - Info:                                         
+20:47:02.765 - Info: 100% [Working]
+20:47:02.765 - Info:               
+20:47:02.765 - Info: Fetched 15.4 kB in 0s (131 kB/s)
+20:47:02.765 - Info: 
+20:47:04.217 - Info: Selecting previously unselected package pva-allow-2.
+20:47:04.218 - Info: 
+20:47:04.218 - Info: (Reading database ... 
+20:47:04.242 - Info: (Reading database ... 5%
+20:47:04.242 - Info: (Reading database ... 10%
+20:47:04.242 - Info: (Reading database ... 15%
+20:47:04.242 - Info: (Reading database ... 20%
+20:47:04.242 - Info: (Reading database ... 25%
+20:47:04.242 - Info: (Reading database ... 30%
+20:47:04.242 - Info: (Reading database ... 35%
+20:47:04.242 - Info: (Reading database ... 40%
+20:47:04.242 - Info: (Reading database ... 45%
+20:47:04.242 - Info: (Reading database ... 50%
+20:47:04.248 - Info: (Reading database ... 55%
+20:47:04.259 - Info: (Reading database ... 60%
+20:47:04.270 - Info: (Reading database ... 65%
+20:47:04.287 - Info: (Reading database ... 70%
+20:47:04.323 - Info: (Reading database ... 75%
+20:47:04.335 - Info: (Reading database ... 80%
+20:47:04.351 - Info: (Reading database ... 85%
+20:47:04.368 - Info: (Reading database ... 90%
+20:47:04.378 - Info: (Reading database ... 95%
+20:47:04.429 - Info: (Reading database ... 100%
+20:47:04.429 - Info: (Reading database ... 190416 files and directories currently installed.)
+20:47:04.429 - Info: 
+20:47:04.447 - Info: Preparing to unpack .../pva-allow-2_2.0.5_all.deb ...
+20:47:04.447 - Info: 
+20:47:04.454 - Info: Unpacking pva-allow-2 (2.0.5) ...
+20:47:04.454 - Info: 
+20:47:04.680 - Info: Setting up pva-allow-2 (2.0.5) ...
+20:47:04.680 - Info: 
+20:47:05.474 - Info: Created symlink /etc/systemd/system/default.target.wants/nvidia-pva-allowd.service → /etc/systemd/system/nvidia-pva-allowd.service.
+20:47:05.474 - Info: 
+20:47:05.474 - Info: 
+20:47:17.260 - Info: change working directory to /tmp20:47:17.260 - Info: exec_command: ssh jetson@192.168.55.1 "dpkg-query -W -f='\${db:Status-abbrev} \${Version}' pva-allow-2"20:47:17.688 - Info: [ Package Install Finished Successfully ]20:47:17.688 - Info: exec_command: ssh   jetson@192.168.55.1 "df -B1 / | tail -1 | awk '{ printf \$4 }'"20:47:18.065 - Info: [target] [ 1.93 MB used. Disk Avail: 205.10 GB ]20:47:18.065 - Info: [ NV_L4T_CUPVA_RUNTIME_SBSA_TARGET_POST_INSTALL_COMP Install took 49s ]

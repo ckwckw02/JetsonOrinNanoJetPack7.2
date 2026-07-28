@@ -1,0 +1,349 @@
+------ 2026-07-27 20:32:56 ------
+------ SDK: JetPack_7.2_Linux ------
+20:32:56.384 - Info: exec_command: ssh   jetson@192.168.55.1 "df -B1 / | tail -1 | awk '{ printf \$4 }'"20:32:56.792 - Info: NV_L4T_GSTREAMER_SBSA_TARGET_POST_INSTALL_COMP include 1 package20:32:56.792 - Info: [ Package Install Started ]20:32:56.792 - Info: target deb installer start to install20:32:56.793 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+sudo mkdir -p /opt/nvidia/deb_repos
+sudo chmod 777 /opt/nvidia/deb_repos
+sudo rm -f /opt/nvidia/deb_repos/nvidia-l4t-gstreamer_39.2.0-20260601141651_arm64.deb
+**********************20:32:58.411 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+
+exec 3>&1
+exec 1>&2
+exec 2>&3
+function safe_apt_install {
+    export DEBIAN_FRONTEND=noninteractive
+    echo "*begin $1, $2"
+    tmp_log=/tmp/sdkm_apt_install_log.ckw.txt
+    sudo rm -f $tmp_log
+    set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+    MAX_RETRY=3
+    TIMES=1
+    while [ ${CMD_STATUS} -ne 0 ]; do
+        cat $tmp_log > /dev/stderr
+        if [ $TIMES -gt $MAX_RETRY ]; then
+            echo "Unhandled error when running $1: `tr '\n' '; ' <$tmp_log`" 1>&2; exit 1
+        fi
+        if grep -q -e "is locked by another process" -e "E: Could not get lock /var/" -e "Could not open lock" $tmp_log; then
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting $2 seconds for apt to be available"; sleep ${2}
+        elif grep -q -e "apt --fix-broken install" $tmp_log; then
+            echo "safe apt install failed, need to run apt --fix-broken install"
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; sudo apt-get -f -y --allow-downgrades install 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting 5 seconds for apt"; sleep 5
+        else
+            echo "safe apt install failed: $1, exit code: $CMD_STATUS, retry number: $TIMES"
+            echo "will sleep $[ $TIMES*10 ] seconds before next attempt"
+            sleep $[ $TIMES*10 ]
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+        fi
+    done
+    if [ $CMD_STATUS -eq 0 ] && [ $TIMES -ne 1 ]; then
+        echo "safe apt install succeed. retry number: $TIMES."
+    fi
+}
+safe_apt_install "sudo apt-get -y update" 5
+sleep 0.5
+safe_apt_install "sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/nvidia-l4t-gstreamer_39.2.0-20260601141651_arm64.deb" 5
+sleep 5
+sudo rm -f /opt/nvidia/deb_repos/nvidia-l4t-gstreamer_39.2.0-20260601141651_arm64.deb
+**********************20:32:59.189 - Info: *begin sudo apt-get -y update, 5
+20:32:59.189 - Info: 
+20:32:59.449 - Info: 
+20:32:59.574 - Info: 0% [Working]
+20:32:59.574 - Info:             
+20:32:59.574 - Info: Hit:1 https://repo.download.nvidia.com/jetson/common r39.2 InRelease
+20:32:59.574 - Info: 
+20:32:59.574 - Info: 
+20:32:59.618 - Info: 0% [Connecting to ports.ubuntu.com (91.189.92.21)]
+20:32:59.618 - Info:                                                   
+20:32:59.618 - Info: Hit:2 https://repo.download.nvidia.com/jetson/som r39.2 InRelease
+20:32:59.618 - Info: 
+20:32:59.618 - Info: 
+20:32:59.674 - Info: 0% [Connecting to ports.ubuntu.com (91.189.92.21)]
+20:32:59.674 - Info:                                                   
+20:32:59.674 - Info: Hit:3 https://repo.download.nvidia.com/jetson/ffmpeg r39.2 InRelease
+20:32:59.674 - Info: 
+20:32:59.674 - Info: 
+20:32:59.674 - Info:                                                   
+20:32:59.751 - Info: 0% [Waiting for headers]
+20:32:59.876 - Info:                         
+20:32:59.876 - Info: Hit:4 http://ports.ubuntu.com/ubuntu-ports noble InRelease
+20:32:59.876 - Info: 
+20:32:59.876 - Info: 
+20:32:59.876 - Info:                         
+20:32:59.910 - Info: 0% [Working]
+20:33:00.068 - Info: 0% [Waiting for headers]
+20:33:00.084 - Info:                         
+20:33:00.084 - Info: Hit:5 http://ports.ubuntu.com/ubuntu-ports noble-updates InRelease
+20:33:00.084 - Info: 
+20:33:00.084 - Info: 
+20:33:00.084 - Info:                         
+20:33:00.195 - Info: 0% [Working]
+20:33:00.293 - Info: 0% [Waiting for headers]
+20:33:00.293 - Info:                         
+20:33:00.293 - Info: Hit:6 http://ports.ubuntu.com/ubuntu-ports noble-backports InRelease
+20:33:00.293 - Info: 
+20:33:00.293 - Info: 
+20:33:00.293 - Info:                         
+20:33:00.307 - Info: 0% [Working]
+20:33:00.428 - Info: 0% [Waiting for headers]
+20:33:00.503 - Info:                         
+20:33:00.503 - Info: Hit:7 http://ports.ubuntu.com/ubuntu-ports noble-security InRelease
+20:33:00.503 - Info: 
+20:33:00.503 - Info: 
+20:33:00.503 - Info:                         
+20:33:00.618 - Info: 0% [Working]
+20:33:00.618 - Info: 20% [Working]
+20:33:00.618 - Info:              
+20:33:00.823 - Info: 
+20:33:00.823 - Info: Reading package lists... 0%
+20:33:00.840 - Info: 
+20:33:00.840 - Info: Reading package lists... 0%
+20:33:00.846 - Info: 
+20:33:00.846 - Info: Reading package lists... 0%
+20:33:00.846 - Info: 
+20:33:00.846 - Info: Reading package lists... 0%
+20:33:00.846 - Info: 
+20:33:00.846 - Info: Reading package lists... 0%
+20:33:00.846 - Info: 
+20:33:00.846 - Info: Reading package lists... 0%
+20:33:00.849 - Info: 
+20:33:00.849 - Info: Reading package lists... 0%
+20:33:00.849 - Info: 
+20:33:00.849 - Info: Reading package lists... 0%
+20:33:00.862 - Info: 
+20:33:00.862 - Info: Reading package lists... 0%
+20:33:00.940 - Info: 
+20:33:00.940 - Info: Reading package lists... 3%
+20:33:00.941 - Info: 
+20:33:00.941 - Info: Reading package lists... 3%
+20:33:00.953 - Info: 
+20:33:00.953 - Info: Reading package lists... 5%
+20:33:00.953 - Info: 
+20:33:00.953 - Info: Reading package lists... 5%
+20:33:01.600 - Info: 
+20:33:01.600 - Info: Reading package lists... 26%
+20:33:02.127 - Info: 
+20:33:02.127 - Info: Reading package lists... 41%
+20:33:02.127 - Info: 
+20:33:02.127 - Info: Reading package lists... 41%
+20:33:02.291 - Info: 
+20:33:02.291 - Info: Reading package lists... 57%
+20:33:02.291 - Info: 
+20:33:02.291 - Info: Reading package lists... 57%
+20:33:02.297 - Info: 
+20:33:02.297 - Info: Reading package lists... 58%
+20:33:02.297 - Info: 
+20:33:02.297 - Info: Reading package lists... 58%
+20:33:02.297 - Info: 
+20:33:02.297 - Info: Reading package lists... 58%
+20:33:02.297 - Info: 
+20:33:02.297 - Info: Reading package lists... 58%
+20:33:02.308 - Info: 
+20:33:02.308 - Info: Reading package lists... 58%
+20:33:02.316 - Info: 
+20:33:02.316 - Info: Reading package lists... 58%
+20:33:02.316 - Info: 
+20:33:02.316 - Info: Reading package lists... 58%
+20:33:02.320 - Info: 
+20:33:02.320 - Info: Reading package lists... 59%
+20:33:02.320 - Info: 
+20:33:02.320 - Info: Reading package lists... 59%
+20:33:02.422 - Info: 
+20:33:02.422 - Info: Reading package lists... 62%
+20:33:02.422 - Info: 
+20:33:02.422 - Info: Reading package lists... 62%
+20:33:02.439 - Info: 
+20:33:02.439 - Info: Reading package lists... 64%
+20:33:02.439 - Info: 
+20:33:02.439 - Info: Reading package lists... 64%
+20:33:02.580 - Info: 
+20:33:02.580 - Info: Reading package lists... 69%
+20:33:02.580 - Info: 
+20:33:02.580 - Info: Reading package lists... 69%
+20:33:02.602 - Info: 
+20:33:02.602 - Info: Reading package lists... 71%
+20:33:02.602 - Info: 
+20:33:02.602 - Info: Reading package lists... 71%
+20:33:02.733 - Info: 
+20:33:02.733 - Info: Reading package lists... 77%
+20:33:02.733 - Info: 
+20:33:02.733 - Info: Reading package lists... 77%
+20:33:02.767 - Info: 
+20:33:02.767 - Info: Reading package lists... 80%
+20:33:02.767 - Info: 
+20:33:02.767 - Info: Reading package lists... 80%
+20:33:02.772 - Info: 
+20:33:02.772 - Info: Reading package lists... 80%
+20:33:02.772 - Info: 
+20:33:02.772 - Info: Reading package lists... 80%
+20:33:02.774 - Info: 
+20:33:02.774 - Info: Reading package lists... 80%
+20:33:02.774 - Info: 
+20:33:02.774 - Info: Reading package lists... 80%
+20:33:02.780 - Info: 
+20:33:02.780 - Info: Reading package lists... 80%
+20:33:02.780 - Info: 
+20:33:02.780 - Info: Reading package lists... 80%
+20:33:02.780 - Info: 
+20:33:02.780 - Info: Reading package lists... 80%
+20:33:02.780 - Info: 
+20:33:02.780 - Info: Reading package lists... 80%
+20:33:02.783 - Info: 
+20:33:02.783 - Info: Reading package lists... 80%
+20:33:02.783 - Info: 
+20:33:02.783 - Info: Reading package lists... 80%
+20:33:02.783 - Info: 
+20:33:02.783 - Info: Reading package lists... 80%
+20:33:02.783 - Info: 
+20:33:02.783 - Info: Reading package lists... 80%
+20:33:02.783 - Info: 
+20:33:02.783 - Info: Reading package lists... 80%
+20:33:02.783 - Info: 
+20:33:02.783 - Info: Reading package lists... 80%
+20:33:02.785 - Info: 
+20:33:02.785 - Info: Reading package lists... 80%
+20:33:02.785 - Info: 
+20:33:02.785 - Info: Reading package lists... 80%
+20:33:02.815 - Info: 
+20:33:02.815 - Info: Reading package lists... 83%
+20:33:02.815 - Info: 
+20:33:02.815 - Info: Reading package lists... 83%
+20:33:02.829 - Info: 
+20:33:02.829 - Info: Reading package lists... 84%
+20:33:02.829 - Info: 
+20:33:02.829 - Info: Reading package lists... 84%
+20:33:02.872 - Info: 
+20:33:02.872 - Info: Reading package lists... 88%
+20:33:02.872 - Info: 
+20:33:02.872 - Info: Reading package lists... 88%
+20:33:02.890 - Info: 
+20:33:02.890 - Info: Reading package lists... 90%
+20:33:02.890 - Info: 
+20:33:02.890 - Info: Reading package lists... 90%
+20:33:02.952 - Info: 
+20:33:02.952 - Info: Reading package lists... 95%
+20:33:02.952 - Info: 
+20:33:02.952 - Info: Reading package lists... 95%
+20:33:02.982 - Info: 
+20:33:02.982 - Info: Reading package lists... 98%
+20:33:02.982 - Info: 
+20:33:02.982 - Info: Reading package lists... 98%
+20:33:02.986 - Info: 
+20:33:02.986 - Info: Reading package lists... 98%
+20:33:02.986 - Info: 
+20:33:02.986 - Info: Reading package lists... 98%
+20:33:03.062 - Info: 
+20:33:03.062 - Info: Reading package lists... 98%
+20:33:03.062 - Info: 
+20:33:03.062 - Info: Reading package lists... 98%
+20:33:03.072 - Info: 
+20:33:03.072 - Info: Reading package lists... 99%
+20:33:03.177 - Info: 
+20:33:03.177 - Info: Reading package lists... Done
+20:33:03.177 - Info: 
+20:33:03.177 - Info: 
+20:33:03.751 - Info: *begin sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/nvidia-l4t-gstreamer_39.2.0-20260601141651_arm64.deb, 5
+20:33:03.751 - Info: 
+20:33:03.927 - Info: 
+20:33:03.927 - Info: Reading package lists... 0%
+20:33:04.003 - Info: 
+20:33:04.004 - Info: Reading package lists... 0%
+20:33:04.016 - Info: 
+20:33:04.016 - Info: Reading package lists... Done
+20:33:04.016 - Info: 
+20:33:04.016 - Info: 
+20:33:04.047 - Info: 
+20:33:04.047 - Info: Building dependency tree... 0%
+20:33:04.047 - Info: 
+20:33:04.047 - Info: Building dependency tree... 0%
+20:33:04.049 - Info: 
+20:33:04.049 - Info: Building dependency tree... 0%
+20:33:04.276 - Info: 
+20:33:04.276 - Info: Building dependency tree... 50%
+20:33:04.276 - Info: 
+20:33:04.276 - Info: Building dependency tree... 50%
+20:33:04.757 - Info: 
+20:33:04.758 - Info: Building dependency tree... 84%
+20:33:04.954 - Info: 
+20:33:04.954 - Info: Building dependency tree... Done
+20:33:04.954 - Info: 
+20:33:04.954 - Info: 
+20:33:04.954 - Info: 
+20:33:04.954 - Info: Reading state information... 0% 
+20:33:04.954 - Info: 
+20:33:04.954 - Info: Reading state information... 0%
+20:33:04.959 - Info: 
+20:33:04.959 - Info: Reading state information... Done
+20:33:04.959 - Info: 
+20:33:04.959 - Info: 
+20:33:05.092 - Info: Note, selecting 'nvidia-l4t-gstreamer' instead of '/opt/nvidia/deb_repos/nvidia-l4t-gstreamer_39.2.0-20260601141651_arm64.deb'
+20:33:05.092 - Info: 
+20:33:06.691 - Info: The following NEW packages will be installed:
+20:33:06.691 - Info: 
+20:33:06.692 - Info:   nvidia-l4t-gstreamer
+20:33:06.692 - Info: 
+20:33:06.763 - Info: 0 upgraded, 1 newly installed, 0 to remove and 288 not upgraded.
+20:33:06.763 - Info: 
+20:33:06.769 - Info: Need to get 2,518 kB of archives.
+20:33:06.769 - Info: 
+20:33:06.769 - Info: After this operation, 11.0 MB of additional disk space will be used.
+20:33:06.769 - Info: 
+20:33:06.780 - Info: 
+20:33:06.844 - Info: 0% [Working]
+20:33:06.844 - Info:             
+20:33:06.844 - Info: Get:1 https://repo.download.nvidia.com/jetson/common r39.2/main arm64 nvidia-l4t-gstreamer arm64 39.2.0-20260601141651 [2,518 kB]
+20:33:06.844 - Info: 
+20:33:06.844 - Info: 
+20:33:06.917 - Info: 0% [1 nvidia-l4t-gstreamer 15.7 kB/2,518 kB 1%]
+20:33:06.917 - Info:                                                
+20:33:06.917 - Info: 100% [Working]
+20:33:06.917 - Info:               
+20:33:06.917 - Info: Fetched 2,518 kB in 0s (17.2 MB/s)
+20:33:06.917 - Info: 
+20:33:08.378 - Info: Selecting previously unselected package nvidia-l4t-gstreamer.
+20:33:08.378 - Info: 
+20:33:08.378 - Info: (Reading database ... 
+20:33:08.402 - Info: (Reading database ... 5%
+20:33:08.402 - Info: (Reading database ... 10%
+20:33:08.402 - Info: (Reading database ... 15%
+20:33:08.402 - Info: (Reading database ... 20%
+20:33:08.402 - Info: (Reading database ... 25%
+20:33:08.402 - Info: (Reading database ... 30%
+20:33:08.402 - Info: (Reading database ... 35%
+20:33:08.402 - Info: (Reading database ... 40%
+20:33:08.402 - Info: (Reading database ... 45%
+20:33:08.402 - Info: (Reading database ... 50%
+20:33:08.454 - Info: (Reading database ... 55%
+20:33:08.550 - Info: (Reading database ... 60%
+20:33:08.644 - Info: (Reading database ... 65%
+20:33:08.762 - Info: (Reading database ... 70%
+20:33:08.902 - Info: (Reading database ... 75%
+20:33:08.994 - Info: (Reading database ... 80%
+20:33:09.089 - Info: (Reading database ... 85%
+20:33:09.210 - Info: (Reading database ... 90%
+20:33:09.296 - Info: (Reading database ... 95%
+20:33:09.444 - Info: (Reading database ... 100%
+20:33:09.444 - Info: (Reading database ... 182919 files and directories currently installed.)
+20:33:09.444 - Info: 
+20:33:09.469 - Info: Preparing to unpack .../nvidia-l4t-gstreamer_39.2.0-20260601141651_arm64.deb ...
+20:33:09.469 - Info: 
+20:33:09.507 - Info: Unpacking nvidia-l4t-gstreamer (39.2.0-20260601141651) ...
+20:33:09.507 - Info: 
+20:33:09.933 - Info: Setting up nvidia-l4t-gstreamer (39.2.0-20260601141651) ...
+20:33:09.933 - Info: 
+20:33:09.956 - Info: Processing triggers for libc-bin (2.39-0ubuntu8.7) ...
+20:33:09.956 - Info: 
+20:33:20.926 - Info: change working directory to /tmp20:33:20.926 - Info: exec_command: ssh jetson@192.168.55.1 "dpkg-query -W -f='\${db:Status-abbrev} \${Version}' nvidia-l4t-gstreamer"20:33:21.345 - Info: [ Package Install Finished Successfully ]20:33:21.345 - Info: exec_command: ssh   jetson@192.168.55.1 "df -B1 / | tail -1 | awk '{ printf \$4 }'"20:33:21.737 - Info: [target] [ 13.26 MB used. Disk Avail: 205.86 GB ]20:33:21.737 - Info: [ NV_L4T_GSTREAMER_SBSA_TARGET_POST_INSTALL_COMP Install took 25s ]

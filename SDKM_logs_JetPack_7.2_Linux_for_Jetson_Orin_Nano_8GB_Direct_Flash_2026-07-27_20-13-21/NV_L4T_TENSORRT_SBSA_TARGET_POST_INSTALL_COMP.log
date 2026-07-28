@@ -1,0 +1,1039 @@
+------ 2026-07-27 21:25:10 ------
+------ SDK: JetPack_7.2_Linux ------
+21:25:10.942 - Info: exec_command: ssh   jetson@192.168.55.1 "df -B1 / | tail -1 | awk '{ printf \$4 }'"21:25:11.352 - Info: NV_L4T_TENSORRT_SBSA_TARGET_POST_INSTALL_COMP include 1 package21:25:11.352 - Info: [ Package Install Started ]21:25:11.352 - Info: target deb installer start to install21:25:11.370 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+sudo mkdir -p /opt/nvidia/deb_repos
+sudo chmod 777 /opt/nvidia/deb_repos
+sudo rm -f /opt/nvidia/deb_repos/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2_1.0-1_arm64.deb
+**********************21:30:18.735 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+
+exec 3>&1
+exec 1>&2
+exec 2>&3
+function safe_apt_install {
+    export DEBIAN_FRONTEND=noninteractive
+    echo "*begin $1, $2"
+    tmp_log=/tmp/sdkm_apt_install_log.ckw.txt
+    sudo rm -f $tmp_log
+    set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+    MAX_RETRY=3
+    TIMES=1
+    while [ ${CMD_STATUS} -ne 0 ]; do
+        cat $tmp_log > /dev/stderr
+        if [ $TIMES -gt $MAX_RETRY ]; then
+            echo "Unhandled error when running $1: `tr '\n' '; ' <$tmp_log`" 1>&2; exit 1
+        fi
+        if grep -q -e "is locked by another process" -e "E: Could not get lock /var/" -e "Could not open lock" $tmp_log; then
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting $2 seconds for apt to be available"; sleep ${2}
+        elif grep -q -e "apt --fix-broken install" $tmp_log; then
+            echo "safe apt install failed, need to run apt --fix-broken install"
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; sudo apt-get -f -y --allow-downgrades install 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting 5 seconds for apt"; sleep 5
+        else
+            echo "safe apt install failed: $1, exit code: $CMD_STATUS, retry number: $TIMES"
+            echo "will sleep $[ $TIMES*10 ] seconds before next attempt"
+            sleep $[ $TIMES*10 ]
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+        fi
+    done
+    if [ $CMD_STATUS -eq 0 ] && [ $TIMES -ne 1 ]; then
+        echo "safe apt install succeed. retry number: $TIMES."
+    fi
+}
+safe_apt_install "sudo apt-get -y update" 5
+sleep 0.5
+safe_apt_install "sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2_1.0-1_arm64.deb" 5
+sleep 5
+# ensure package version from local repository has a higher priority
+sudo mkdir -p /etc/apt/preferences.d/
+sudo rm -f /etc/apt/preferences.d/sdkm
+sudo touch /etc/apt/preferences.d/sdkm
+echo 'Package: *' | sudo tee -a /etc/apt/preferences.d/sdkm
+echo 'Pin: origin ""' | sudo tee -a /etc/apt/preferences.d/sdkm
+echo 'Pin-Priority: 999' | sudo tee -a /etc/apt/preferences.d/sdkm
+
+packageName=$(dpkg -f /opt/nvidia/deb_repos/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2_1.0-1_arm64.deb Package)
+keyringFilePath=$(dpkg -L $packageName | grep 'keyring\.gpg$' | head -n 1 | tr -d "\n")
+if [ -n "$keyringFilePath" ]
+then
+	if [ -f "$keyringFilePath" ]
+	then
+		sudo cp $keyringFilePath /usr/share/keyrings/
+	else
+		echo 'Warning: deb repo keyring file not found' >&2
+	fi
+else
+	pubKeyFilePath=$(dpkg -L $packageName | grep '\.pub$' | head -n 1 | tr -d "\n")
+	echo $pubKeyFilePath
+	if [ -n "$pubKeyFilePath" ]
+	then
+		safe_apt_install "sudo apt-key add $pubKeyFilePath" 5
+	else
+		echo 'Warning: deb repo pub key file not found' >&2
+	fi
+fi
+sleep 2
+safe_apt_install "sudo apt-get -y update" 5
+
+safe_apt_install "sudo -E apt-get -y  install tensorrt " 5
+targetDebRepoPackageName=$(dpkg -f /opt/nvidia/deb_repos/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2_1.0-1_arm64.deb Package | tr -d '\n')
+echo targetDebRepoPackageName $targetDebRepoPackageName
+if [ -n "targetDebRepoPackageName" ]
+then
+    safe_apt_install "sudo apt-get purge -y $targetDebRepoPackageName" 5
+else
+    echo 'Warning: target deb repo package name not found' >&2
+fi
+sudo rm -f /etc/apt/preferences.d/sdkm
+
+sudo rm -f /opt/nvidia/deb_repos/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2_1.0-1_arm64.deb
+**********************21:30:20.975 - Info: *begin sudo apt-get -y update, 5
+21:30:20.975 - Info: 
+21:30:21.537 - Info: 
+21:30:21.608 - Info: 0% [Working]
+21:30:21.608 - Info:             
+21:30:21.608 - Info: Hit:1 https://download.docker.com/linux/ubuntu noble InRelease
+21:30:21.608 - Info: 
+21:30:21.608 - Info: 
+21:30:21.621 - Info: 0% [Connected to repo.download.nvidia.com (23.205.151.158)] [Connecting to ports.ubuntu.com]
+21:30:21.621 - Info:                                                                                             
+21:30:21.621 - Info: Hit:2 https://repo.download.nvidia.com/jetson/common r39.2 InRelease
+21:30:21.621 - Info: 
+21:30:21.621 - Info: 
+21:30:21.621 - Info:                                                                                             
+21:30:21.685 - Info: 0% [Connecting to ports.ubuntu.com]
+21:30:21.685 - Info:                                    
+21:30:21.685 - Info: Hit:3 https://repo.download.nvidia.com/jetson/som r39.2 InRelease
+21:30:21.685 - Info: 
+21:30:21.685 - Info: 
+21:30:21.734 - Info: 0% [Connecting to ports.ubuntu.com]
+21:30:21.742 - Info: 0% [Waiting for headers] [Connecting to ports.ubuntu.com]
+21:30:21.742 - Info:                                                          
+21:30:21.742 - Info: Hit:4 https://repo.download.nvidia.com/jetson/ffmpeg r39.2 InRelease
+21:30:21.742 - Info: 
+21:30:21.742 - Info: 
+21:30:21.742 - Info:                                                          
+21:30:21.906 - Info: 0% [Connecting to ports.ubuntu.com]
+21:30:22.101 - Info: 0% [Connecting to ports.ubuntu.com (91.189.92.19)]
+21:30:22.101 - Info:                                                   
+21:30:22.251 - Info: 0% [Waiting for headers]
+21:30:22.251 - Info:                         
+21:30:22.251 - Info: Hit:5 http://ports.ubuntu.com/ubuntu-ports noble InRelease
+21:30:22.251 - Info: 
+21:30:22.251 - Info: 
+21:30:22.251 - Info:                         
+21:30:22.297 - Info: 0% [Working]
+21:30:22.418 - Info: 0% [Waiting for headers]
+21:30:22.459 - Info:                         
+21:30:22.459 - Info: Hit:6 http://ports.ubuntu.com/ubuntu-ports noble-updates InRelease
+21:30:22.459 - Info: 
+21:30:22.459 - Info: 
+21:30:22.459 - Info:                         
+21:30:22.576 - Info: 0% [Working]
+21:30:22.668 - Info: 0% [Waiting for headers]
+21:30:22.668 - Info:                         
+21:30:22.668 - Info: Hit:7 http://ports.ubuntu.com/ubuntu-ports noble-backports InRelease
+21:30:22.668 - Info: 
+21:30:22.668 - Info: 
+21:30:22.668 - Info:                         
+21:30:22.806 - Info: 0% [Working]
+21:30:22.877 - Info: 0% [Waiting for headers]
+21:30:22.877 - Info:                         
+21:30:22.877 - Info: Hit:8 http://ports.ubuntu.com/ubuntu-ports noble-security InRelease
+21:30:22.877 - Info: 
+21:30:22.877 - Info: 
+21:30:22.877 - Info:                         
+21:30:23.000 - Info: 0% [Working]
+21:30:23.000 - Info: 20% [Working]
+21:30:23.000 - Info:              
+21:30:23.363 - Info: 
+21:30:23.363 - Info: Reading package lists... 0%
+21:30:23.379 - Info: 
+21:30:23.379 - Info: Reading package lists... 0%
+21:30:23.384 - Info: 
+21:30:23.384 - Info: Reading package lists... 0%
+21:30:23.384 - Info: 
+21:30:23.384 - Info: Reading package lists... 0%
+21:30:23.387 - Info: 
+21:30:23.387 - Info: Reading package lists... 0%
+21:30:23.387 - Info: 
+21:30:23.387 - Info: Reading package lists... 0%
+21:30:23.388 - Info: 
+21:30:23.389 - Info: Reading package lists... 0%
+21:30:23.389 - Info: 
+21:30:23.389 - Info: Reading package lists... 0%
+21:30:23.391 - Info: 
+21:30:23.391 - Info: Reading package lists... 0%
+21:30:23.391 - Info: 
+21:30:23.391 - Info: Reading package lists... 0%
+21:30:23.396 - Info: 
+21:30:23.396 - Info: Reading package lists... 0%
+21:30:23.467 - Info: 
+21:30:23.467 - Info: Reading package lists... 3%
+21:30:23.467 - Info: 
+21:30:23.467 - Info: Reading package lists... 3%
+21:30:23.479 - Info: 
+21:30:23.479 - Info: Reading package lists... 5%
+21:30:23.480 - Info: 
+21:30:23.480 - Info: Reading package lists... 5%
+21:30:24.150 - Info: 
+21:30:24.150 - Info: Reading package lists... 26%
+21:30:24.722 - Info: 
+21:30:24.722 - Info: Reading package lists... 41%
+21:30:24.722 - Info: 
+21:30:24.722 - Info: Reading package lists... 41%
+21:30:24.861 - Info: 
+21:30:24.861 - Info: Reading package lists... 53%
+21:30:24.909 - Info: 
+21:30:24.909 - Info: Reading package lists... 57%
+21:30:24.909 - Info: 
+21:30:24.909 - Info: Reading package lists... 57%
+21:30:24.916 - Info: 
+21:30:24.916 - Info: Reading package lists... 58%
+21:30:24.916 - Info: 
+21:30:24.916 - Info: Reading package lists... 58%
+21:30:24.917 - Info: 
+21:30:24.917 - Info: Reading package lists... 58%
+21:30:24.917 - Info: 
+21:30:24.917 - Info: Reading package lists... 58%
+21:30:24.938 - Info: 
+21:30:24.938 - Info: Reading package lists... 58%
+21:30:24.938 - Info: 
+21:30:24.938 - Info: Reading package lists... 58%
+21:30:24.942 - Info: 
+21:30:24.942 - Info: Reading package lists... 59%
+21:30:24.942 - Info: 
+21:30:24.942 - Info: Reading package lists... 59%
+21:30:25.045 - Info: 
+21:30:25.045 - Info: Reading package lists... 62%
+21:30:25.045 - Info: 
+21:30:25.045 - Info: Reading package lists... 62%
+21:30:25.065 - Info: 
+21:30:25.065 - Info: Reading package lists... 64%
+21:30:25.065 - Info: 
+21:30:25.065 - Info: Reading package lists... 64%
+21:30:25.224 - Info: 
+21:30:25.224 - Info: Reading package lists... 69%
+21:30:25.224 - Info: 
+21:30:25.224 - Info: Reading package lists... 69%
+21:30:25.249 - Info: 
+21:30:25.250 - Info: Reading package lists... 71%
+21:30:25.250 - Info: 
+21:30:25.250 - Info: Reading package lists... 71%
+21:30:25.390 - Info: 
+21:30:25.390 - Info: Reading package lists... 77%
+21:30:25.390 - Info: 
+21:30:25.390 - Info: Reading package lists... 77%
+21:30:25.427 - Info: 
+21:30:25.427 - Info: Reading package lists... 80%
+21:30:25.427 - Info: 
+21:30:25.427 - Info: Reading package lists... 80%
+21:30:25.433 - Info: 
+21:30:25.433 - Info: Reading package lists... 80%
+21:30:25.433 - Info: 
+21:30:25.433 - Info: Reading package lists... 80%
+21:30:25.436 - Info: 
+21:30:25.436 - Info: Reading package lists... 80%
+21:30:25.436 - Info: 
+21:30:25.436 - Info: Reading package lists... 80%
+21:30:25.441 - Info: 
+21:30:25.441 - Info: Reading package lists... 80%
+21:30:25.441 - Info: 
+21:30:25.441 - Info: Reading package lists... 80%
+21:30:25.441 - Info: 
+21:30:25.441 - Info: Reading package lists... 80%
+21:30:25.441 - Info: 
+21:30:25.441 - Info: Reading package lists... 80%
+21:30:25.446 - Info: 
+21:30:25.446 - Info: Reading package lists... 80%
+21:30:25.446 - Info: 
+21:30:25.446 - Info: Reading package lists... 80%
+21:30:25.446 - Info: 
+21:30:25.446 - Info: Reading package lists... 80%
+21:30:25.446 - Info: 
+21:30:25.446 - Info: Reading package lists... 80%
+21:30:25.446 - Info: 
+21:30:25.446 - Info: Reading package lists... 80%
+21:30:25.446 - Info: 
+21:30:25.446 - Info: Reading package lists... 80%
+21:30:25.448 - Info: 
+21:30:25.448 - Info: Reading package lists... 80%
+21:30:25.448 - Info: 
+21:30:25.448 - Info: Reading package lists... 80%
+21:30:25.481 - Info: 
+21:30:25.481 - Info: Reading package lists... 83%
+21:30:25.481 - Info: 
+21:30:25.481 - Info: Reading package lists... 83%
+21:30:25.498 - Info: 
+21:30:25.498 - Info: Reading package lists... 84%
+21:30:25.498 - Info: 
+21:30:25.498 - Info: Reading package lists... 84%
+21:30:25.546 - Info: 
+21:30:25.546 - Info: Reading package lists... 88%
+21:30:25.546 - Info: 
+21:30:25.546 - Info: Reading package lists... 88%
+21:30:25.564 - Info: 
+21:30:25.564 - Info: Reading package lists... 90%
+21:30:25.564 - Info: 
+21:30:25.564 - Info: Reading package lists... 90%
+21:30:25.569 - Info: 
+21:30:25.569 - Info: Reading package lists... 90%
+21:30:25.631 - Info: 
+21:30:25.632 - Info: Reading package lists... 95%
+21:30:25.632 - Info: 
+21:30:25.632 - Info: Reading package lists... 95%
+21:30:25.667 - Info: 
+21:30:25.667 - Info: Reading package lists... 98%
+21:30:25.667 - Info: 
+21:30:25.667 - Info: Reading package lists... 98%
+21:30:25.670 - Info: 
+21:30:25.670 - Info: Reading package lists... 98%
+21:30:25.670 - Info: 
+21:30:25.670 - Info: Reading package lists... 98%
+21:30:25.759 - Info: 
+21:30:25.760 - Info: Reading package lists... 98%
+21:30:25.760 - Info: 
+21:30:25.760 - Info: Reading package lists... 98%
+21:30:25.897 - Info: 
+21:30:25.897 - Info: Reading package lists... Done
+21:30:25.897 - Info: 
+21:30:25.897 - Info: 
+21:30:26.547 - Info: *begin sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2_1.0-1_arm64.deb, 5
+21:30:26.547 - Info: 
+21:30:28.123 - Info: 
+21:30:28.123 - Info: Reading package lists... 0%
+21:30:28.237 - Info: 
+21:30:28.237 - Info: Reading package lists... 0%
+21:30:28.254 - Info: 
+21:30:28.254 - Info: Reading package lists... Done
+21:30:28.254 - Info: 
+21:30:28.254 - Info: 
+21:30:28.283 - Info: 
+21:30:28.284 - Info: Building dependency tree... 0%
+21:30:28.284 - Info: 
+21:30:28.284 - Info: Building dependency tree... 0%
+21:30:28.286 - Info: 
+21:30:28.286 - Info: Building dependency tree... 0%
+21:30:28.514 - Info: 
+21:30:28.514 - Info: Building dependency tree... 50%
+21:30:28.514 - Info: 
+21:30:28.514 - Info: Building dependency tree... 50%
+21:30:28.988 - Info: 
+21:30:28.988 - Info: Building dependency tree... 82%
+21:30:29.239 - Info: 
+21:30:29.239 - Info: Building dependency tree... Done
+21:30:29.239 - Info: 
+21:30:29.239 - Info: 
+21:30:29.239 - Info: 
+21:30:29.239 - Info: Reading state information... 0% 
+21:30:29.239 - Info: 
+21:30:29.239 - Info: Reading state information... 0%
+21:30:29.244 - Info: 
+21:30:29.244 - Info: Reading state information... Done
+21:30:29.244 - Info: 
+21:30:29.244 - Info: 
+21:30:29.384 - Info: Note, selecting 'nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2' instead of '/opt/nvidia/deb_repos/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2_1.0-1_arm64.deb'
+21:30:29.384 - Info: 
+21:30:30.993 - Info: The following NEW packages will be installed:
+21:30:30.993 - Info: 
+21:30:30.994 - Info:   nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2
+21:30:30.994 - Info: 
+21:30:31.070 - Info: 0 upgraded, 1 newly installed, 0 to remove and 285 not upgraded.
+21:30:31.070 - Info: 
+21:30:31.079 - Info: Need to get 0 B/4,894 MB of archives.
+21:30:31.079 - Info: 
+21:30:31.079 - Info: After this operation, 4,899 MB of additional disk space will be used.
+21:30:31.079 - Info: 
+21:30:31.090 - Info: 
+21:30:31.592 - Info: 0% [Working]
+21:31:28.873 - Info:             
+21:31:28.873 - Info: Get:1 /opt/nvidia/deb_repos/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2_1.0-1_arm64.deb nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2 arm64 1.0-1 [4,894 MB]
+21:31:28.873 - Info: 
+21:31:28.873 - Info: 
+21:31:28.873 - Info: 100% [Working]
+21:31:28.873 - Info:               
+21:31:30.393 - Info: Selecting previously unselected package nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2.
+21:31:30.394 - Info: 
+21:31:30.394 - Info: (Reading database ... 
+21:31:30.420 - Info: (Reading database ... 5%
+21:31:30.420 - Info: (Reading database ... 10%
+21:31:30.420 - Info: (Reading database ... 15%
+21:31:30.420 - Info: (Reading database ... 20%
+21:31:30.420 - Info: (Reading database ... 25%
+21:31:30.420 - Info: (Reading database ... 30%
+21:31:30.420 - Info: (Reading database ... 35%
+21:31:30.420 - Info: (Reading database ... 40%
+21:31:30.420 - Info: (Reading database ... 45%
+21:31:30.420 - Info: (Reading database ... 50%
+21:31:30.427 - Info: (Reading database ... 55%
+21:31:30.438 - Info: (Reading database ... 60%
+21:31:30.450 - Info: (Reading database ... 65%
+21:31:30.462 - Info: (Reading database ... 70%
+21:31:30.507 - Info: (Reading database ... 75%
+21:31:30.519 - Info: (Reading database ... 80%
+21:31:30.536 - Info: (Reading database ... 85%
+21:31:30.553 - Info: (Reading database ... 90%
+21:31:30.576 - Info: (Reading database ... 95%
+21:31:30.628 - Info: (Reading database ... 100%
+21:31:30.629 - Info: (Reading database ... 201882 files and directories currently installed.)
+21:31:30.629 - Info: 
+21:31:30.647 - Info: Preparing to unpack .../nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2_1.0-1_arm64.deb ...
+21:31:30.647 - Info: 
+21:31:30.658 - Info: Unpacking nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2 (1.0-1) ...
+21:31:30.658 - Info: 
+21:33:18.376 - Info: Setting up nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2 (1.0-1) ...
+21:33:18.376 - Info: 
+21:33:33.143 - Info: Package: *
+21:33:33.143 - Info: 
+21:33:33.143 - Info: 
+21:33:33.231 - Info: Pin: origin ""
+21:33:33.231 - Info: 
+21:33:33.231 - Info: 
+21:33:33.320 - Info: Pin-Priority: 999
+21:33:33.320 - Info: 
+21:33:33.320 - Info: 
+21:33:35.521 - Info: *begin sudo apt-get -y update, 5
+21:33:35.521 - Info: 
+21:33:35.881 - Info: 
+21:33:35.881 - Info: 0% [Working]
+21:33:35.881 - Info:             
+21:33:35.881 - Info: Get:1 file:/var/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2  InRelease [1,572 B]
+21:33:35.881 - Info: 
+21:33:35.900 - Info: 
+21:33:35.902 - Info: 0% [Working]
+21:33:35.902 - Info:             
+21:33:35.902 - Info: Get:1 file:/var/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2  InRelease [1,572 B]
+21:33:35.902 - Info: 
+21:33:35.904 - Info: 
+21:33:35.928 - Info: 0% [1 InRelease 1,572 B/1,572 B 100%] [Connected to download.docker.com (18.65.14.67)] [Connected to repo.download.nvidia.com (23.205.151.187)]
+21:33:35.928 - Info:                                                                                                                                                
+21:33:35.938 - Info: 0% [Connected to download.docker.com (18.65.14.67)] [Connected to repo.download.nvidia.com (23.205.151.187)]
+21:33:35.938 - Info:                                                                                                             
+21:33:35.938 - Info: Hit:2 https://download.docker.com/linux/ubuntu noble InRelease
+21:33:35.938 - Info: 
+21:33:35.938 - Info: 
+21:33:35.938 - Info:                                                                                                             
+21:33:35.955 - Info: 0% [Waiting for headers]
+21:33:35.955 - Info:                         
+21:33:35.955 - Info: Hit:3 https://repo.download.nvidia.com/jetson/common r39.2 InRelease
+21:33:35.955 - Info: 
+21:33:35.955 - Info: 
+21:33:35.955 - Info:                         
+21:33:36.013 - Info: 0% [Working]
+21:33:36.013 - Info:             
+21:33:36.013 - Info: Hit:4 https://repo.download.nvidia.com/jetson/som r39.2 InRelease
+21:33:36.013 - Info: 
+21:33:36.013 - Info: 
+21:33:36.064 - Info: 0% [Working]
+21:33:36.065 - Info: 0% [Waiting for headers]
+21:33:36.065 - Info:                         
+21:33:36.065 - Info: Get:5 file:/var/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2  Packages [5,460 B]
+21:33:36.065 - Info: 
+21:33:36.089 - Info: 
+21:33:36.089 - Info: 0% [Waiting for headers]
+21:33:36.089 - Info:                         
+21:33:36.089 - Info: Hit:6 https://repo.download.nvidia.com/jetson/ffmpeg r39.2 InRelease
+21:33:36.089 - Info: 
+21:33:36.089 - Info: 
+21:33:36.089 - Info:                         
+21:33:36.090 - Info: 0% [Working]
+21:33:36.091 - Info: 0% [5 Packages store 0 B]
+21:33:36.091 - Info:                          
+21:33:36.185 - Info: 0% [Working]
+21:33:37.493 - Info: 0% [Connecting to ports.ubuntu.com (91.189.91.104)]
+21:33:37.493 - Info:                                                    
+21:33:37.493 - Info: Hit:7 http://ports.ubuntu.com/ubuntu-ports noble InRelease
+21:33:37.493 - Info: 
+21:33:37.493 - Info: 
+21:33:37.493 - Info:                                                    
+21:33:37.617 - Info: 0% [Working]
+21:33:37.728 - Info: 0% [Waiting for headers]
+21:33:37.728 - Info:                         
+21:33:37.728 - Info: Hit:8 http://ports.ubuntu.com/ubuntu-ports noble-updates InRelease
+21:33:37.728 - Info: 
+21:33:37.728 - Info: 
+21:33:37.728 - Info:                         
+21:33:37.842 - Info: 0% [Working]
+21:33:37.965 - Info: 0% [Waiting for headers]
+21:33:37.965 - Info:                         
+21:33:37.965 - Info: Hit:9 http://ports.ubuntu.com/ubuntu-ports noble-backports InRelease
+21:33:37.965 - Info: 
+21:33:37.965 - Info: 
+21:33:37.965 - Info:                         
+21:33:38.090 - Info: 0% [Working]
+21:33:38.202 - Info: 0% [Waiting for headers]
+21:33:38.202 - Info:                         
+21:33:38.202 - Info: Hit:10 http://ports.ubuntu.com/ubuntu-ports noble-security InRelease
+21:33:38.202 - Info: 
+21:33:38.202 - Info: 
+21:33:38.202 - Info:                         
+21:33:38.316 - Info: 0% [Working]
+21:33:38.316 - Info: 100% [Working]
+21:33:38.316 - Info:               
+21:33:38.589 - Info: 
+21:33:38.589 - Info: Reading package lists... 0%
+21:33:38.608 - Info: 
+21:33:38.608 - Info: Reading package lists... 0%
+21:33:38.613 - Info: 
+21:33:38.613 - Info: Reading package lists... 0%
+21:33:38.613 - Info: 
+21:33:38.613 - Info: Reading package lists... 0%
+21:33:38.614 - Info: 
+21:33:38.614 - Info: Reading package lists... 0%
+21:33:38.614 - Info: 
+21:33:38.614 - Info: Reading package lists... 0%
+21:33:38.618 - Info: 
+21:33:38.618 - Info: Reading package lists... 0%
+21:33:38.618 - Info: 
+21:33:38.618 - Info: Reading package lists... 0%
+21:33:38.619 - Info: 
+21:33:38.619 - Info: Reading package lists... 0%
+21:33:38.619 - Info: 
+21:33:38.619 - Info: Reading package lists... 0%
+21:33:38.621 - Info: 
+21:33:38.621 - Info: Reading package lists... 0%
+21:33:38.621 - Info: 
+21:33:38.621 - Info: Reading package lists... 0%
+21:33:38.627 - Info: 
+21:33:38.627 - Info: Reading package lists... 0%
+21:33:38.698 - Info: 
+21:33:38.698 - Info: Reading package lists... 3%
+21:33:38.698 - Info: 
+21:33:38.698 - Info: Reading package lists... 3%
+21:33:38.711 - Info: 
+21:33:38.711 - Info: Reading package lists... 5%
+21:33:38.711 - Info: 
+21:33:38.711 - Info: Reading package lists... 5%
+21:33:39.374 - Info: 
+21:33:39.374 - Info: Reading package lists... 27%
+21:33:39.846 - Info: 
+21:33:39.846 - Info: Reading package lists... 41%
+21:33:39.846 - Info: 
+21:33:39.846 - Info: Reading package lists... 41%
+21:33:40.019 - Info: 
+21:33:40.019 - Info: Reading package lists... 57%
+21:33:40.019 - Info: 
+21:33:40.019 - Info: Reading package lists... 57%
+21:33:40.025 - Info: 
+21:33:40.026 - Info: Reading package lists... 58%
+21:33:40.026 - Info: 
+21:33:40.026 - Info: Reading package lists... 58%
+21:33:40.027 - Info: 
+21:33:40.027 - Info: Reading package lists... 58%
+21:33:40.027 - Info: 
+21:33:40.027 - Info: Reading package lists... 58%
+21:33:40.045 - Info: 
+21:33:40.046 - Info: Reading package lists... 58%
+21:33:40.046 - Info: 
+21:33:40.046 - Info: Reading package lists... 58%
+21:33:40.049 - Info: 
+21:33:40.049 - Info: Reading package lists... 59%
+21:33:40.050 - Info: 
+21:33:40.050 - Info: Reading package lists... 59%
+21:33:40.087 - Info: 
+21:33:40.087 - Info: Reading package lists... 60%
+21:33:40.144 - Info: 
+21:33:40.144 - Info: Reading package lists... 62%
+21:33:40.144 - Info: 
+21:33:40.144 - Info: Reading package lists... 62%
+21:33:40.163 - Info: 
+21:33:40.163 - Info: Reading package lists... 64%
+21:33:40.163 - Info: 
+21:33:40.163 - Info: Reading package lists... 64%
+21:33:40.306 - Info: 
+21:33:40.306 - Info: Reading package lists... 69%
+21:33:40.306 - Info: 
+21:33:40.306 - Info: Reading package lists... 69%
+21:33:40.330 - Info: 
+21:33:40.330 - Info: Reading package lists... 71%
+21:33:40.330 - Info: 
+21:33:40.330 - Info: Reading package lists... 71%
+21:33:40.461 - Info: 
+21:33:40.461 - Info: Reading package lists... 77%
+21:33:40.461 - Info: 
+21:33:40.461 - Info: Reading package lists... 77%
+21:33:40.497 - Info: 
+21:33:40.497 - Info: Reading package lists... 80%
+21:33:40.497 - Info: 
+21:33:40.497 - Info: Reading package lists... 80%
+21:33:40.502 - Info: 
+21:33:40.503 - Info: Reading package lists... 80%
+21:33:40.503 - Info: 
+21:33:40.503 - Info: Reading package lists... 80%
+21:33:40.505 - Info: 
+21:33:40.505 - Info: Reading package lists... 80%
+21:33:40.505 - Info: 
+21:33:40.505 - Info: Reading package lists... 80%
+21:33:40.510 - Info: 
+21:33:40.510 - Info: Reading package lists... 80%
+21:33:40.510 - Info: 
+21:33:40.510 - Info: Reading package lists... 80%
+21:33:40.510 - Info: 
+21:33:40.510 - Info: Reading package lists... 80%
+21:33:40.510 - Info: 
+21:33:40.510 - Info: Reading package lists... 80%
+21:33:40.514 - Info: 
+21:33:40.514 - Info: Reading package lists... 80%
+21:33:40.514 - Info: 
+21:33:40.514 - Info: Reading package lists... 80%
+21:33:40.514 - Info: 
+21:33:40.514 - Info: Reading package lists... 80%
+21:33:40.514 - Info: 
+21:33:40.514 - Info: Reading package lists... 80%
+21:33:40.515 - Info: 
+21:33:40.515 - Info: Reading package lists... 80%
+21:33:40.515 - Info: 
+21:33:40.515 - Info: Reading package lists... 80%
+21:33:40.516 - Info: 
+21:33:40.516 - Info: Reading package lists... 80%
+21:33:40.516 - Info: 
+21:33:40.516 - Info: Reading package lists... 80%
+21:33:40.548 - Info: 
+21:33:40.548 - Info: Reading package lists... 83%
+21:33:40.548 - Info: 
+21:33:40.548 - Info: Reading package lists... 83%
+21:33:40.564 - Info: 
+21:33:40.564 - Info: Reading package lists... 84%
+21:33:40.564 - Info: 
+21:33:40.564 - Info: Reading package lists... 84%
+21:33:40.608 - Info: 
+21:33:40.608 - Info: Reading package lists... 88%
+21:33:40.608 - Info: 
+21:33:40.608 - Info: Reading package lists... 88%
+21:33:40.625 - Info: 
+21:33:40.625 - Info: Reading package lists... 90%
+21:33:40.625 - Info: 
+21:33:40.625 - Info: Reading package lists... 90%
+21:33:40.688 - Info: 
+21:33:40.688 - Info: Reading package lists... 95%
+21:33:40.688 - Info: 
+21:33:40.688 - Info: Reading package lists... 95%
+21:33:40.722 - Info: 
+21:33:40.722 - Info: Reading package lists... 98%
+21:33:40.722 - Info: 
+21:33:40.722 - Info: Reading package lists... 98%
+21:33:40.724 - Info: 
+21:33:40.724 - Info: Reading package lists... 98%
+21:33:40.724 - Info: 
+21:33:40.724 - Info: Reading package lists... 98%
+21:33:40.806 - Info: 
+21:33:40.806 - Info: Reading package lists... 98%
+21:33:40.806 - Info: 
+21:33:40.806 - Info: Reading package lists... 98%
+21:33:40.816 - Info: 
+21:33:40.817 - Info: Reading package lists... 99%
+21:33:40.940 - Info: 
+21:33:40.940 - Info: Reading package lists... Done
+21:33:40.940 - Info: 
+21:33:40.940 - Info: 
+21:33:41.039 - Info: *begin sudo -E apt-get -y  install tensorrt , 5
+21:33:41.039 - Info: 
+21:33:41.205 - Info: 
+21:33:41.205 - Info: Reading package lists... 0%
+21:33:41.247 - Info: 
+21:33:41.247 - Info: Reading package lists... 100%
+21:33:41.247 - Info: 
+21:33:41.247 - Info: Reading package lists... Done
+21:33:41.247 - Info: 
+21:33:41.247 - Info: 
+21:33:41.254 - Info: 
+21:33:41.254 - Info: Building dependency tree... 0%
+21:33:41.254 - Info: 
+21:33:41.254 - Info: Building dependency tree... 0%
+21:33:41.486 - Info: 
+21:33:41.486 - Info: Building dependency tree... 50%
+21:33:41.486 - Info: 
+21:33:41.486 - Info: Building dependency tree... 50%
+21:33:41.956 - Info: 
+21:33:41.957 - Info: Building dependency tree... 83%
+21:33:42.180 - Info: 
+21:33:42.180 - Info: Building dependency tree... Done
+21:33:42.180 - Info: 
+21:33:42.180 - Info: 
+21:33:42.180 - Info: 
+21:33:42.180 - Info: Reading state information... 0% 
+21:33:42.180 - Info: 
+21:33:42.180 - Info: Reading state information... 0%
+21:33:42.185 - Info: 
+21:33:42.185 - Info: Reading state information... Done
+21:33:42.185 - Info: 
+21:33:42.185 - Info: 
+21:33:43.916 - Info: The following additional packages will be installed:
+21:33:43.916 - Info: 
+21:33:43.920 - Info:   libnvinfer-bin libnvinfer-dev libnvinfer-dispatch-dev libnvinfer-headers-dev libnvinfer-headers-plugin-dev libnvinfer-headers-python-plugin-dev libnvinfer-lean-dev libnvinfer-plugin-dev libnvinfer-safe-headers-dev libnvinfer-vc-plugin-dev libnvonnxparsers-dev python3-libnvinfer python3-libnvinfer-dev python3-libnvinfer-dispatch python3-libnvinfer-lean
+21:33:43.920 - Info: 
+21:33:44.021 - Info: The following NEW packages will be installed:
+21:33:44.021 - Info: 
+21:33:44.026 - Info:   libnvinfer-bin libnvinfer-dev libnvinfer-dispatch-dev libnvinfer-headers-dev libnvinfer-headers-plugin-dev libnvinfer-headers-python-plugin-dev libnvinfer-lean-dev libnvinfer-plugin-dev libnvinfer-safe-headers-dev libnvinfer-vc-plugin-dev libnvonnxparsers-dev python3-libnvinfer python3-libnvinfer-dev python3-libnvinfer-dispatch python3-libnvinfer-lean tensorrt
+21:33:44.026 - Info: 
+21:33:44.100 - Info: 0 upgraded, 16 newly installed, 0 to remove and 285 not upgraded.
+21:33:44.100 - Info: 
+21:33:44.105 - Info: Need to get 0 B/2,548 MB of archives.
+21:33:44.105 - Info: 
+21:33:44.105 - Info: After this operation, 5,154 MB of additional disk space will be used.
+21:33:44.105 - Info: 
+21:33:44.115 - Info: 
+21:33:44.126 - Info: 0% [Working]
+21:33:44.126 - Info:             
+21:33:44.126 - Info: Get:1 file:/var/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2  libnvinfer-bin 10.16.2.10-1+cuda13.2 [587 kB]
+21:33:44.126 - Info: 
+21:33:44.126 - Info: 
+21:33:44.126 - Info: 0% [1 libnvinfer-bin 0 B/587 kB 0%]
+21:33:44.126 - Info:                                    
+21:33:44.128 - Info: 1% [Working]
+21:33:44.128 - Info:             
+21:33:44.128 - Info: Get:2 file:/var/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2  libnvinfer-headers-dev 10.16.2.10-1+cuda13.2 [121 kB]
+21:33:44.128 - Info: 
+21:33:44.129 - Info: 
+21:33:44.129 - Info: 1% [2 libnvinfer-headers-dev 0 B/121 kB 0%]
+21:33:44.129 - Info:                                            
+21:33:44.130 - Info: 3% [Working]
+21:33:44.130 - Info:             
+21:33:44.130 - Info: Get:3 file:/var/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2  libnvinfer-safe-headers-dev 10.16.2.10-1+cuda13.2 [19.9 kB]
+21:33:44.130 - Info: 
+21:33:44.130 - Info: 
+21:33:44.130 - Info: 3% [3 libnvinfer-safe-headers-dev 0 B/19.9 kB 0%]
+21:33:44.130 - Info:                                                  
+21:33:44.631 - Info: 4% [Working]
+21:33:50.640 - Info: 4% [Working]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              121 kB/s 5h 51min 33s
+21:33:56.152 - Info:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+21:33:56.651 - Info: 4% [Working]
+21:34:11.214 - Info:             
+21:34:11.214 - Info: Get:4 file:/var/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2  libnvinfer-dev 10.16.2.10-1+cuda13.2 [2,113 MB]
+21:34:11.214 - Info: 
+21:34:11.214 - Info: 
+21:34:11.214 - Info: 4% [4 libnvinfer-dev 0 B/2,113 MB 0%]
+21:34:11.214 - Info:                                      
+21:34:11.217 - Info: 71% [Working]
+21:34:11.217 - Info:              
+21:34:11.217 - Info: Get:5 file:/var/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2  libnvinfer-dispatch-dev 10.16.2.10-1+cuda13.2 [123 kB]
+21:34:11.218 - Info: 
+21:34:11.218 - Info: 
+21:34:11.218 - Info: 71% [5 libnvinfer-dispatch-dev 0 B/123 kB 0%]
+21:34:11.218 - Info:                                              
+21:34:11.218 - Info: 73% [Working]
+21:34:11.218 - Info:              
+21:34:11.218 - Info: Get:6 file:/var/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2  libnvinfer-headers-plugin-dev 10.16.2.10-1+cuda13.2 [6,048 B]
+21:34:11.218 - Info: 
+21:34:11.218 - Info: 
+21:34:11.218 - Info: 73% [6 libnvinfer-headers-plugin-dev 0 B/6,048 B 0%]
+21:34:11.218 - Info:                                                     
+21:34:11.219 - Info: 74% [Working]
+21:34:11.219 - Info:              
+21:34:11.219 - Info: Get:7 file:/var/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2  libnvinfer-headers-python-plugin-dev 10.16.2.10-1+cuda13.2 [6,796 B]
+21:34:11.219 - Info: 
+21:34:11.219 - Info: 
+21:34:11.219 - Info: 74% [7 libnvinfer-headers-python-plugin-dev 0 B/6,796 B 0%]
+21:34:11.219 - Info:                                                            
+21:34:11.721 - Info: 75% [Working]
+21:34:14.725 - Info: 75% [Working]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       349 MB/s 1s
+21:34:16.096 - Info:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+21:34:16.097 - Info: Get:8 file:/var/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2  libnvinfer-lean-dev 10.16.2.10-1+cuda13.2 [399 MB]
+21:34:16.097 - Info: 
+21:34:16.097 - Info: 
+21:34:16.296 - Info: 89% [Working]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       349 MB/s 0s
+21:34:16.296 - Info:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+21:34:16.296 - Info: Get:9 file:/var/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2  libnvinfer-plugin-dev 10.16.2.10-1+cuda13.2 [15.8 MB]
+21:34:16.296 - Info: 
+21:34:16.296 - Info: 
+21:34:16.296 - Info: 89% [9 libnvinfer-plugin-dev 0 B/15.8 MB 0%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        349 MB/s 0s
+21:34:16.497 - Info: 91% [Working]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       349 MB/s 0s
+21:34:16.497 - Info:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+21:34:16.498 - Info: Get:10 file:/var/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2  libnvinfer-vc-plugin-dev 10.16.2.10-1+cuda13.2 [15.8 MB]
+21:34:16.498 - Info: 
+21:34:16.498 - Info: 
+21:34:16.522 - Info: 92% [Working]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       349 MB/s 0s
+21:34:16.522 - Info:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+21:34:16.523 - Info: Get:11 file:/var/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2  libnvonnxparsers-dev 10.16.2.10-1+cuda13.2 [2,045 kB]
+21:34:16.523 - Info: 
+21:34:16.523 - Info: 
+21:34:16.523 - Info: 92% [11 libnvonnxparsers-dev 0 B/2,045 kB 0%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       349 MB/s 0s
+21:34:16.532 - Info: 94% [Working]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       349 MB/s 0s
+21:34:16.532 - Info:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+21:34:16.532 - Info: Get:12 file:/var/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2  python3-libnvinfer 10.16.2.10-1+cuda13.2 [846 kB]
+21:34:16.532 - Info: 
+21:34:16.532 - Info: 
+21:34:16.532 - Info: 94% [12 python3-libnvinfer 0 B/846 kB 0%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           349 MB/s 0s
+21:34:16.539 - Info: 95% [Working]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       349 MB/s 0s
+21:34:16.539 - Info:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+21:34:16.539 - Info: Get:13 file:/var/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2  python3-libnvinfer-lean 10.16.2.10-1+cuda13.2 [520 kB]
+21:34:16.539 - Info: 
+21:34:16.539 - Info: 
+21:34:16.539 - Info: 95% [13 python3-libnvinfer-lean 0 B/520 kB 0%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      349 MB/s 0s
+21:34:16.547 - Info: 96% [Working]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       349 MB/s 0s
+21:34:16.547 - Info:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+21:34:16.547 - Info: Get:14 file:/var/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2  python3-libnvinfer-dispatch 10.16.2.10-1+cuda13.2 [521 kB]
+21:34:16.547 - Info: 
+21:34:16.547 - Info: 
+21:34:16.547 - Info: 96% [14 python3-libnvinfer-dispatch 0 B/521 kB 0%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  349 MB/s 0s
+21:34:16.547 - Info: 97% [Working]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       349 MB/s 0s
+21:34:16.547 - Info:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+21:34:16.547 - Info: Get:15 file:/var/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2  python3-libnvinfer-dev 10.16.2.10-1+cuda13.2 [2,978 B]
+21:34:16.547 - Info: 
+21:34:16.547 - Info: 
+21:34:16.547 - Info: 97% [15 python3-libnvinfer-dev 0 B/2,978 B 0%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      349 MB/s 0s
+21:34:16.547 - Info: 99% [Working]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       349 MB/s 0s
+21:34:16.547 - Info:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+21:34:16.547 - Info: Get:16 file:/var/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2  tensorrt 10.16.2.10-1+cuda13.2 [2,962 B]
+21:34:16.547 - Info: 
+21:34:16.547 - Info: 
+21:34:16.547 - Info: 99% [16 tensorrt 0 B/2,962 B 0%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    349 MB/s 0s
+21:34:16.547 - Info: 100% [Working]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      349 MB/s 0s
+21:34:16.547 - Info:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+21:34:18.155 - Info: Selecting previously unselected package libnvinfer-bin.
+21:34:18.155 - Info: 
+21:34:18.155 - Info: (Reading database ... 
+21:34:18.174 - Info: (Reading database ... 5%
+21:34:18.174 - Info: (Reading database ... 10%
+21:34:18.174 - Info: (Reading database ... 15%
+21:34:18.174 - Info: (Reading database ... 20%
+21:34:18.174 - Info: (Reading database ... 25%
+21:34:18.174 - Info: (Reading database ... 30%
+21:34:18.174 - Info: (Reading database ... 35%
+21:34:18.174 - Info: (Reading database ... 40%
+21:34:18.174 - Info: (Reading database ... 45%
+21:34:18.174 - Info: (Reading database ... 50%
+21:34:18.184 - Info: (Reading database ... 55%
+21:34:18.207 - Info: (Reading database ... 60%
+21:34:18.219 - Info: (Reading database ... 65%
+21:34:18.230 - Info: (Reading database ... 70%
+21:34:18.278 - Info: (Reading database ... 75%
+21:34:18.291 - Info: (Reading database ... 80%
+21:34:18.337 - Info: (Reading database ... 85%
+21:34:18.425 - Info: (Reading database ... 90%
+21:34:18.511 - Info: (Reading database ... 95%
+21:34:18.672 - Info: (Reading database ... 100%
+21:34:18.672 - Info: (Reading database ... 201919 files and directories currently installed.)
+21:34:18.672 - Info: 
+21:34:18.696 - Info: Preparing to unpack .../00-libnvinfer-bin_10.16.2.10-1+cuda13.2_arm64.deb ...
+21:34:18.696 - Info: 
+21:34:18.706 - Info: Unpacking libnvinfer-bin (10.16.2.10-1+cuda13.2) ...
+21:34:18.707 - Info: 
+21:34:18.920 - Info: Selecting previously unselected package libnvinfer-headers-dev.
+21:34:18.921 - Info: 
+21:34:18.992 - Info: Preparing to unpack .../01-libnvinfer-headers-dev_10.16.2.10-1+cuda13.2_arm64.deb ...
+21:34:18.992 - Info: 
+21:34:19.003 - Info: Unpacking libnvinfer-headers-dev (10.16.2.10-1+cuda13.2) ...
+21:34:19.003 - Info: 
+21:34:19.155 - Info: Selecting previously unselected package libnvinfer-safe-headers-dev.
+21:34:19.155 - Info: 
+21:34:19.222 - Info: Preparing to unpack .../02-libnvinfer-safe-headers-dev_10.16.2.10-1+cuda13.2_arm64.deb ...
+21:34:19.222 - Info: 
+21:34:19.227 - Info: Unpacking libnvinfer-safe-headers-dev (10.16.2.10-1+cuda13.2) ...
+21:34:19.227 - Info: 
+21:34:19.347 - Info: Selecting previously unselected package libnvinfer-dev.
+21:34:19.347 - Info: 
+21:34:19.411 - Info: Preparing to unpack .../03-libnvinfer-dev_10.16.2.10-1+cuda13.2_arm64.deb ...
+21:34:19.411 - Info: 
+21:34:19.416 - Info: Unpacking libnvinfer-dev (10.16.2.10-1+cuda13.2) ...
+21:34:19.416 - Info: 
+21:35:37.332 - Info: Selecting previously unselected package libnvinfer-dispatch-dev.
+21:35:37.332 - Info: 
+21:35:37.395 - Info: Preparing to unpack .../04-libnvinfer-dispatch-dev_10.16.2.10-1+cuda13.2_arm64.deb ...
+21:35:37.395 - Info: 
+21:35:37.401 - Info: Unpacking libnvinfer-dispatch-dev (10.16.2.10-1+cuda13.2) ...
+21:35:37.401 - Info: 
+21:35:37.551 - Info: Selecting previously unselected package libnvinfer-headers-plugin-dev.
+21:35:37.551 - Info: 
+21:35:37.620 - Info: Preparing to unpack .../05-libnvinfer-headers-plugin-dev_10.16.2.10-1+cuda13.2_arm64.deb ...
+21:35:37.620 - Info: 
+21:35:37.625 - Info: Unpacking libnvinfer-headers-plugin-dev (10.16.2.10-1+cuda13.2) ...
+21:35:37.625 - Info: 
+21:35:37.741 - Info: Selecting previously unselected package libnvinfer-headers-python-plugin-dev.
+21:35:37.741 - Info: 
+21:35:37.808 - Info: Preparing to unpack .../06-libnvinfer-headers-python-plugin-dev_10.16.2.10-1+cuda13.2_arm64.deb ...
+21:35:37.808 - Info: 
+21:35:37.817 - Info: Unpacking libnvinfer-headers-python-plugin-dev (10.16.2.10-1+cuda13.2) ...
+21:35:37.817 - Info: 
+21:35:37.933 - Info: Selecting previously unselected package libnvinfer-lean-dev.
+21:35:37.933 - Info: 
+21:35:37.997 - Info: Preparing to unpack .../07-libnvinfer-lean-dev_10.16.2.10-1+cuda13.2_arm64.deb ...
+21:35:37.997 - Info: 
+21:35:38.008 - Info: Unpacking libnvinfer-lean-dev (10.16.2.10-1+cuda13.2) ...
+21:35:38.008 - Info: 
+21:36:16.207 - Info: Selecting previously unselected package libnvinfer-plugin-dev.
+21:36:16.207 - Info: 
+21:36:16.278 - Info: Preparing to unpack .../08-libnvinfer-plugin-dev_10.16.2.10-1+cuda13.2_arm64.deb ...
+21:36:16.279 - Info: 
+21:36:16.289 - Info: Unpacking libnvinfer-plugin-dev (10.16.2.10-1+cuda13.2) ...
+21:36:16.289 - Info: 
+21:36:17.581 - Info: Selecting previously unselected package libnvinfer-vc-plugin-dev.
+21:36:17.581 - Info: 
+21:36:17.646 - Info: Preparing to unpack .../09-libnvinfer-vc-plugin-dev_10.16.2.10-1+cuda13.2_arm64.deb ...
+21:36:17.646 - Info: 
+21:36:17.657 - Info: Unpacking libnvinfer-vc-plugin-dev (10.16.2.10-1+cuda13.2) ...
+21:36:17.657 - Info: 
+21:36:18.975 - Info: Selecting previously unselected package libnvonnxparsers-dev.
+21:36:18.975 - Info: 
+21:36:19.036 - Info: Preparing to unpack .../10-libnvonnxparsers-dev_10.16.2.10-1+cuda13.2_arm64.deb ...
+21:36:19.036 - Info: 
+21:36:19.045 - Info: Unpacking libnvonnxparsers-dev (10.16.2.10-1+cuda13.2) ...
+21:36:19.046 - Info: 
+21:36:19.556 - Info: Selecting previously unselected package python3-libnvinfer.
+21:36:19.556 - Info: 
+21:36:19.617 - Info: Preparing to unpack .../11-python3-libnvinfer_10.16.2.10-1+cuda13.2_arm64.deb ...
+21:36:19.617 - Info: 
+21:36:19.628 - Info: Unpacking python3-libnvinfer (10.16.2.10-1+cuda13.2) ...
+21:36:19.628 - Info: 
+21:36:19.932 - Info: Selecting previously unselected package python3-libnvinfer-lean.
+21:36:19.932 - Info: 
+21:36:19.999 - Info: Preparing to unpack .../12-python3-libnvinfer-lean_10.16.2.10-1+cuda13.2_arm64.deb ...
+21:36:19.999 - Info: 
+21:36:20.005 - Info: Unpacking python3-libnvinfer-lean (10.16.2.10-1+cuda13.2) ...
+21:36:20.005 - Info: 
+21:36:20.236 - Info: Selecting previously unselected package python3-libnvinfer-dispatch.
+21:36:20.236 - Info: 
+21:36:20.306 - Info: Preparing to unpack .../13-python3-libnvinfer-dispatch_10.16.2.10-1+cuda13.2_arm64.deb ...
+21:36:20.306 - Info: 
+21:36:20.313 - Info: Unpacking python3-libnvinfer-dispatch (10.16.2.10-1+cuda13.2) ...
+21:36:20.313 - Info: 
+21:36:20.524 - Info: Selecting previously unselected package python3-libnvinfer-dev.
+21:36:20.525 - Info: 
+21:36:20.588 - Info: Preparing to unpack .../14-python3-libnvinfer-dev_10.16.2.10-1+cuda13.2_arm64.deb ...
+21:36:20.588 - Info: 
+21:36:20.603 - Info: Unpacking python3-libnvinfer-dev (10.16.2.10-1+cuda13.2) ...
+21:36:20.603 - Info: 
+21:36:20.705 - Info: Selecting previously unselected package tensorrt.
+21:36:20.705 - Info: 
+21:36:20.772 - Info: Preparing to unpack .../15-tensorrt_10.16.2.10-1+cuda13.2_arm64.deb ...
+21:36:20.772 - Info: 
+21:36:20.777 - Info: Unpacking tensorrt (10.16.2.10-1+cuda13.2) ...
+21:36:20.777 - Info: 
+21:36:21.001 - Info: Setting up libnvinfer-safe-headers-dev (10.16.2.10-1+cuda13.2) ...
+21:36:21.001 - Info: 
+21:36:21.026 - Info: Setting up libnvinfer-headers-dev (10.16.2.10-1+cuda13.2) ...
+21:36:21.026 - Info: 
+21:36:21.051 - Info: Setting up python3-libnvinfer (10.16.2.10-1+cuda13.2) ...
+21:36:21.051 - Info: 
+21:36:21.077 - Info: Setting up python3-libnvinfer-lean (10.16.2.10-1+cuda13.2) ...
+21:36:21.077 - Info: 
+21:36:21.102 - Info: Setting up libnvinfer-bin (10.16.2.10-1+cuda13.2) ...
+21:36:21.102 - Info: 
+21:36:21.125 - Info: Setting up libnvinfer-dispatch-dev (10.16.2.10-1+cuda13.2) ...
+21:36:21.125 - Info: 
+21:36:21.165 - Info: Setting up libnvinfer-dev (10.16.2.10-1+cuda13.2) ...
+21:36:21.165 - Info: 
+21:36:21.269 - Info: Setting up libnvonnxparsers-dev (10.16.2.10-1+cuda13.2) ...
+21:36:21.269 - Info: 
+21:36:21.296 - Info: Setting up python3-libnvinfer-dispatch (10.16.2.10-1+cuda13.2) ...
+21:36:21.296 - Info: 
+21:36:21.316 - Info: Setting up libnvinfer-headers-plugin-dev (10.16.2.10-1+cuda13.2) ...
+21:36:21.316 - Info: 
+21:36:21.340 - Info: Setting up libnvinfer-headers-python-plugin-dev (10.16.2.10-1+cuda13.2) ...
+21:36:21.340 - Info: 
+21:36:21.359 - Info: Setting up libnvinfer-lean-dev (10.16.2.10-1+cuda13.2) ...
+21:36:21.359 - Info: 
+21:36:21.386 - Info: Setting up libnvinfer-plugin-dev (10.16.2.10-1+cuda13.2) ...
+21:36:21.386 - Info: 
+21:36:21.403 - Info: Setting up libnvinfer-vc-plugin-dev (10.16.2.10-1+cuda13.2) ...
+21:36:21.403 - Info: 
+21:36:21.429 - Info: Setting up python3-libnvinfer-dev (10.16.2.10-1+cuda13.2) ...
+21:36:21.429 - Info: 
+21:36:21.447 - Info: Setting up tensorrt (10.16.2.10-1+cuda13.2) ...
+21:36:21.447 - Info: 
+21:36:27.793 - Info: targetDebRepoPackageName nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2
+21:36:27.793 - Info: 
+21:36:27.793 - Info: *begin sudo apt-get purge -y nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2, 5
+21:36:27.793 - Info: 
+21:36:27.960 - Info: 
+21:36:27.960 - Info: Reading package lists... 0%
+21:36:28.003 - Info: 
+21:36:28.003 - Info: Reading package lists... 100%
+21:36:28.003 - Info: 
+21:36:28.003 - Info: Reading package lists... Done
+21:36:28.003 - Info: 
+21:36:28.003 - Info: 
+21:36:28.010 - Info: 
+21:36:28.010 - Info: Building dependency tree... 0%
+21:36:28.010 - Info: 
+21:36:28.010 - Info: Building dependency tree... 0%
+21:36:28.237 - Info: 
+21:36:28.237 - Info: Building dependency tree... 50%
+21:36:28.237 - Info: 
+21:36:28.237 - Info: Building dependency tree... 50%
+21:36:28.711 - Info: 
+21:36:28.711 - Info: Building dependency tree... 84%
+21:36:28.922 - Info: 
+21:36:28.922 - Info: Building dependency tree... Done
+21:36:28.922 - Info: 
+21:36:28.922 - Info: 
+21:36:28.922 - Info: 
+21:36:28.922 - Info: Reading state information... 0% 
+21:36:28.922 - Info: 
+21:36:28.922 - Info: Reading state information... 0%
+21:36:28.926 - Info: 
+21:36:28.927 - Info: Reading state information... Done
+21:36:28.927 - Info: 
+21:36:28.927 - Info: 
+21:36:30.760 - Info: The following packages will be REMOVED:
+21:36:30.761 - Info: 
+21:36:30.761 - Info:   nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2*
+21:36:30.761 - Info: 
+21:36:30.842 - Info: 0 upgraded, 0 newly installed, 1 to remove and 285 not upgraded.
+21:36:30.842 - Info: 
+21:36:30.847 - Info: After this operation, 4,899 MB disk space will be freed.
+21:36:30.847 - Info: 
+21:36:32.446 - Info: (Reading database ... 
+21:36:32.462 - Info: (Reading database ... 5%
+21:36:32.462 - Info: (Reading database ... 10%
+21:36:32.462 - Info: (Reading database ... 15%
+21:36:32.462 - Info: (Reading database ... 20%
+21:36:32.462 - Info: (Reading database ... 25%
+21:36:32.462 - Info: (Reading database ... 30%
+21:36:32.462 - Info: (Reading database ... 35%
+21:36:32.462 - Info: (Reading database ... 40%
+21:36:32.462 - Info: (Reading database ... 45%
+21:36:32.462 - Info: (Reading database ... 50%
+21:36:32.471 - Info: (Reading database ... 55%
+21:36:32.484 - Info: (Reading database ... 60%
+21:36:32.500 - Info: (Reading database ... 65%
+21:36:32.510 - Info: (Reading database ... 70%
+21:36:32.558 - Info: (Reading database ... 75%
+21:36:32.570 - Info: (Reading database ... 80%
+21:36:32.616 - Info: (Reading database ... 85%
+21:36:32.700 - Info: (Reading database ... 90%
+21:36:32.796 - Info: (Reading database ... 95%
+21:36:32.948 - Info: (Reading database ... 100%
+21:36:32.948 - Info: (Reading database ... 202069 files and directories currently installed.)
+21:36:32.948 - Info: 
+21:36:32.974 - Info: Removing nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2 (1.0-1) ...
+21:36:32.974 - Info: 
+21:36:34.016 - Info: (Reading database ... 
+21:36:34.031 - Info: (Reading database ... 5%
+21:36:34.031 - Info: (Reading database ... 10%
+21:36:34.031 - Info: (Reading database ... 15%
+21:36:34.031 - Info: (Reading database ... 20%
+21:36:34.031 - Info: (Reading database ... 25%
+21:36:34.031 - Info: (Reading database ... 30%
+21:36:34.031 - Info: (Reading database ... 35%
+21:36:34.031 - Info: (Reading database ... 40%
+21:36:34.031 - Info: (Reading database ... 45%
+21:36:34.031 - Info: (Reading database ... 50%
+21:36:34.039 - Info: (Reading database ... 55%
+21:36:34.048 - Info: (Reading database ... 60%
+21:36:34.066 - Info: (Reading database ... 65%
+21:36:34.077 - Info: (Reading database ... 70%
+21:36:34.125 - Info: (Reading database ... 75%
+21:36:34.138 - Info: (Reading database ... 80%
+21:36:34.155 - Info: (Reading database ... 85%
+21:36:34.172 - Info: (Reading database ... 90%
+21:36:34.195 - Info: (Reading database ... 95%
+21:36:34.247 - Info: (Reading database ... 100%
+21:36:34.247 - Info: (Reading database ... 202033 files and directories currently installed.)
+21:36:34.247 - Info: 
+21:36:34.266 - Info: Purging configuration files for nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2 (1.0-1) ...
+21:36:34.266 - Info: 
+21:36:44.060 - Info: change working directory to /tmp21:36:44.060 - Info: exec_command: ssh jetson@192.168.55.1 "dpkg-query -W -f='\${db:Status-abbrev} \${Version}' tensorrt"21:36:45.078 - Info: [ Package Install Finished Successfully ]21:36:45.078 - Info: exec_command: ssh   jetson@192.168.55.1 "df -B1 / | tail -1 | awk '{ printf \$4 }'"21:36:45.476 - Info: [target] [ 4.80 GB used. Disk Avail: 187.79 GB ]21:36:45.477 - Info: [ NV_L4T_TENSORRT_SBSA_TARGET_POST_INSTALL_COMP Install took 11m34s ]

@@ -1,0 +1,415 @@
+------ 2026-07-27 21:03:07 ------
+------ SDK: JetPack_7.2_Linux ------
+21:03:07.138 - Info: exec_command: ssh   jetson@192.168.55.1 "df -B1 / | tail -1 | awk '{ printf \$4 }'"21:03:07.543 - Info: NV_L4T_NVIDIA_NSIGHT_SYSTEMS_SBSA_TARGET_POST_INSTALL_COMP include 1 package21:03:07.543 - Info: [ Package Install Started ]21:03:07.543 - Info: target deb installer start to install21:03:07.565 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+sudo mkdir -p /opt/nvidia/deb_repos
+sudo chmod 777 /opt/nvidia/deb_repos
+sudo rm -f /opt/nvidia/deb_repos/nsight-systems-2026.3.1_2026.3.1.157-1_arm64.deb
+**********************21:03:36.114 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+
+exec 3>&1
+exec 1>&2
+exec 2>&3
+function safe_apt_install {
+    export DEBIAN_FRONTEND=noninteractive
+    echo "*begin $1, $2"
+    tmp_log=/tmp/sdkm_apt_install_log.ckw.txt
+    sudo rm -f $tmp_log
+    set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+    MAX_RETRY=3
+    TIMES=1
+    while [ ${CMD_STATUS} -ne 0 ]; do
+        cat $tmp_log > /dev/stderr
+        if [ $TIMES -gt $MAX_RETRY ]; then
+            echo "Unhandled error when running $1: `tr '\n' '; ' <$tmp_log`" 1>&2; exit 1
+        fi
+        if grep -q -e "is locked by another process" -e "E: Could not get lock /var/" -e "Could not open lock" $tmp_log; then
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting $2 seconds for apt to be available"; sleep ${2}
+        elif grep -q -e "apt --fix-broken install" $tmp_log; then
+            echo "safe apt install failed, need to run apt --fix-broken install"
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; sudo apt-get -f -y --allow-downgrades install 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting 5 seconds for apt"; sleep 5
+        else
+            echo "safe apt install failed: $1, exit code: $CMD_STATUS, retry number: $TIMES"
+            echo "will sleep $[ $TIMES*10 ] seconds before next attempt"
+            sleep $[ $TIMES*10 ]
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+        fi
+    done
+    if [ $CMD_STATUS -eq 0 ] && [ $TIMES -ne 1 ]; then
+        echo "safe apt install succeed. retry number: $TIMES."
+    fi
+}
+safe_apt_install "sudo apt-get -y update" 5
+sleep 0.5
+safe_apt_install "sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/nsight-systems-2026.3.1_2026.3.1.157-1_arm64.deb" 5
+sleep 5
+sudo rm -f /opt/nvidia/deb_repos/nsight-systems-2026.3.1_2026.3.1.157-1_arm64.deb
+**********************21:03:36.910 - Info: *begin sudo apt-get -y update, 5
+21:03:36.910 - Info: 
+21:03:37.196 - Info: 
+21:03:37.330 - Info: 0% [Working]
+21:03:37.330 - Info:             
+21:03:37.330 - Info: Hit:1 https://repo.download.nvidia.com/jetson/common r39.2 InRelease
+21:03:37.330 - Info: 
+21:03:37.330 - Info: 
+21:03:37.344 - Info: 0% [Connecting to download.docker.com (18.65.14.45)] [Connecting to ports.ubuntu.com]
+21:03:37.344 - Info:                                                                                      
+21:03:37.344 - Info: Hit:2 https://download.docker.com/linux/ubuntu noble InRelease
+21:03:37.344 - Info: 
+21:03:37.344 - Info: 
+21:03:37.402 - Info: 0% [Connected to repo.download.nvidia.com (23.205.151.162)] [Connecting to ports.ubuntu.com]
+21:03:37.402 - Info:                                                                                             
+21:03:37.402 - Info: Hit:3 https://repo.download.nvidia.com/jetson/som r39.2 InRelease
+21:03:37.402 - Info: 
+21:03:37.402 - Info: 
+21:03:37.402 - Info:                                                                                             
+21:03:37.458 - Info: 0% [Connecting to ports.ubuntu.com]
+21:03:37.458 - Info:                                    
+21:03:37.458 - Info: Hit:4 https://repo.download.nvidia.com/jetson/ffmpeg r39.2 InRelease
+21:03:37.458 - Info: 
+21:03:37.458 - Info: 
+21:03:37.542 - Info: 0% [Connecting to ports.ubuntu.com]
+21:03:37.657 - Info: 0% [Connecting to ports.ubuntu.com (91.189.92.20)]
+21:03:37.822 - Info:                                                   
+21:03:37.920 - Info: 0% [Waiting for headers]
+21:03:37.920 - Info:                         
+21:03:37.920 - Info: Hit:5 http://ports.ubuntu.com/ubuntu-ports noble InRelease
+21:03:37.920 - Info: 
+21:03:37.920 - Info: 
+21:03:37.920 - Info:                         
+21:03:37.989 - Info: 0% [Working]
+21:03:38.120 - Info: 0% [Waiting for headers]
+21:03:38.132 - Info:                         
+21:03:38.133 - Info: Hit:6 http://ports.ubuntu.com/ubuntu-ports noble-updates InRelease
+21:03:38.133 - Info: 
+21:03:38.133 - Info: 
+21:03:38.133 - Info:                         
+21:03:38.252 - Info: 0% [Working]
+21:03:38.347 - Info: 0% [Waiting for headers]
+21:03:38.348 - Info:                         
+21:03:38.348 - Info: Hit:7 http://ports.ubuntu.com/ubuntu-ports noble-backports InRelease
+21:03:38.348 - Info: 
+21:03:38.348 - Info: 
+21:03:38.348 - Info:                         
+21:03:38.458 - Info: 0% [Working]
+21:03:38.562 - Info: 0% [Waiting for headers]
+21:03:38.563 - Info:                         
+21:03:38.563 - Info: Get:8 http://ports.ubuntu.com/ubuntu-ports noble-security InRelease [126 kB]
+21:03:38.563 - Info: 
+21:03:38.563 - Info: 
+21:03:39.063 - Info: 0% [8 InRelease 11.3 kB/126 kB 9%]
+21:03:39.274 - Info: 0% [8 InRelease 35.9 kB/126 kB 28%]
+21:03:39.274 - Info:                                    
+21:03:39.396 - Info: 0% [Working]
+21:03:39.610 - Info: 24% [Working]
+21:03:39.610 - Info:              
+21:03:39.610 - Info: Get:9 http://ports.ubuntu.com/ubuntu-ports noble-security/main arm64 Packages [924 kB]
+21:03:39.610 - Info: 
+21:03:39.610 - Info: 
+21:03:40.112 - Info: 24% [9 Packages 2,657 B/924 kB 0%]
+21:03:40.612 - Info: 29% [9 Packages 143 kB/924 kB 15%]
+21:03:41.114 - Info: 41% [9 Packages 483 kB/924 kB 52%]
+21:03:41.431 - Info: 48% [9 Packages 689 kB/924 kB 75%]
+21:03:41.431 - Info:                                   
+21:03:41.431 - Info: 56% [Working]
+21:03:41.596 - Info: 56% [9 Packages store 0 B] [Waiting for headers]
+21:03:41.596 - Info:                                                 
+21:03:41.646 - Info: 56% [Waiting for headers]
+21:03:41.646 - Info:                          
+21:03:41.646 - Info: Get:10 http://ports.ubuntu.com/ubuntu-ports noble-security/universe arm64 Packages [1,249 kB]
+21:03:41.646 - Info: 
+21:03:41.646 - Info: 
+21:03:42.146 - Info: 56% [10 Packages 1,207 B/1,249 kB 0%]
+21:03:42.647 - Info: 61% [10 Packages 133 kB/1,249 kB 11%]
+21:03:43.149 - Info: 83% [10 Packages 757 kB/1,249 kB 61%]
+21:03:43.229 - Info: 98% [10 Packages 1,181 kB/1,249 kB 95%]
+21:03:43.229 - Info: 100% [Working]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      379 kB/s 0s
+21:03:43.460 - Info: 100% [10 Packages store 0 B]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        379 kB/s 0s
+21:03:43.460 - Info: 100% [Working]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      379 kB/s 0s
+21:03:43.460 - Info:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+21:03:43.460 - Info: Fetched 2,299 kB in 6s (365 kB/s)
+21:03:43.460 - Info: 
+21:03:44.532 - Info: 
+21:03:44.532 - Info: Reading package lists... 0%
+21:03:44.550 - Info: 
+21:03:44.550 - Info: Reading package lists... 0%
+21:03:44.554 - Info: 
+21:03:44.554 - Info: Reading package lists... 0%
+21:03:44.554 - Info: 
+21:03:44.554 - Info: Reading package lists... 0%
+21:03:44.557 - Info: 
+21:03:44.557 - Info: Reading package lists... 0%
+21:03:44.557 - Info: 
+21:03:44.557 - Info: Reading package lists... 0%
+21:03:44.559 - Info: 
+21:03:44.559 - Info: Reading package lists... 0%
+21:03:44.559 - Info: 
+21:03:44.559 - Info: Reading package lists... 0%
+21:03:44.561 - Info: 
+21:03:44.561 - Info: Reading package lists... 0%
+21:03:44.561 - Info: 
+21:03:44.561 - Info: Reading package lists... 0%
+21:03:44.566 - Info: 
+21:03:44.566 - Info: Reading package lists... 0%
+21:03:44.636 - Info: 
+21:03:44.636 - Info: Reading package lists... 3%
+21:03:44.636 - Info: 
+21:03:44.636 - Info: Reading package lists... 3%
+21:03:44.649 - Info: 
+21:03:44.649 - Info: Reading package lists... 5%
+21:03:44.649 - Info: 
+21:03:44.649 - Info: Reading package lists... 5%
+21:03:45.307 - Info: 
+21:03:45.307 - Info: Reading package lists... 27%
+21:03:45.780 - Info: 
+21:03:45.780 - Info: Reading package lists... 41%
+21:03:45.780 - Info: 
+21:03:45.780 - Info: Reading package lists... 41%
+21:03:45.959 - Info: 
+21:03:45.959 - Info: Reading package lists... 57%
+21:03:45.959 - Info: 
+21:03:45.959 - Info: Reading package lists... 57%
+21:03:45.966 - Info: 
+21:03:45.966 - Info: Reading package lists... 58%
+21:03:45.966 - Info: 
+21:03:45.966 - Info: Reading package lists... 58%
+21:03:45.967 - Info: 
+21:03:45.967 - Info: Reading package lists... 58%
+21:03:45.967 - Info: 
+21:03:45.967 - Info: Reading package lists... 58%
+21:03:45.987 - Info: 
+21:03:45.987 - Info: Reading package lists... 58%
+21:03:45.987 - Info: 
+21:03:45.987 - Info: Reading package lists... 58%
+21:03:45.991 - Info: 
+21:03:45.991 - Info: Reading package lists... 59%
+21:03:45.992 - Info: 
+21:03:45.992 - Info: Reading package lists... 59%
+21:03:46.031 - Info: 
+21:03:46.031 - Info: Reading package lists... 60%
+21:03:46.091 - Info: 
+21:03:46.091 - Info: Reading package lists... 62%
+21:03:46.091 - Info: 
+21:03:46.091 - Info: Reading package lists... 62%
+21:03:46.110 - Info: 
+21:03:46.110 - Info: Reading package lists... 64%
+21:03:46.110 - Info: 
+21:03:46.110 - Info: Reading package lists... 64%
+21:03:46.261 - Info: 
+21:03:46.261 - Info: Reading package lists... 69%
+21:03:46.261 - Info: 
+21:03:46.261 - Info: Reading package lists... 69%
+21:03:46.285 - Info: 
+21:03:46.285 - Info: Reading package lists... 71%
+21:03:46.285 - Info: 
+21:03:46.285 - Info: Reading package lists... 71%
+21:03:46.419 - Info: 
+21:03:46.419 - Info: Reading package lists... 77%
+21:03:46.419 - Info: 
+21:03:46.419 - Info: Reading package lists... 77%
+21:03:46.456 - Info: 
+21:03:46.456 - Info: Reading package lists... 80%
+21:03:46.456 - Info: 
+21:03:46.456 - Info: Reading package lists... 80%
+21:03:46.460 - Info: 
+21:03:46.460 - Info: Reading package lists... 80%
+21:03:46.460 - Info: 
+21:03:46.460 - Info: Reading package lists... 80%
+21:03:46.462 - Info: 
+21:03:46.463 - Info: Reading package lists... 80%
+21:03:46.463 - Info: 
+21:03:46.463 - Info: Reading package lists... 80%
+21:03:46.467 - Info: 
+21:03:46.468 - Info: Reading package lists... 80%
+21:03:46.468 - Info: 
+21:03:46.468 - Info: Reading package lists... 80%
+21:03:46.468 - Info: 
+21:03:46.468 - Info: Reading package lists... 80%
+21:03:46.468 - Info: 
+21:03:46.468 - Info: Reading package lists... 80%
+21:03:46.472 - Info: 
+21:03:46.472 - Info: Reading package lists... 80%
+21:03:46.472 - Info: 
+21:03:46.472 - Info: Reading package lists... 80%
+21:03:46.472 - Info: 
+21:03:46.472 - Info: Reading package lists... 80%
+21:03:46.472 - Info: 
+21:03:46.472 - Info: Reading package lists... 80%
+21:03:46.472 - Info: 
+21:03:46.472 - Info: Reading package lists... 80%
+21:03:46.472 - Info: 
+21:03:46.472 - Info: Reading package lists... 80%
+21:03:46.473 - Info: 
+21:03:46.473 - Info: Reading package lists... 80%
+21:03:46.473 - Info: 
+21:03:46.473 - Info: Reading package lists... 80%
+21:03:46.505 - Info: 
+21:03:46.505 - Info: Reading package lists... 83%
+21:03:46.505 - Info: 
+21:03:46.505 - Info: Reading package lists... 83%
+21:03:46.521 - Info: 
+21:03:46.521 - Info: Reading package lists... 84%
+21:03:46.521 - Info: 
+21:03:46.521 - Info: Reading package lists... 84%
+21:03:46.564 - Info: 
+21:03:46.564 - Info: Reading package lists... 88%
+21:03:46.564 - Info: 
+21:03:46.564 - Info: Reading package lists... 88%
+21:03:46.582 - Info: 
+21:03:46.582 - Info: Reading package lists... 90%
+21:03:46.582 - Info: 
+21:03:46.582 - Info: Reading package lists... 90%
+21:03:46.646 - Info: 
+21:03:46.646 - Info: Reading package lists... 95%
+21:03:46.646 - Info: 
+21:03:46.646 - Info: Reading package lists... 95%
+21:03:46.680 - Info: 
+21:03:46.680 - Info: Reading package lists... 98%
+21:03:46.680 - Info: 
+21:03:46.680 - Info: Reading package lists... 98%
+21:03:46.683 - Info: 
+21:03:46.683 - Info: Reading package lists... 98%
+21:03:46.683 - Info: 
+21:03:46.683 - Info: Reading package lists... 98%
+21:03:46.763 - Info: 
+21:03:46.763 - Info: Reading package lists... 98%
+21:03:46.763 - Info: 
+21:03:46.763 - Info: Reading package lists... 98%
+21:03:46.774 - Info: 
+21:03:46.774 - Info: Reading package lists... 99%
+21:03:46.900 - Info: 
+21:03:46.900 - Info: Reading package lists... Done
+21:03:46.900 - Info: 
+21:03:46.900 - Info: 
+21:03:47.473 - Info: *begin sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/nsight-systems-2026.3.1_2026.3.1.157-1_arm64.deb, 5
+21:03:47.473 - Info: 
+21:03:47.649 - Info: 
+21:03:47.649 - Info: Reading package lists... 0%
+21:03:47.747 - Info: 
+21:03:47.747 - Info: Reading package lists... 0%
+21:03:47.759 - Info: 
+21:03:47.759 - Info: Reading package lists... Done
+21:03:47.759 - Info: 
+21:03:47.759 - Info: 
+21:03:47.782 - Info: 
+21:03:47.782 - Info: Building dependency tree... 0%
+21:03:47.782 - Info: 
+21:03:47.782 - Info: Building dependency tree... 0%
+21:03:47.783 - Info: 
+21:03:47.783 - Info: Building dependency tree... 0%
+21:03:48.005 - Info: 
+21:03:48.005 - Info: Building dependency tree... 50%
+21:03:48.005 - Info: 
+21:03:48.005 - Info: Building dependency tree... 50%
+21:03:48.489 - Info: 
+21:03:48.489 - Info: Building dependency tree... 86%
+21:03:48.662 - Info: 
+21:03:48.662 - Info: Building dependency tree... Done
+21:03:48.662 - Info: 
+21:03:48.662 - Info: 
+21:03:48.662 - Info: 
+21:03:48.662 - Info: Reading state information... 0% 
+21:03:48.662 - Info: 
+21:03:48.662 - Info: Reading state information... 0%
+21:03:48.666 - Info: 
+21:03:48.666 - Info: Reading state information... Done
+21:03:48.666 - Info: 
+21:03:48.666 - Info: 
+21:03:48.802 - Info: Note, selecting 'nsight-systems-2026.3.1' instead of '/opt/nvidia/deb_repos/nsight-systems-2026.3.1_2026.3.1.157-1_arm64.deb'
+21:03:48.802 - Info: 
+21:03:50.370 - Info: The following NEW packages will be installed:
+21:03:50.370 - Info: 
+21:03:50.372 - Info:   nsight-systems-2026.3.1
+21:03:50.372 - Info: 
+21:03:50.441 - Info: 0 upgraded, 1 newly installed, 0 to remove and 285 not upgraded.
+21:03:50.441 - Info: 
+21:03:50.446 - Info: Need to get 443 MB of archives.
+21:03:50.446 - Info: 
+21:03:50.446 - Info: After this operation, 0 B of additional disk space will be used.
+21:03:50.446 - Info: 
+21:03:50.459 - Info: 
+21:03:50.600 - Info: 0% [Working]
+21:03:50.600 - Info:             
+21:03:50.600 - Info: Get:1 https://repo.download.nvidia.com/jetson/common r39.2/main arm64 nsight-systems-2026.3.1 arm64 2026.3.1.157-263138048394v0 [443 MB]
+21:03:50.600 - Info: 
+21:03:50.600 - Info: 
+21:03:51.101 - Info: 0% [1 nsight-systems-2026.3.1 17.4 kB/443 MB 0%]
+21:03:51.601 - Info: 4% [1 nsight-systems-2026.3.1 20.0 MB/443 MB 5%]
+21:03:52.103 - Info: 8% [1 nsight-systems-2026.3.1 43.3 MB/443 MB 10%]
+21:03:52.604 - Info: 11% [1 nsight-systems-2026.3.1 63.0 MB/443 MB 14%]
+21:03:53.105 - Info: 15% [1 nsight-systems-2026.3.1 83.9 MB/443 MB 19%]
+21:03:53.106 - Info:                                                   
+21:03:53.606 - Info: 19% [1 nsight-systems-2026.3.1 107 MB/443 MB 24%]
+21:03:54.107 - Info: 23% [1 nsight-systems-2026.3.1 130 MB/443 MB 29%]
+21:03:54.607 - Info: 27% [1 nsight-systems-2026.3.1 151 MB/443 MB 34%]
+21:03:55.108 - Info: 32% [1 nsight-systems-2026.3.1 176 MB/443 MB 40%]
+21:03:55.609 - Info: 36% [1 nsight-systems-2026.3.1 200 MB/443 MB 45%]
+21:03:56.110 - Info: 40% [1 nsight-systems-2026.3.1 223 MB/443 MB 50%]
+21:03:56.612 - Info: 45% [1 nsight-systems-2026.3.1 247 MB/443 MB 56%]
+21:03:57.112 - Info: 49% [1 nsight-systems-2026.3.1 269 MB/443 MB 61%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  43.6 MB/s 3s
+21:03:57.613 - Info: 53% [1 nsight-systems-2026.3.1 294 MB/443 MB 66%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  43.6 MB/s 3s
+21:03:58.114 - Info: 58% [1 nsight-systems-2026.3.1 319 MB/443 MB 72%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  43.6 MB/s 2s
+21:03:58.616 - Info: 62% [1 nsight-systems-2026.3.1 342 MB/443 MB 77%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  43.6 MB/s 2s
+21:03:59.117 - Info: 67% [1 nsight-systems-2026.3.1 369 MB/443 MB 83%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  43.6 MB/s 1s
+21:03:59.617 - Info: 71% [1 nsight-systems-2026.3.1 393 MB/443 MB 89%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  43.6 MB/s 1s
+21:04:00.119 - Info: 76% [1 nsight-systems-2026.3.1 419 MB/443 MB 95%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  43.6 MB/s 0s
+21:04:00.620 - Info: 80% [1 nsight-systems-2026.3.1 443 MB/443 MB 100%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 43.6 MB/s 0s
+21:04:03.125 - Info: 80% [1 nsight-systems-2026.3.1 443 MB/443 MB 100%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 28.9 MB/s 0s
+21:04:05.112 - Info: 100% [Working]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     28.9 MB/s 0s
+21:04:05.112 - Info:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+21:04:05.112 - Info: Fetched 443 MB in 15s (30.2 MB/s)
+21:04:05.112 - Info: 
+21:04:06.595 - Info: Selecting previously unselected package nsight-systems-2026.3.1.
+21:04:06.595 - Info: 
+21:04:06.595 - Info: (Reading database ... 
+21:04:06.617 - Info: (Reading database ... 5%
+21:04:06.617 - Info: (Reading database ... 10%
+21:04:06.617 - Info: (Reading database ... 15%
+21:04:06.617 - Info: (Reading database ... 20%
+21:04:06.617 - Info: (Reading database ... 25%
+21:04:06.617 - Info: (Reading database ... 30%
+21:04:06.617 - Info: (Reading database ... 35%
+21:04:06.617 - Info: (Reading database ... 40%
+21:04:06.618 - Info: (Reading database ... 45%
+21:04:06.618 - Info: (Reading database ... 50%
+21:04:06.629 - Info: (Reading database ... 55%
+21:04:06.642 - Info: (Reading database ... 60%
+21:04:06.654 - Info: (Reading database ... 65%
+21:04:06.668 - Info: (Reading database ... 70%
+21:04:06.709 - Info: (Reading database ... 75%
+21:04:06.721 - Info: (Reading database ... 80%
+21:04:06.738 - Info: (Reading database ... 85%
+21:04:06.755 - Info: (Reading database ... 90%
+21:04:06.766 - Info: (Reading database ... 95%
+21:04:06.823 - Info: (Reading database ... 100%
+21:04:06.823 - Info: (Reading database ... 199781 files and directories currently installed.)
+21:04:06.823 - Info: 
+21:04:06.841 - Info: Preparing to unpack .../nsight-systems-2026.3.1_2026.3.1.157-263138048394v0_arm64.deb ...
+21:04:06.841 - Info: 
+21:04:06.852 - Info: Unpacking nsight-systems-2026.3.1 (2026.3.1.157-263138048394v0) ...
+21:04:06.852 - Info: 
+21:04:43.758 - Info: Setting up nsight-systems-2026.3.1 (2026.3.1.157-263138048394v0) ...
+21:04:43.758 - Info: 
+21:04:43.785 - Info: update-alternatives: using /opt/nvidia/nsight-systems/2026.3.1/target-linux-sbsa-armv8/nsys to provide /usr/local/bin/nsys (nsys) in manual mode
+21:04:43.785 - Info: 
+21:04:43.796 - Info: update-alternatives: using /opt/nvidia/nsight-systems/2026.3.1/host-linux-armv8/nsys-ui to provide /usr/local/bin/nsys-ui (nsys-ui) in manual mode
+21:04:43.796 - Info: 
+21:04:43.806 - Info: Processing triggers for gnome-menus (3.36.0-1.1ubuntu3) ...
+21:04:43.806 - Info: 
+21:04:43.825 - Info: Processing triggers for desktop-file-utils (0.27-2build1) ...
+21:04:43.825 - Info: 
+21:04:54.894 - Info: change working directory to /tmp21:04:54.894 - Info: exec_command: ssh jetson@192.168.55.1 "dpkg-query -W -f='\${db:Status-abbrev} \${Version}' nsight-systems-2026.3.1"21:04:55.357 - Info: [ Package Install Finished Successfully ]21:04:55.357 - Info: exec_command: ssh   jetson@192.168.55.1 "df -B1 / | tail -1 | awk '{ printf \$4 }'"21:04:55.754 - Info: [target] [ 1.57 GB used. Disk Avail: 196.23 GB ]21:04:55.754 - Info: [ NV_L4T_NVIDIA_NSIGHT_SYSTEMS_SBSA_TARGET_POST_INSTALL_COMP Install took 1m48s ]

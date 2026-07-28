@@ -1,0 +1,443 @@
+------ 2026-07-27 11:12:34 ------
+------ SDK: JetPack_7.2_Linux ------
+11:12:34.343 - Info: exec_command: ssh   jetson@192.168.55.1 "df -B1 / | tail -1 | awk '{ printf \$4 }'"11:12:34.749 - Info: NV_L4T_OPENCV_RUNTIME_SBSA_TARGET_POST_INSTALL_COMP include 1 package11:12:34.749 - Info: [ Package Install Started ]11:12:34.749 - Info: target deb installer start to install11:12:34.750 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+sudo mkdir -p /opt/nvidia/deb_repos
+sudo chmod 777 /opt/nvidia/deb_repos
+sudo rm -f /opt/nvidia/deb_repos/OpenCV-4.8.0-3-g6ef37b4-aarch64-libs.deb
+**********************11:12:37.056 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+
+exec 3>&1
+exec 1>&2
+exec 2>&3
+function safe_apt_install {
+    export DEBIAN_FRONTEND=noninteractive
+    echo "*begin $1, $2"
+    tmp_log=/tmp/sdkm_apt_install_log.ckw.txt
+    sudo rm -f $tmp_log
+    set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+    MAX_RETRY=3
+    TIMES=1
+    while [ ${CMD_STATUS} -ne 0 ]; do
+        cat $tmp_log > /dev/stderr
+        if [ $TIMES -gt $MAX_RETRY ]; then
+            echo "Unhandled error when running $1: `tr '\n' '; ' <$tmp_log`" 1>&2; exit 1
+        fi
+        if grep -q -e "is locked by another process" -e "E: Could not get lock /var/" -e "Could not open lock" $tmp_log; then
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting $2 seconds for apt to be available"; sleep ${2}
+        elif grep -q -e "apt --fix-broken install" $tmp_log; then
+            echo "safe apt install failed, need to run apt --fix-broken install"
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; sudo apt-get -f -y --allow-downgrades install 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting 5 seconds for apt"; sleep 5
+        else
+            echo "safe apt install failed: $1, exit code: $CMD_STATUS, retry number: $TIMES"
+            echo "will sleep $[ $TIMES*10 ] seconds before next attempt"
+            sleep $[ $TIMES*10 ]
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+        fi
+    done
+    if [ $CMD_STATUS -eq 0 ] && [ $TIMES -ne 1 ]; then
+        echo "safe apt install succeed. retry number: $TIMES."
+    fi
+}
+safe_apt_install "sudo apt-get -y update" 5
+sleep 0.5
+safe_apt_install "sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/OpenCV-4.8.0-3-g6ef37b4-aarch64-libs.deb" 5
+sleep 5
+sudo rm -f /opt/nvidia/deb_repos/OpenCV-4.8.0-3-g6ef37b4-aarch64-libs.deb
+**********************11:12:37.858 - Info: *begin sudo apt-get -y update, 5
+11:12:37.858 - Info: 
+11:12:38.147 - Info: 
+11:12:38.207 - Info: 0% [Working]
+11:12:38.207 - Info:             
+11:12:38.207 - Info: Hit:1 https://download.docker.com/linux/ubuntu noble InRelease
+11:12:38.207 - Info: 
+11:12:38.207 - Info: 
+11:12:38.252 - Info: 0% [Connected to repo.download.nvidia.com (23.205.151.187)] [Connecting to ports.ubuntu.com (91.189.92.21)]
+11:12:38.252 - Info:                                                                                                            
+11:12:38.252 - Info: Hit:2 https://repo.download.nvidia.com/jetson/common r39.2 InRelease
+11:12:38.252 - Info: 
+11:12:38.252 - Info: 
+11:12:38.332 - Info: 0% [Connecting to repo.download.nvidia.com (23.205.151.187)] [Connecting to ports.ubuntu.com (91.189.92.21)]
+11:12:38.332 - Info:                                                                                                             
+11:12:38.346 - Info: 0% [Waiting for headers] [Connecting to ports.ubuntu.com (91.189.92.21)]
+11:12:38.346 - Info:                                                                         
+11:12:38.346 - Info: Hit:3 https://repo.download.nvidia.com/jetson/som r39.2 InRelease
+11:12:38.346 - Info: 
+11:12:38.346 - Info: 
+11:12:38.410 - Info: 0% [Connecting to repo.download.nvidia.com (23.205.151.187)] [Connecting to ports.ubuntu.com (91.189.92.21)]
+11:12:38.410 - Info:                                                                                                             
+11:12:38.410 - Info: Hit:4 https://repo.download.nvidia.com/jetson/ffmpeg r39.2 InRelease
+11:12:38.410 - Info: 
+11:12:38.410 - Info: 
+11:12:38.410 - Info:                                                                                                             
+11:12:38.529 - Info: 0% [Waiting for headers]
+11:12:38.568 - Info:                         
+11:12:38.568 - Info: Hit:5 http://ports.ubuntu.com/ubuntu-ports noble InRelease
+11:12:38.568 - Info: 
+11:12:38.568 - Info: 
+11:12:38.568 - Info:                         
+11:12:38.702 - Info: 0% [Working]
+11:12:38.775 - Info: 0% [Waiting for headers]
+11:12:38.775 - Info:                         
+11:12:38.775 - Info: Hit:6 http://ports.ubuntu.com/ubuntu-ports noble-updates InRelease
+11:12:38.775 - Info: 
+11:12:38.775 - Info: 
+11:12:38.775 - Info:                         
+11:12:38.873 - Info: 0% [Working]
+11:12:38.982 - Info: 0% [Waiting for headers]
+11:12:38.982 - Info:                         
+11:12:38.982 - Info: Hit:7 http://ports.ubuntu.com/ubuntu-ports noble-backports InRelease
+11:12:38.982 - Info: 
+11:12:38.982 - Info: 
+11:12:38.982 - Info:                         
+11:12:39.004 - Info: 0% [Working]
+11:12:39.124 - Info: 0% [Waiting for headers]
+11:12:39.189 - Info:                         
+11:12:39.190 - Info: Hit:8 http://ports.ubuntu.com/ubuntu-ports noble-security InRelease
+11:12:39.190 - Info: 
+11:12:39.190 - Info: 
+11:12:39.190 - Info:                         
+11:12:39.245 - Info: 0% [Working]
+11:12:39.356 - Info: 20% [Working]
+11:12:39.356 - Info:              
+11:12:39.568 - Info: 
+11:12:39.568 - Info: Reading package lists... 0%
+11:12:39.585 - Info: 
+11:12:39.585 - Info: Reading package lists... 0%
+11:12:39.588 - Info: 
+11:12:39.588 - Info: Reading package lists... 0%
+11:12:39.588 - Info: 
+11:12:39.588 - Info: Reading package lists... 0%
+11:12:39.592 - Info: 
+11:12:39.592 - Info: Reading package lists... 0%
+11:12:39.592 - Info: 
+11:12:39.592 - Info: Reading package lists... 0%
+11:12:39.594 - Info: 
+11:12:39.594 - Info: Reading package lists... 0%
+11:12:39.594 - Info: 
+11:12:39.594 - Info: Reading package lists... 0%
+11:12:39.596 - Info: 
+11:12:39.596 - Info: Reading package lists... 0%
+11:12:39.596 - Info: 
+11:12:39.596 - Info: Reading package lists... 0%
+11:12:39.601 - Info: 
+11:12:39.601 - Info: Reading package lists... 0%
+11:12:39.675 - Info: 
+11:12:39.675 - Info: Reading package lists... 3%
+11:12:39.675 - Info: 
+11:12:39.675 - Info: Reading package lists... 3%
+11:12:39.687 - Info: 
+11:12:39.687 - Info: Reading package lists... 5%
+11:12:39.687 - Info: 
+11:12:39.687 - Info: Reading package lists... 5%
+11:12:40.360 - Info: 
+11:12:40.360 - Info: Reading package lists... 27%
+11:12:40.826 - Info: 
+11:12:40.826 - Info: Reading package lists... 41%
+11:12:40.826 - Info: 
+11:12:40.826 - Info: Reading package lists... 41%
+11:12:40.986 - Info: 
+11:12:40.986 - Info: Reading package lists... 58%
+11:12:40.986 - Info: 
+11:12:40.986 - Info: Reading package lists... 58%
+11:12:40.992 - Info: 
+11:12:40.992 - Info: Reading package lists... 58%
+11:12:40.992 - Info: 
+11:12:40.992 - Info: Reading package lists... 58%
+11:12:40.994 - Info: 
+11:12:40.994 - Info: Reading package lists... 58%
+11:12:40.994 - Info: 
+11:12:40.994 - Info: Reading package lists... 58%
+11:12:41.013 - Info: 
+11:12:41.013 - Info: Reading package lists... 59%
+11:12:41.013 - Info: 
+11:12:41.013 - Info: Reading package lists... 59%
+11:12:41.016 - Info: 
+11:12:41.016 - Info: Reading package lists... 59%
+11:12:41.016 - Info: 
+11:12:41.016 - Info: Reading package lists... 59%
+11:12:41.079 - Info: 
+11:12:41.079 - Info: Reading package lists... 61%
+11:12:41.111 - Info: 
+11:12:41.111 - Info: Reading package lists... 62%
+11:12:41.111 - Info: 
+11:12:41.111 - Info: Reading package lists... 62%
+11:12:41.130 - Info: 
+11:12:41.130 - Info: Reading package lists... 64%
+11:12:41.130 - Info: 
+11:12:41.130 - Info: Reading package lists... 64%
+11:12:41.274 - Info: 
+11:12:41.274 - Info: Reading package lists... 69%
+11:12:41.274 - Info: 
+11:12:41.274 - Info: Reading package lists... 69%
+11:12:41.297 - Info: 
+11:12:41.297 - Info: Reading package lists... 71%
+11:12:41.297 - Info: 
+11:12:41.297 - Info: Reading package lists... 71%
+11:12:41.425 - Info: 
+11:12:41.425 - Info: Reading package lists... 77%
+11:12:41.425 - Info: 
+11:12:41.425 - Info: Reading package lists... 77%
+11:12:41.457 - Info: 
+11:12:41.457 - Info: Reading package lists... 80%
+11:12:41.457 - Info: 
+11:12:41.457 - Info: Reading package lists... 80%
+11:12:41.462 - Info: 
+11:12:41.462 - Info: Reading package lists... 80%
+11:12:41.463 - Info: 
+11:12:41.463 - Info: Reading package lists... 80%
+11:12:41.464 - Info: 
+11:12:41.464 - Info: Reading package lists... 80%
+11:12:41.464 - Info: 
+11:12:41.464 - Info: Reading package lists... 80%
+11:12:41.468 - Info: 
+11:12:41.469 - Info: Reading package lists... 80%
+11:12:41.469 - Info: 
+11:12:41.469 - Info: Reading package lists... 80%
+11:12:41.469 - Info: 
+11:12:41.469 - Info: Reading package lists... 80%
+11:12:41.469 - Info: 
+11:12:41.469 - Info: Reading package lists... 80%
+11:12:41.473 - Info: 
+11:12:41.473 - Info: Reading package lists... 80%
+11:12:41.473 - Info: 
+11:12:41.473 - Info: Reading package lists... 80%
+11:12:41.474 - Info: 
+11:12:41.474 - Info: Reading package lists... 81%
+11:12:41.474 - Info: 
+11:12:41.474 - Info: Reading package lists... 81%
+11:12:41.474 - Info: 
+11:12:41.474 - Info: Reading package lists... 81%
+11:12:41.474 - Info: 
+11:12:41.474 - Info: Reading package lists... 81%
+11:12:41.475 - Info: 
+11:12:41.475 - Info: Reading package lists... 81%
+11:12:41.475 - Info: 
+11:12:41.475 - Info: Reading package lists... 81%
+11:12:41.505 - Info: 
+11:12:41.505 - Info: Reading package lists... 83%
+11:12:41.505 - Info: 
+11:12:41.505 - Info: Reading package lists... 83%
+11:12:41.520 - Info: 
+11:12:41.520 - Info: Reading package lists... 84%
+11:12:41.520 - Info: 
+11:12:41.520 - Info: Reading package lists... 84%
+11:12:41.562 - Info: 
+11:12:41.562 - Info: Reading package lists... 88%
+11:12:41.562 - Info: 
+11:12:41.562 - Info: Reading package lists... 88%
+11:12:41.578 - Info: 
+11:12:41.578 - Info: Reading package lists... 90%
+11:12:41.578 - Info: 
+11:12:41.578 - Info: Reading package lists... 90%
+11:12:41.637 - Info: 
+11:12:41.637 - Info: Reading package lists... 95%
+11:12:41.637 - Info: 
+11:12:41.637 - Info: Reading package lists... 95%
+11:12:41.667 - Info: 
+11:12:41.667 - Info: Reading package lists... 98%
+11:12:41.667 - Info: 
+11:12:41.667 - Info: Reading package lists... 98%
+11:12:41.670 - Info: 
+11:12:41.670 - Info: Reading package lists... 98%
+11:12:41.670 - Info: 
+11:12:41.670 - Info: Reading package lists... 98%
+11:12:41.753 - Info: 
+11:12:41.753 - Info: Reading package lists... 98%
+11:12:41.753 - Info: 
+11:12:41.753 - Info: Reading package lists... 98%
+11:12:41.876 - Info: 
+11:12:41.876 - Info: Reading package lists... Done
+11:12:41.876 - Info: 
+11:12:41.876 - Info: 
+11:12:42.452 - Info: *begin sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/OpenCV-4.8.0-3-g6ef37b4-aarch64-libs.deb, 5
+11:12:42.452 - Info: 
+11:12:42.616 - Info: 
+11:12:42.616 - Info: Reading package lists... 0%
+11:12:42.720 - Info: 
+11:12:42.720 - Info: Reading package lists... 0%
+11:12:42.732 - Info: 
+11:12:42.732 - Info: Reading package lists... Done
+11:12:42.732 - Info: 
+11:12:42.732 - Info: 
+11:12:42.755 - Info: 
+11:12:42.755 - Info: Building dependency tree... 0%
+11:12:42.755 - Info: 
+11:12:42.755 - Info: Building dependency tree... 0%
+11:12:42.757 - Info: 
+11:12:42.757 - Info: Building dependency tree... 0%
+11:12:42.978 - Info: 
+11:12:42.978 - Info: Building dependency tree... 50%
+11:12:42.978 - Info: 
+11:12:42.978 - Info: Building dependency tree... 50%
+11:12:43.466 - Info: 
+11:12:43.466 - Info: Building dependency tree... 86%
+11:12:43.638 - Info: 
+11:12:43.638 - Info: Building dependency tree... Done
+11:12:43.638 - Info: 
+11:12:43.638 - Info: 
+11:12:43.638 - Info: 
+11:12:43.638 - Info: Reading state information... 0% 
+11:12:43.638 - Info: 
+11:12:43.638 - Info: Reading state information... 0%
+11:12:43.643 - Info: 
+11:12:43.643 - Info: Reading state information... Done
+11:12:43.643 - Info: 
+11:12:43.643 - Info: 
+11:12:43.778 - Info: Note, selecting 'libopencv' instead of '/opt/nvidia/deb_repos/OpenCV-4.8.0-3-g6ef37b4-aarch64-libs.deb'
+11:12:43.778 - Info: 
+11:12:45.248 - Info: The following additional packages will be installed:
+11:12:45.248 - Info: 
+11:12:45.254 - Info:   libavcodec60 libavformat60 libavutil58 libswresample4 libswscale7
+11:12:45.254 - Info: 
+11:12:45.262 - Info: Suggested packages:
+11:12:45.262 - Info: 
+11:12:45.262 - Info:   libcuda1 libnvcuvid1 libnvidia-encode1
+11:12:45.262 - Info: 
+11:12:45.366 - Info: The following NEW packages will be installed:
+11:12:45.366 - Info: 
+11:12:45.372 - Info:   libavcodec60 libavformat60 libavutil58 libopencv libswresample4 libswscale7
+11:12:45.372 - Info: 
+11:12:45.442 - Info: 0 upgraded, 6 newly installed, 0 to remove and 285 not upgraded.
+11:12:45.442 - Info: 
+11:12:45.448 - Info: Need to get 20.4 MB of archives.
+11:12:45.448 - Info: 
+11:12:45.448 - Info: After this operation, 92.0 MB of additional disk space will be used.
+11:12:45.448 - Info: 
+11:12:45.475 - Info: 
+11:12:45.546 - Info: 0% [Working]
+11:12:45.546 - Info:             
+11:12:45.546 - Info: Get:1 https://repo.download.nvidia.com/jetson/common r39.2/main arm64 libopencv arm64 4.8.0-3-g6ef37b4 [12.8 MB]
+11:12:45.546 - Info: 
+11:12:45.546 - Info: 
+11:12:46.048 - Info: 0% [Connecting to ports.ubuntu.com] [1 libopencv 15.6 kB/12.8 MB 0%]
+11:12:46.048 - Info:                                                                     
+11:12:46.238 - Info: 50% [Waiting for headers] [1 libopencv 12.8 MB/12.8 MB 100%]
+11:12:46.238 - Info:                                                             
+11:12:46.238 - Info: Get:2 http://ports.ubuntu.com/ubuntu-ports noble/universe arm64 libavutil58 arm64 7:6.1.1-3ubuntu5 [388 kB]
+11:12:46.238 - Info: 
+11:12:46.238 - Info: 
+11:12:46.739 - Info: 50% [2 libavutil58 14.2 kB/388 kB 4%] [1 libopencv 12.8 MB/12.8 MB 100%]
+11:12:47.239 - Info: 51% [2 libavutil58 54.7 kB/388 kB 14%] [1 libopencv 12.8 MB/12.8 MB 100%]
+11:12:47.240 - Info:                                                                          
+11:12:47.589 - Info: 51% [2 libavutil58 234 kB/388 kB 60%] [1 libopencv 12.8 MB/12.8 MB 100%]
+11:12:47.589 - Info:                                                                         
+11:12:47.819 - Info: 55% [1 libopencv 12.8 MB/12.8 MB 100%]
+11:12:47.819 - Info:                                       
+11:12:47.819 - Info: Get:3 http://ports.ubuntu.com/ubuntu-ports noble/universe arm64 libswresample4 arm64 7:6.1.1-3ubuntu5 [57.9 kB]
+11:12:47.819 - Info: 
+11:12:47.819 - Info: 
+11:12:51.931 - Info: 55% [3 libswresample4 8,398 B/57.9 kB 15%] [1 libopencv 12.8 MB/12.8 MB 100%]
+11:12:51.931 - Info: 59% [Waiting for headers] [1 libopencv 12.8 MB/12.8 MB 100%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      2,049 kB/s 3s
+11:12:51.931 - Info:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+11:12:51.931 - Info: Get:4 http://ports.ubuntu.com/ubuntu-ports noble/universe arm64 libavcodec60 arm64 7:6.1.1-3ubuntu5 [5,769 kB]
+11:12:51.931 - Info: 
+11:12:51.931 - Info: 
+11:12:52.431 - Info: 59% [4 libavcodec60 67.9 kB/5,769 kB 1%] [1 libopencv 12.8 MB/12.8 MB 100%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       2,049 kB/s 3s
+11:12:52.933 - Info: 67% [4 libavcodec60 2,076 kB/5,769 kB 36%] [1 libopencv 12.8 MB/12.8 MB 100%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     2,049 kB/s 2s
+11:12:53.434 - Info: 81% [4 libavcodec60 5,769 kB/5,769 kB 100%] [1 libopencv 12.8 MB/12.8 MB 100%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    2,049 kB/s 0s
+11:12:55.142 - Info: 85% [4 libavcodec60 5,769 kB/5,769 kB 100%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       2,049 kB/s 0s
+11:12:56.283 - Info: 88% [Working]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     2,049 kB/s 0s
+11:12:56.283 - Info:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+11:12:56.283 - Info: Get:5 http://ports.ubuntu.com/ubuntu-ports noble/universe arm64 libavformat60 arm64 7:6.1.1-3ubuntu5 [1,188 kB]
+11:12:56.283 - Info: 
+11:12:56.283 - Info: 
+11:12:56.317 - Info: 88% [5 libavformat60 7,668 B/1,188 kB 1%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         2,049 kB/s 0s
+11:12:56.317 - Info: 96% [Working]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     2,049 kB/s 0s
+11:12:56.317 - Info:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+11:12:56.317 - Info: Get:6 http://ports.ubuntu.com/ubuntu-ports noble/universe arm64 libswscale7 arm64 7:6.1.1-3ubuntu5 [173 kB]
+11:12:56.317 - Info: 
+11:12:56.317 - Info: 
+11:12:56.322 - Info: 96% [6 libswscale7 64.8 kB/173 kB 38%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            2,049 kB/s 0s
+11:12:56.322 - Info: 100% [Working]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    2,049 kB/s 0s
+11:12:56.322 - Info:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+11:12:56.322 - Info: Fetched 20.4 MB in 11s (1,877 kB/s)
+11:12:56.322 - Info: 
+11:12:57.804 - Info: Selecting previously unselected package libavutil58:arm64.
+11:12:57.804 - Info: 
+11:12:57.804 - Info: (Reading database ... 
+11:12:57.827 - Info: (Reading database ... 5%
+11:12:57.827 - Info: (Reading database ... 10%
+11:12:57.827 - Info: (Reading database ... 15%
+11:12:57.827 - Info: (Reading database ... 20%
+11:12:57.827 - Info: (Reading database ... 25%
+11:12:57.827 - Info: (Reading database ... 30%
+11:12:57.827 - Info: (Reading database ... 35%
+11:12:57.827 - Info: (Reading database ... 40%
+11:12:57.827 - Info: (Reading database ... 45%
+11:12:57.827 - Info: (Reading database ... 50%
+11:12:57.836 - Info: (Reading database ... 55%
+11:12:57.854 - Info: (Reading database ... 60%
+11:12:57.865 - Info: (Reading database ... 65%
+11:12:57.874 - Info: (Reading database ... 70%
+11:12:57.891 - Info: (Reading database ... 75%
+11:12:57.904 - Info: (Reading database ... 80%
+11:12:57.922 - Info: (Reading database ... 85%
+11:12:57.938 - Info: (Reading database ... 90%
+11:12:57.983 - Info: (Reading database ... 95%
+11:12:58.024 - Info: (Reading database ... 100%
+11:12:58.024 - Info: (Reading database ... 190406 files and directories currently installed.)
+11:12:58.024 - Info: 
+11:12:58.041 - Info: Preparing to unpack .../0-libavutil58_7%3a6.1.1-3ubuntu5_arm64.deb ...
+11:12:58.041 - Info: 
+11:12:58.054 - Info: Unpacking libavutil58:arm64 (7:6.1.1-3ubuntu5) ...
+11:12:58.054 - Info: 
+11:12:58.198 - Info: Selecting previously unselected package libswresample4:arm64.
+11:12:58.199 - Info: 
+11:12:58.263 - Info: Preparing to unpack .../1-libswresample4_7%3a6.1.1-3ubuntu5_arm64.deb ...
+11:12:58.263 - Info: 
+11:12:58.271 - Info: Unpacking libswresample4:arm64 (7:6.1.1-3ubuntu5) ...
+11:12:58.271 - Info: 
+11:12:58.393 - Info: Selecting previously unselected package libavcodec60:arm64.
+11:12:58.393 - Info: 
+11:12:58.460 - Info: Preparing to unpack .../2-libavcodec60_7%3a6.1.1-3ubuntu5_arm64.deb ...
+11:12:58.460 - Info: 
+11:12:58.465 - Info: Unpacking libavcodec60:arm64 (7:6.1.1-3ubuntu5) ...
+11:12:58.465 - Info: 
+11:12:58.885 - Info: Selecting previously unselected package libavformat60:arm64.
+11:12:58.885 - Info: 
+11:12:58.951 - Info: Preparing to unpack .../3-libavformat60_7%3a6.1.1-3ubuntu5_arm64.deb ...
+11:12:58.951 - Info: 
+11:12:58.959 - Info: Unpacking libavformat60:arm64 (7:6.1.1-3ubuntu5) ...
+11:12:58.959 - Info: 
+11:12:59.145 - Info: Selecting previously unselected package libswscale7:arm64.
+11:12:59.145 - Info: 
+11:12:59.214 - Info: Preparing to unpack .../4-libswscale7_7%3a6.1.1-3ubuntu5_arm64.deb ...
+11:12:59.214 - Info: 
+11:12:59.223 - Info: Unpacking libswscale7:arm64 (7:6.1.1-3ubuntu5) ...
+11:12:59.224 - Info: 
+11:12:59.350 - Info: Selecting previously unselected package libopencv.
+11:12:59.350 - Info: 
+11:12:59.412 - Info: Preparing to unpack .../5-libopencv_4.8.0-3-g6ef37b4_arm64.deb ...
+11:12:59.412 - Info: 
+11:12:59.421 - Info: Unpacking libopencv (4.8.0-3-g6ef37b4) ...
+11:12:59.421 - Info: 
+11:13:00.273 - Info: Setting up libavutil58:arm64 (7:6.1.1-3ubuntu5) ...
+11:13:00.273 - Info: 
+11:13:00.301 - Info: Setting up libswresample4:arm64 (7:6.1.1-3ubuntu5) ...
+11:13:00.301 - Info: 
+11:13:00.319 - Info: Setting up libavcodec60:arm64 (7:6.1.1-3ubuntu5) ...
+11:13:00.319 - Info: 
+11:13:00.346 - Info: Setting up libswscale7:arm64 (7:6.1.1-3ubuntu5) ...
+11:13:00.346 - Info: 
+11:13:00.364 - Info: Setting up libavformat60:arm64 (7:6.1.1-3ubuntu5) ...
+11:13:00.364 - Info: 
+11:13:00.391 - Info: Setting up libopencv (4.8.0-3-g6ef37b4) ...
+11:13:00.391 - Info: 
+11:13:00.437 - Info: Processing triggers for libc-bin (2.39-0ubuntu8.7) ...
+11:13:00.437 - Info: 
+11:13:11.394 - Info: change working directory to /tmp11:13:11.394 - Info: exec_command: ssh jetson@192.168.55.1 "dpkg-query -W -f='\${db:Status-abbrev} \${Version}' libopencv"11:13:11.800 - Info: [ Package Install Finished Successfully ]11:13:11.800 - Info: exec_command: ssh   jetson@192.168.55.1 "df -B1 / | tail -1 | awk '{ printf \$4 }'"11:13:12.187 - Info: [target] [ 77.55 MB used. Disk Avail: 205.03 GB ]11:13:12.187 - Info: [ NV_L4T_OPENCV_RUNTIME_SBSA_TARGET_POST_INSTALL_COMP Install took 37s ]

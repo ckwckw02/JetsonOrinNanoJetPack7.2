@@ -1,0 +1,931 @@
+------ 2026-07-27 21:09:06 ------
+------ SDK: JetPack_7.2_Linux ------
+21:09:06.084 - Info: exec_command: ssh   jetson@192.168.55.1 "df -B1 / | tail -1 | awk '{ printf \$4 }'"21:09:06.472 - Info: NV_L4T_TENSORRT_RUNTIME_SBSA_TARGET_POST_INSTALL_COMP include 1 package21:09:06.472 - Info: [ Package Install Started ]21:09:06.472 - Info: target deb installer start to install21:09:06.472 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+sudo mkdir -p /opt/nvidia/deb_repos
+sudo chmod 777 /opt/nvidia/deb_repos
+sudo rm -f /opt/nvidia/deb_repos/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2_1.0-1_arm64.deb
+**********************21:14:15.465 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+
+exec 3>&1
+exec 1>&2
+exec 2>&3
+function safe_apt_install {
+    export DEBIAN_FRONTEND=noninteractive
+    echo "*begin $1, $2"
+    tmp_log=/tmp/sdkm_apt_install_log.ckw.txt
+    sudo rm -f $tmp_log
+    set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+    MAX_RETRY=3
+    TIMES=1
+    while [ ${CMD_STATUS} -ne 0 ]; do
+        cat $tmp_log > /dev/stderr
+        if [ $TIMES -gt $MAX_RETRY ]; then
+            echo "Unhandled error when running $1: `tr '\n' '; ' <$tmp_log`" 1>&2; exit 1
+        fi
+        if grep -q -e "is locked by another process" -e "E: Could not get lock /var/" -e "Could not open lock" $tmp_log; then
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting $2 seconds for apt to be available"; sleep ${2}
+        elif grep -q -e "apt --fix-broken install" $tmp_log; then
+            echo "safe apt install failed, need to run apt --fix-broken install"
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; sudo apt-get -f -y --allow-downgrades install 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting 5 seconds for apt"; sleep 5
+        else
+            echo "safe apt install failed: $1, exit code: $CMD_STATUS, retry number: $TIMES"
+            echo "will sleep $[ $TIMES*10 ] seconds before next attempt"
+            sleep $[ $TIMES*10 ]
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+        fi
+    done
+    if [ $CMD_STATUS -eq 0 ] && [ $TIMES -ne 1 ]; then
+        echo "safe apt install succeed. retry number: $TIMES."
+    fi
+}
+safe_apt_install "sudo apt-get -y update" 5
+sleep 0.5
+safe_apt_install "sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2_1.0-1_arm64.deb" 5
+sleep 5
+# ensure package version from local repository has a higher priority
+sudo mkdir -p /etc/apt/preferences.d/
+sudo rm -f /etc/apt/preferences.d/sdkm
+sudo touch /etc/apt/preferences.d/sdkm
+echo 'Package: *' | sudo tee -a /etc/apt/preferences.d/sdkm
+echo 'Pin: origin ""' | sudo tee -a /etc/apt/preferences.d/sdkm
+echo 'Pin-Priority: 999' | sudo tee -a /etc/apt/preferences.d/sdkm
+
+packageName=$(dpkg -f /opt/nvidia/deb_repos/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2_1.0-1_arm64.deb Package)
+keyringFilePath=$(dpkg -L $packageName | grep 'keyring\.gpg$' | head -n 1 | tr -d "\n")
+if [ -n "$keyringFilePath" ]
+then
+	if [ -f "$keyringFilePath" ]
+	then
+		sudo cp $keyringFilePath /usr/share/keyrings/
+	else
+		echo 'Warning: deb repo keyring file not found' >&2
+	fi
+else
+	pubKeyFilePath=$(dpkg -L $packageName | grep '\.pub$' | head -n 1 | tr -d "\n")
+	echo $pubKeyFilePath
+	if [ -n "$pubKeyFilePath" ]
+	then
+		safe_apt_install "sudo apt-key add $pubKeyFilePath" 5
+	else
+		echo 'Warning: deb repo pub key file not found' >&2
+	fi
+fi
+sleep 2
+safe_apt_install "sudo apt-get -y update" 5
+
+safe_apt_install "sudo -E apt-get -y  install tensorrt-libs " 5
+targetDebRepoPackageName=$(dpkg -f /opt/nvidia/deb_repos/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2_1.0-1_arm64.deb Package | tr -d '\n')
+echo targetDebRepoPackageName $targetDebRepoPackageName
+if [ -n "targetDebRepoPackageName" ]
+then
+    safe_apt_install "sudo apt-get purge -y $targetDebRepoPackageName" 5
+else
+    echo 'Warning: target deb repo package name not found' >&2
+fi
+sudo rm -f /etc/apt/preferences.d/sdkm
+
+sudo rm -f /opt/nvidia/deb_repos/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2_1.0-1_arm64.deb
+**********************21:14:16.283 - Info: *begin sudo apt-get -y update, 5
+21:14:16.283 - Info: 
+21:14:16.581 - Info: 
+21:14:16.664 - Info: 0% [Working]
+21:14:16.664 - Info:             
+21:14:16.664 - Info: Hit:1 https://download.docker.com/linux/ubuntu noble InRelease
+21:14:16.664 - Info: 
+21:14:16.664 - Info: 
+21:14:16.701 - Info: 0% [Connected to repo.download.nvidia.com (23.205.151.187)] [Connecting to ports.ubuntu.com]
+21:14:16.701 - Info:                                                                                             
+21:14:16.701 - Info: Hit:2 https://repo.download.nvidia.com/jetson/common r39.2 InRelease
+21:14:16.701 - Info: 
+21:14:16.701 - Info: 
+21:14:16.701 - Info:                                                                                             
+21:14:16.760 - Info: 0% [Connecting to ports.ubuntu.com]
+21:14:16.760 - Info:                                    
+21:14:16.760 - Info: Hit:3 https://repo.download.nvidia.com/jetson/som r39.2 InRelease
+21:14:16.760 - Info: 
+21:14:16.760 - Info: 
+21:14:16.805 - Info: 0% [Connecting to ports.ubuntu.com]
+21:14:16.819 - Info: 0% [Waiting for headers] [Connecting to ports.ubuntu.com]
+21:14:16.819 - Info:                                                          
+21:14:16.819 - Info: Hit:4 https://repo.download.nvidia.com/jetson/ffmpeg r39.2 InRelease
+21:14:16.819 - Info: 
+21:14:16.819 - Info: 
+21:14:16.819 - Info:                                                          
+21:14:16.993 - Info: 0% [Connecting to ports.ubuntu.com]
+21:14:17.153 - Info: 0% [Connecting to ports.ubuntu.com (91.189.92.21)]
+21:14:17.153 - Info:                                                   
+21:14:17.292 - Info: 0% [Waiting for headers]
+21:14:17.292 - Info:                         
+21:14:17.292 - Info: Hit:5 http://ports.ubuntu.com/ubuntu-ports noble InRelease
+21:14:17.293 - Info: 
+21:14:17.293 - Info: 
+21:14:17.293 - Info:                         
+21:14:17.320 - Info: 0% [Working]
+21:14:17.451 - Info: 0% [Waiting for headers]
+21:14:17.499 - Info:                         
+21:14:17.499 - Info: Hit:6 http://ports.ubuntu.com/ubuntu-ports noble-updates InRelease
+21:14:17.499 - Info: 
+21:14:17.499 - Info: 
+21:14:17.499 - Info:                         
+21:14:17.624 - Info: 0% [Working]
+21:14:17.705 - Info: 0% [Waiting for headers]
+21:14:17.705 - Info:                         
+21:14:17.705 - Info: Hit:7 http://ports.ubuntu.com/ubuntu-ports noble-backports InRelease
+21:14:17.705 - Info: 
+21:14:17.705 - Info: 
+21:14:17.705 - Info:                         
+21:14:17.831 - Info: 0% [Working]
+21:14:17.912 - Info: 0% [Waiting for headers]
+21:14:17.912 - Info:                         
+21:14:17.912 - Info: Hit:8 http://ports.ubuntu.com/ubuntu-ports noble-security InRelease
+21:14:17.912 - Info: 
+21:14:17.912 - Info: 
+21:14:17.912 - Info:                         
+21:14:18.033 - Info: 0% [Working]
+21:14:18.033 - Info: 20% [Working]
+21:14:18.033 - Info:              
+21:14:18.378 - Info: 
+21:14:18.378 - Info: Reading package lists... 0%
+21:14:18.395 - Info: 
+21:14:18.395 - Info: Reading package lists... 0%
+21:14:18.399 - Info: 
+21:14:18.399 - Info: Reading package lists... 0%
+21:14:18.399 - Info: 
+21:14:18.399 - Info: Reading package lists... 0%
+21:14:18.404 - Info: 
+21:14:18.404 - Info: Reading package lists... 0%
+21:14:18.404 - Info: 
+21:14:18.404 - Info: Reading package lists... 0%
+21:14:18.405 - Info: 
+21:14:18.405 - Info: Reading package lists... 0%
+21:14:18.405 - Info: 
+21:14:18.405 - Info: Reading package lists... 0%
+21:14:18.407 - Info: 
+21:14:18.407 - Info: Reading package lists... 0%
+21:14:18.407 - Info: 
+21:14:18.407 - Info: Reading package lists... 0%
+21:14:18.412 - Info: 
+21:14:18.412 - Info: Reading package lists... 0%
+21:14:18.497 - Info: 
+21:14:18.497 - Info: Reading package lists... 3%
+21:14:18.497 - Info: 
+21:14:18.497 - Info: Reading package lists... 3%
+21:14:18.516 - Info: 
+21:14:18.516 - Info: Reading package lists... 5%
+21:14:18.516 - Info: 
+21:14:18.516 - Info: Reading package lists... 5%
+21:14:19.158 - Info: 
+21:14:19.158 - Info: Reading package lists... 26%
+21:14:19.709 - Info: 
+21:14:19.709 - Info: Reading package lists... 41%
+21:14:19.709 - Info: 
+21:14:19.709 - Info: Reading package lists... 41%
+21:14:19.867 - Info: 
+21:14:19.867 - Info: Reading package lists... 55%
+21:14:19.893 - Info: 
+21:14:19.893 - Info: Reading package lists... 57%
+21:14:19.893 - Info: 
+21:14:19.893 - Info: Reading package lists... 57%
+21:14:19.899 - Info: 
+21:14:19.899 - Info: Reading package lists... 58%
+21:14:19.899 - Info: 
+21:14:19.899 - Info: Reading package lists... 58%
+21:14:19.901 - Info: 
+21:14:19.901 - Info: Reading package lists... 58%
+21:14:19.901 - Info: 
+21:14:19.901 - Info: Reading package lists... 58%
+21:14:19.921 - Info: 
+21:14:19.921 - Info: Reading package lists... 58%
+21:14:19.921 - Info: 
+21:14:19.921 - Info: Reading package lists... 58%
+21:14:19.925 - Info: 
+21:14:19.925 - Info: Reading package lists... 59%
+21:14:19.925 - Info: 
+21:14:19.925 - Info: Reading package lists... 59%
+21:14:20.028 - Info: 
+21:14:20.028 - Info: Reading package lists... 62%
+21:14:20.028 - Info: 
+21:14:20.028 - Info: Reading package lists... 62%
+21:14:20.048 - Info: 
+21:14:20.048 - Info: Reading package lists... 64%
+21:14:20.048 - Info: 
+21:14:20.048 - Info: Reading package lists... 64%
+21:14:20.205 - Info: 
+21:14:20.205 - Info: Reading package lists... 69%
+21:14:20.205 - Info: 
+21:14:20.205 - Info: Reading package lists... 69%
+21:14:20.229 - Info: 
+21:14:20.229 - Info: Reading package lists... 71%
+21:14:20.229 - Info: 
+21:14:20.229 - Info: Reading package lists... 71%
+21:14:20.370 - Info: 
+21:14:20.370 - Info: Reading package lists... 77%
+21:14:20.370 - Info: 
+21:14:20.370 - Info: Reading package lists... 77%
+21:14:20.408 - Info: 
+21:14:20.408 - Info: Reading package lists... 80%
+21:14:20.408 - Info: 
+21:14:20.408 - Info: Reading package lists... 80%
+21:14:20.413 - Info: 
+21:14:20.413 - Info: Reading package lists... 80%
+21:14:20.413 - Info: 
+21:14:20.413 - Info: Reading package lists... 80%
+21:14:20.415 - Info: 
+21:14:20.415 - Info: Reading package lists... 80%
+21:14:20.415 - Info: 
+21:14:20.415 - Info: Reading package lists... 80%
+21:14:20.420 - Info: 
+21:14:20.420 - Info: Reading package lists... 80%
+21:14:20.420 - Info: 
+21:14:20.420 - Info: Reading package lists... 80%
+21:14:20.421 - Info: 
+21:14:20.421 - Info: Reading package lists... 80%
+21:14:20.421 - Info: 
+21:14:20.421 - Info: Reading package lists... 80%
+21:14:20.425 - Info: 
+21:14:20.425 - Info: Reading package lists... 80%
+21:14:20.425 - Info: 
+21:14:20.425 - Info: Reading package lists... 80%
+21:14:20.425 - Info: 
+21:14:20.426 - Info: Reading package lists... 80%
+21:14:20.426 - Info: 
+21:14:20.426 - Info: Reading package lists... 80%
+21:14:20.426 - Info: 
+21:14:20.426 - Info: Reading package lists... 80%
+21:14:20.426 - Info: 
+21:14:20.426 - Info: Reading package lists... 80%
+21:14:20.427 - Info: 
+21:14:20.427 - Info: Reading package lists... 80%
+21:14:20.427 - Info: 
+21:14:20.427 - Info: Reading package lists... 80%
+21:14:20.459 - Info: 
+21:14:20.460 - Info: Reading package lists... 83%
+21:14:20.460 - Info: 
+21:14:20.460 - Info: Reading package lists... 83%
+21:14:20.476 - Info: 
+21:14:20.476 - Info: Reading package lists... 84%
+21:14:20.476 - Info: 
+21:14:20.476 - Info: Reading package lists... 84%
+21:14:20.522 - Info: 
+21:14:20.522 - Info: Reading package lists... 88%
+21:14:20.522 - Info: 
+21:14:20.522 - Info: Reading package lists... 88%
+21:14:20.540 - Info: 
+21:14:20.540 - Info: Reading package lists... 90%
+21:14:20.540 - Info: 
+21:14:20.540 - Info: Reading package lists... 90%
+21:14:20.569 - Info: 
+21:14:20.570 - Info: Reading package lists... 92%
+21:14:20.607 - Info: 
+21:14:20.607 - Info: Reading package lists... 95%
+21:14:20.607 - Info: 
+21:14:20.607 - Info: Reading package lists... 95%
+21:14:20.642 - Info: 
+21:14:20.642 - Info: Reading package lists... 98%
+21:14:20.642 - Info: 
+21:14:20.642 - Info: Reading package lists... 98%
+21:14:20.645 - Info: 
+21:14:20.645 - Info: Reading package lists... 98%
+21:14:20.645 - Info: 
+21:14:20.645 - Info: Reading package lists... 98%
+21:14:20.739 - Info: 
+21:14:20.739 - Info: Reading package lists... 98%
+21:14:20.739 - Info: 
+21:14:20.739 - Info: Reading package lists... 98%
+21:14:20.873 - Info: 
+21:14:20.873 - Info: Reading package lists... Done
+21:14:20.873 - Info: 
+21:14:20.873 - Info: 
+21:14:21.467 - Info: *begin sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2_1.0-1_arm64.deb, 5
+21:14:21.467 - Info: 
+21:14:21.632 - Info: 
+21:14:21.632 - Info: Reading package lists... 0%
+21:14:21.829 - Info: 
+21:14:21.829 - Info: Reading package lists... 0%
+21:14:21.847 - Info: 
+21:14:21.847 - Info: Reading package lists... Done
+21:14:21.847 - Info: 
+21:14:21.847 - Info: 
+21:14:21.895 - Info: 
+21:14:21.895 - Info: Building dependency tree... 0%
+21:14:21.895 - Info: 
+21:14:21.895 - Info: Building dependency tree... 0%
+21:14:21.896 - Info: 
+21:14:21.896 - Info: Building dependency tree... 0%
+21:14:22.139 - Info: 
+21:14:22.139 - Info: Building dependency tree... 50%
+21:14:22.139 - Info: 
+21:14:22.139 - Info: Building dependency tree... 50%
+21:14:22.598 - Info: 
+21:14:22.598 - Info: Building dependency tree... 83%
+21:14:22.834 - Info: 
+21:14:22.834 - Info: Building dependency tree... Done
+21:14:22.834 - Info: 
+21:14:22.834 - Info: 
+21:14:22.834 - Info: 
+21:14:22.834 - Info: Reading state information... 0% 
+21:14:22.834 - Info: 
+21:14:22.834 - Info: Reading state information... 0%
+21:14:22.838 - Info: 
+21:14:22.838 - Info: Reading state information... Done
+21:14:22.838 - Info: 
+21:14:22.838 - Info: 
+21:14:22.978 - Info: Note, selecting 'nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2' instead of '/opt/nvidia/deb_repos/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2_1.0-1_arm64.deb'
+21:14:22.978 - Info: 
+21:14:24.728 - Info: The following NEW packages will be installed:
+21:14:24.728 - Info: 
+21:14:24.729 - Info:   nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2
+21:14:24.729 - Info: 
+21:14:24.816 - Info: 0 upgraded, 1 newly installed, 0 to remove and 285 not upgraded.
+21:14:24.816 - Info: 
+21:14:24.823 - Info: Need to get 0 B/4,894 MB of archives.
+21:14:24.823 - Info: 
+21:14:24.823 - Info: After this operation, 4,899 MB of additional disk space will be used.
+21:14:24.823 - Info: 
+21:14:24.836 - Info: 
+21:14:25.337 - Info: 0% [Working]
+21:15:27.972 - Info:             
+21:15:27.972 - Info: Get:1 /opt/nvidia/deb_repos/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2_1.0-1_arm64.deb nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2 arm64 1.0-1 [4,894 MB]
+21:15:27.972 - Info: 
+21:15:27.972 - Info: 
+21:15:27.972 - Info: 0% [1 nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2 0 B/4,894 MB 0%]
+21:15:27.972 - Info:                                                                           
+21:15:27.972 - Info: 100% [Working]
+21:15:27.972 - Info:               
+21:15:29.506 - Info: Selecting previously unselected package nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2.
+21:15:29.506 - Info: 
+21:15:29.506 - Info: (Reading database ... 
+21:15:29.530 - Info: (Reading database ... 5%
+21:15:29.530 - Info: (Reading database ... 10%
+21:15:29.530 - Info: (Reading database ... 15%
+21:15:29.530 - Info: (Reading database ... 20%
+21:15:29.530 - Info: (Reading database ... 25%
+21:15:29.530 - Info: (Reading database ... 30%
+21:15:29.530 - Info: (Reading database ... 35%
+21:15:29.530 - Info: (Reading database ... 40%
+21:15:29.530 - Info: (Reading database ... 45%
+21:15:29.530 - Info: (Reading database ... 50%
+21:15:29.541 - Info: (Reading database ... 55%
+21:15:29.552 - Info: (Reading database ... 60%
+21:15:29.564 - Info: (Reading database ... 65%
+21:15:29.577 - Info: (Reading database ... 70%
+21:15:29.619 - Info: (Reading database ... 75%
+21:15:29.633 - Info: (Reading database ... 80%
+21:15:29.650 - Info: (Reading database ... 85%
+21:15:29.667 - Info: (Reading database ... 90%
+21:15:29.678 - Info: (Reading database ... 95%
+21:15:29.740 - Info: (Reading database ... 100%
+21:15:29.740 - Info: (Reading database ... 201739 files and directories currently installed.)
+21:15:29.740 - Info: 
+21:15:29.759 - Info: Preparing to unpack .../nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2_1.0-1_arm64.deb ...
+21:15:29.759 - Info: 
+21:15:29.766 - Info: Unpacking nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2 (1.0-1) ...
+21:15:29.766 - Info: 
+21:17:55.319 - Info: Setting up nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2 (1.0-1) ...
+21:17:55.319 - Info: 
+21:17:55.372 - Info: 
+21:17:55.372 - Info: 
+21:17:55.372 - Info: The public nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2 GPG key does not appear to be installed.
+21:17:55.372 - Info: 
+21:17:55.372 - Info: To install the key, run this command:
+21:17:55.372 - Info: 
+21:17:55.372 - Info: sudo cp /var/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2/nv-tensorrt-local-81D31635-keyring.gpg /usr/share/keyrings/
+21:17:55.372 - Info: 
+21:17:55.372 - Info: 
+21:17:55.372 - Info: 
+21:18:09.895 - Info: Package: *
+21:18:09.895 - Info: 
+21:18:09.895 - Info: 
+21:18:09.983 - Info: Pin: origin ""
+21:18:09.983 - Info: 
+21:18:09.983 - Info: 
+21:18:10.085 - Info: Pin-Priority: 999
+21:18:10.085 - Info: 
+21:18:10.085 - Info: 
+21:18:12.281 - Info: *begin sudo apt-get -y update, 5
+21:18:12.281 - Info: 
+21:18:12.631 - Info: 
+21:18:12.635 - Info: 0% [Working]
+21:18:12.635 - Info:             
+21:18:12.635 - Info: Get:1 file:/var/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2  InRelease [1,572 B]
+21:18:12.635 - Info: 
+21:18:12.655 - Info: 
+21:18:12.656 - Info: 0% [Working]
+21:18:12.657 - Info:             
+21:18:12.657 - Info: Get:1 file:/var/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2  InRelease [1,572 B]
+21:18:12.657 - Info: 
+21:18:12.657 - Info: 
+21:18:12.676 - Info: 0% [1 InRelease 0 B/1,572 B 0%] [Connecting to download.docker.com (18.65.14.18)] [Connected to repo.download.nvidia.com (23.205.151.162)] [Connecting to ports.ubuntu.com]
+21:18:12.676 - Info:                                                                                                                                                                            
+21:18:12.694 - Info: 0% [Connecting to download.docker.com (18.65.14.18)] [Connected to repo.download.nvidia.com (23.205.151.162)] [Connecting to ports.ubuntu.com]
+21:18:12.695 - Info:                                                                                                                                               
+21:18:12.695 - Info: Hit:2 https://download.docker.com/linux/ubuntu noble InRelease
+21:18:12.695 - Info: 
+21:18:12.695 - Info: 
+21:18:12.695 - Info:                                                                                                                                               
+21:18:12.708 - Info: 0% [Waiting for headers] [Connecting to ports.ubuntu.com]
+21:18:12.708 - Info:                                                          
+21:18:12.708 - Info: Hit:3 https://repo.download.nvidia.com/jetson/common r39.2 InRelease
+21:18:12.708 - Info: 
+21:18:12.708 - Info: 
+21:18:12.708 - Info:                                                          
+21:18:12.800 - Info: 0% [Connecting to ports.ubuntu.com]
+21:18:12.800 - Info:                                    
+21:18:12.800 - Info: Hit:4 https://repo.download.nvidia.com/jetson/som r39.2 InRelease
+21:18:12.800 - Info: 
+21:18:12.800 - Info: 
+21:18:12.811 - Info: 0% [Connecting to repo.download.nvidia.com (23.205.151.162)] [Connecting to ports.ubuntu.com]
+21:18:12.811 - Info:                                                                                              
+21:18:12.814 - Info: 0% [Connected to repo.download.nvidia.com (23.205.151.162)] [Connecting to ports.ubuntu.com]
+21:18:12.814 - Info:                                                                                             
+21:18:12.814 - Info: Get:5 file:/var/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2  Packages [5,460 B]
+21:18:12.814 - Info: 
+21:18:12.831 - Info: 
+21:18:12.833 - Info: 0% [Connected to repo.download.nvidia.com (23.205.151.162)] [Connecting to ports.ubuntu.com]
+21:18:12.833 - Info: 0% [5 Packages store 0 B] [Connected to repo.download.nvidia.com (23.205.151.162)] [Connecting to ports.ubuntu.com]
+21:18:12.833 - Info:                                                                                                                    
+21:18:12.904 - Info: 0% [Connected to repo.download.nvidia.com (23.205.151.162)] [Connecting to ports.ubuntu.com]
+21:18:12.905 - Info:                                                                                             
+21:18:12.905 - Info: Hit:6 https://repo.download.nvidia.com/jetson/ffmpeg r39.2 InRelease
+21:18:12.905 - Info: 
+21:18:12.905 - Info: 
+21:18:12.905 - Info:                                                                                             
+21:18:12.940 - Info: 0% [Connecting to ports.ubuntu.com]
+21:18:13.116 - Info: 0% [Connecting to ports.ubuntu.com (91.189.91.103)]
+21:18:13.283 - Info:                                                    
+21:18:13.407 - Info: 0% [Waiting for headers]
+21:18:13.407 - Info:                         
+21:18:13.407 - Info: Hit:7 http://ports.ubuntu.com/ubuntu-ports noble InRelease
+21:18:13.407 - Info: 
+21:18:13.407 - Info: 
+21:18:13.407 - Info:                         
+21:18:13.443 - Info: 0% [Working]
+21:18:13.567 - Info: 0% [Waiting for headers]
+21:18:13.646 - Info:                         
+21:18:13.646 - Info: Hit:8 http://ports.ubuntu.com/ubuntu-ports noble-updates InRelease
+21:18:13.646 - Info: 
+21:18:13.646 - Info: 
+21:18:13.646 - Info:                         
+21:18:13.760 - Info: 0% [Working]
+21:18:13.881 - Info: 0% [Waiting for headers]
+21:18:13.881 - Info:                         
+21:18:13.881 - Info: Hit:9 http://ports.ubuntu.com/ubuntu-ports noble-backports InRelease
+21:18:13.881 - Info: 
+21:18:13.881 - Info: 
+21:18:13.881 - Info:                         
+21:18:14.006 - Info: 0% [Working]
+21:18:14.117 - Info: 0% [Waiting for headers]
+21:18:14.117 - Info:                         
+21:18:14.117 - Info: Hit:10 http://ports.ubuntu.com/ubuntu-ports noble-security InRelease
+21:18:14.117 - Info: 
+21:18:14.117 - Info: 
+21:18:14.117 - Info:                         
+21:18:14.234 - Info: 0% [Working]
+21:18:14.234 - Info: 100% [Working]
+21:18:14.234 - Info:               
+21:18:14.528 - Info: 
+21:18:14.528 - Info: Reading package lists... 0%
+21:18:14.546 - Info: 
+21:18:14.546 - Info: Reading package lists... 0%
+21:18:14.550 - Info: 
+21:18:14.550 - Info: Reading package lists... 0%
+21:18:14.550 - Info: 
+21:18:14.550 - Info: Reading package lists... 0%
+21:18:14.551 - Info: 
+21:18:14.551 - Info: Reading package lists... 0%
+21:18:14.551 - Info: 
+21:18:14.551 - Info: Reading package lists... 0%
+21:18:14.555 - Info: 
+21:18:14.555 - Info: Reading package lists... 0%
+21:18:14.555 - Info: 
+21:18:14.555 - Info: Reading package lists... 0%
+21:18:14.556 - Info: 
+21:18:14.556 - Info: Reading package lists... 0%
+21:18:14.556 - Info: 
+21:18:14.556 - Info: Reading package lists... 0%
+21:18:14.558 - Info: 
+21:18:14.558 - Info: Reading package lists... 0%
+21:18:14.558 - Info: 
+21:18:14.558 - Info: Reading package lists... 0%
+21:18:14.564 - Info: 
+21:18:14.564 - Info: Reading package lists... 0%
+21:18:14.645 - Info: 
+21:18:14.645 - Info: Reading package lists... 3%
+21:18:14.645 - Info: 
+21:18:14.645 - Info: Reading package lists... 3%
+21:18:14.658 - Info: 
+21:18:14.658 - Info: Reading package lists... 5%
+21:18:14.658 - Info: 
+21:18:14.658 - Info: Reading package lists... 5%
+21:18:15.311 - Info: 
+21:18:15.311 - Info: Reading package lists... 27%
+21:18:15.784 - Info: 
+21:18:15.785 - Info: Reading package lists... 41%
+21:18:15.785 - Info: 
+21:18:15.785 - Info: Reading package lists... 41%
+21:18:15.957 - Info: 
+21:18:15.958 - Info: Reading package lists... 57%
+21:18:15.958 - Info: 
+21:18:15.958 - Info: Reading package lists... 57%
+21:18:15.964 - Info: 
+21:18:15.964 - Info: Reading package lists... 58%
+21:18:15.964 - Info: 
+21:18:15.964 - Info: Reading package lists... 58%
+21:18:15.965 - Info: 
+21:18:15.965 - Info: Reading package lists... 58%
+21:18:15.965 - Info: 
+21:18:15.965 - Info: Reading package lists... 58%
+21:18:15.984 - Info: 
+21:18:15.984 - Info: Reading package lists... 58%
+21:18:15.984 - Info: 
+21:18:15.984 - Info: Reading package lists... 58%
+21:18:15.988 - Info: 
+21:18:15.988 - Info: Reading package lists... 59%
+21:18:15.988 - Info: 
+21:18:15.988 - Info: Reading package lists... 59%
+21:18:16.029 - Info: 
+21:18:16.029 - Info: Reading package lists... 60%
+21:18:16.090 - Info: 
+21:18:16.090 - Info: Reading package lists... 62%
+21:18:16.090 - Info: 
+21:18:16.090 - Info: Reading package lists... 62%
+21:18:16.108 - Info: 
+21:18:16.108 - Info: Reading package lists... 64%
+21:18:16.108 - Info: 
+21:18:16.108 - Info: Reading package lists... 64%
+21:18:16.258 - Info: 
+21:18:16.258 - Info: Reading package lists... 69%
+21:18:16.258 - Info: 
+21:18:16.258 - Info: Reading package lists... 69%
+21:18:16.282 - Info: 
+21:18:16.282 - Info: Reading package lists... 71%
+21:18:16.282 - Info: 
+21:18:16.282 - Info: Reading package lists... 71%
+21:18:16.418 - Info: 
+21:18:16.418 - Info: Reading package lists... 77%
+21:18:16.418 - Info: 
+21:18:16.418 - Info: Reading package lists... 77%
+21:18:16.454 - Info: 
+21:18:16.454 - Info: Reading package lists... 80%
+21:18:16.454 - Info: 
+21:18:16.454 - Info: Reading package lists... 80%
+21:18:16.460 - Info: 
+21:18:16.460 - Info: Reading package lists... 80%
+21:18:16.460 - Info: 
+21:18:16.460 - Info: Reading package lists... 80%
+21:18:16.462 - Info: 
+21:18:16.462 - Info: Reading package lists... 80%
+21:18:16.462 - Info: 
+21:18:16.462 - Info: Reading package lists... 80%
+21:18:16.468 - Info: 
+21:18:16.468 - Info: Reading package lists... 80%
+21:18:16.468 - Info: 
+21:18:16.468 - Info: Reading package lists... 80%
+21:18:16.468 - Info: 
+21:18:16.468 - Info: Reading package lists... 80%
+21:18:16.468 - Info: 
+21:18:16.468 - Info: Reading package lists... 80%
+21:18:16.472 - Info: 
+21:18:16.472 - Info: Reading package lists... 80%
+21:18:16.472 - Info: 
+21:18:16.472 - Info: Reading package lists... 80%
+21:18:16.474 - Info: 
+21:18:16.474 - Info: Reading package lists... 80%
+21:18:16.474 - Info: 
+21:18:16.474 - Info: Reading package lists... 80%
+21:18:16.474 - Info: 
+21:18:16.474 - Info: Reading package lists... 80%
+21:18:16.474 - Info: 
+21:18:16.474 - Info: Reading package lists... 80%
+21:18:16.475 - Info: 
+21:18:16.475 - Info: Reading package lists... 80%
+21:18:16.475 - Info: 
+21:18:16.475 - Info: Reading package lists... 80%
+21:18:16.506 - Info: 
+21:18:16.506 - Info: Reading package lists... 83%
+21:18:16.506 - Info: 
+21:18:16.506 - Info: Reading package lists... 83%
+21:18:16.522 - Info: 
+21:18:16.522 - Info: Reading package lists... 84%
+21:18:16.522 - Info: 
+21:18:16.522 - Info: Reading package lists... 84%
+21:18:16.567 - Info: 
+21:18:16.567 - Info: Reading package lists... 88%
+21:18:16.567 - Info: 
+21:18:16.567 - Info: Reading package lists... 88%
+21:18:16.585 - Info: 
+21:18:16.585 - Info: Reading package lists... 90%
+21:18:16.585 - Info: 
+21:18:16.585 - Info: Reading package lists... 90%
+21:18:16.649 - Info: 
+21:18:16.650 - Info: Reading package lists... 95%
+21:18:16.650 - Info: 
+21:18:16.650 - Info: Reading package lists... 95%
+21:18:16.683 - Info: 
+21:18:16.683 - Info: Reading package lists... 98%
+21:18:16.683 - Info: 
+21:18:16.683 - Info: Reading package lists... 98%
+21:18:16.686 - Info: 
+21:18:16.686 - Info: Reading package lists... 98%
+21:18:16.686 - Info: 
+21:18:16.686 - Info: Reading package lists... 98%
+21:18:16.774 - Info: 
+21:18:16.774 - Info: Reading package lists... 98%
+21:18:16.774 - Info: 
+21:18:16.774 - Info: Reading package lists... 98%
+21:18:16.785 - Info: 
+21:18:16.785 - Info: Reading package lists... 99%
+21:18:16.912 - Info: 
+21:18:16.912 - Info: Reading package lists... Done
+21:18:16.912 - Info: 
+21:18:16.912 - Info: 
+21:18:16.984 - Info: *begin sudo -E apt-get -y  install tensorrt-libs , 5
+21:18:16.984 - Info: 
+21:18:17.156 - Info: 
+21:18:17.156 - Info: Reading package lists... 0%
+21:18:17.187 - Info: 
+21:18:17.187 - Info: Reading package lists... 100%
+21:18:17.187 - Info: 
+21:18:17.187 - Info: Reading package lists... Done
+21:18:17.187 - Info: 
+21:18:17.187 - Info: 
+21:18:17.193 - Info: 
+21:18:17.194 - Info: Building dependency tree... 0%
+21:18:17.194 - Info: 
+21:18:17.194 - Info: Building dependency tree... 0%
+21:18:17.425 - Info: 
+21:18:17.426 - Info: Building dependency tree... 50%
+21:18:17.426 - Info: 
+21:18:17.426 - Info: Building dependency tree... 50%
+21:18:17.892 - Info: 
+21:18:17.892 - Info: Building dependency tree... 82%
+21:18:18.134 - Info: 
+21:18:18.134 - Info: Building dependency tree... Done
+21:18:18.134 - Info: 
+21:18:18.134 - Info: 
+21:18:18.134 - Info: 
+21:18:18.134 - Info: Reading state information... 0% 
+21:18:18.134 - Info: 
+21:18:18.134 - Info: Reading state information... 0%
+21:18:18.139 - Info: 
+21:18:18.139 - Info: Reading state information... Done
+21:18:18.139 - Info: 
+21:18:18.139 - Info: 
+21:18:19.814 - Info: The following additional packages will be installed:
+21:18:19.814 - Info: 
+21:18:19.819 - Info:   libnvinfer-dispatch10 libnvinfer-lean10 libnvinfer-plugin10 libnvinfer-vc-plugin10 libnvinfer10 libnvonnxparsers10
+21:18:19.819 - Info: 
+21:18:19.913 - Info: The following NEW packages will be installed:
+21:18:19.913 - Info: 
+21:18:19.918 - Info:   libnvinfer-dispatch10 libnvinfer-lean10 libnvinfer-plugin10 libnvinfer-vc-plugin10 libnvinfer10 libnvonnxparsers10 tensorrt-libs
+21:18:19.919 - Info: 
+21:18:19.991 - Info: 0 upgraded, 7 newly installed, 0 to remove and 285 not upgraded.
+21:18:19.991 - Info: 
+21:18:19.997 - Info: Need to get 0 B/2,351 MB of archives.
+21:18:19.997 - Info: 
+21:18:19.997 - Info: After this operation, 3,312 MB of additional disk space will be used.
+21:18:19.997 - Info: 
+21:18:20.007 - Info: 
+21:18:20.013 - Info: 0% [Working]
+21:18:20.013 - Info:             
+21:18:20.013 - Info: Get:1 file:/var/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2  libnvinfer-dispatch10 10.16.2.10-1+cuda13.2 [317 kB]
+21:18:20.013 - Info: 
+21:18:20.013 - Info: 
+21:18:20.013 - Info: 0% [1 libnvinfer-dispatch10 0 B/317 kB 0%]
+21:18:20.013 - Info:                                           
+21:18:20.261 - Info: 3% [Working]
+21:18:20.261 - Info:             
+21:18:20.261 - Info: Get:2 file:/var/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2  libnvinfer-lean10 10.16.2.10-1+cuda13.2 [20.2 MB]
+21:18:20.261 - Info: 
+21:18:20.261 - Info: 
+21:18:20.261 - Info: 3% [2 libnvinfer-lean10 0 B/20.2 MB 0%]
+21:18:20.261 - Info:                                        
+21:18:20.761 - Info: 6% [Working]
+21:18:26.769 - Info: 6% [Working]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               3,271 kB/s 11min 52s
+21:18:32.279 - Info:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+21:18:32.778 - Info: 6% [Working]
+21:18:47.351 - Info:             
+21:18:47.351 - Info: Get:3 file:/var/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2  libnvinfer10 10.16.2.10-1+cuda13.2 [2,313 MB]
+21:18:47.351 - Info: 
+21:18:47.351 - Info: 
+21:18:47.351 - Info: 6% [3 libnvinfer10 0 B/2,313 MB 0%]
+21:18:47.351 - Info:                                    
+21:18:47.851 - Info: 88% [Working]
+21:18:48.863 - Info:              
+21:18:48.863 - Info: Get:4 file:/var/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2  libnvinfer-plugin10 10.16.2.10-1+cuda13.2 [15.6 MB]
+21:18:48.863 - Info: 
+21:18:48.863 - Info: 
+21:18:48.863 - Info: 88% [4 libnvinfer-plugin10 0 B/15.6 MB 0%]
+21:18:48.863 - Info:                                           
+21:18:48.868 - Info: 91% [Working]
+21:18:48.868 - Info:              
+21:18:48.868 - Info: Get:5 file:/var/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2  libnvinfer-vc-plugin10 10.16.2.10-1+cuda13.2 [275 kB]
+21:18:48.868 - Info: 
+21:18:48.868 - Info: 
+21:18:48.868 - Info: 91% [5 libnvinfer-vc-plugin10 0 B/275 kB 0%]
+21:18:48.868 - Info:                                             
+21:18:48.884 - Info: 94% [Working]
+21:18:48.884 - Info:              
+21:18:48.884 - Info: Get:6 file:/var/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2  libnvonnxparsers10 10.16.2.10-1+cuda13.2 [1,269 kB]
+21:18:48.884 - Info: 
+21:18:48.884 - Info: 
+21:18:48.884 - Info: 94% [6 libnvonnxparsers10 0 B/1,269 kB 0%]
+21:18:48.884 - Info:                                           
+21:18:48.884 - Info: 97% [Working]
+21:18:48.884 - Info:              
+21:18:48.884 - Info: Get:7 file:/var/nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2  tensorrt-libs 10.16.2.10-1+cuda13.2 [2,938 B]
+21:18:48.884 - Info: 
+21:18:48.884 - Info: 
+21:18:48.884 - Info: 97% [7 tensorrt-libs 0 B/2,938 B 0%]
+21:18:48.884 - Info:                                     
+21:18:48.884 - Info: 100% [Working]
+21:18:48.884 - Info:               
+21:18:53.290 - Info: Selecting previously unselected package libnvinfer-dispatch10.
+21:18:53.290 - Info: 
+21:18:53.290 - Info: (Reading database ... 
+21:18:53.325 - Info: (Reading database ... 5%
+21:18:53.325 - Info: (Reading database ... 10%
+21:18:53.325 - Info: (Reading database ... 15%
+21:18:53.325 - Info: (Reading database ... 20%
+21:18:53.325 - Info: (Reading database ... 25%
+21:18:53.325 - Info: (Reading database ... 30%
+21:18:53.325 - Info: (Reading database ... 35%
+21:18:53.325 - Info: (Reading database ... 40%
+21:18:53.325 - Info: (Reading database ... 45%
+21:18:53.325 - Info: (Reading database ... 50%
+21:18:53.407 - Info: (Reading database ... 55%
+21:18:53.485 - Info: (Reading database ... 60%
+21:18:53.577 - Info: (Reading database ... 65%
+21:18:53.664 - Info: (Reading database ... 70%
+21:18:53.777 - Info: (Reading database ... 75%
+21:18:53.804 - Info: (Reading database ... 80%
+21:18:53.826 - Info: (Reading database ... 85%
+21:18:53.843 - Info: (Reading database ... 90%
+21:18:53.853 - Info: (Reading database ... 95%
+21:18:53.916 - Info: (Reading database ... 100%
+21:18:53.916 - Info: (Reading database ... 201776 files and directories currently installed.)
+21:18:53.916 - Info: 
+21:18:53.933 - Info: Preparing to unpack .../0-libnvinfer-dispatch10_10.16.2.10-1+cuda13.2_arm64.deb ...
+21:18:53.934 - Info: 
+21:18:53.951 - Info: Unpacking libnvinfer-dispatch10 (10.16.2.10-1+cuda13.2) ...
+21:18:53.951 - Info: 
+21:18:54.139 - Info: Selecting previously unselected package libnvinfer-lean10.
+21:18:54.140 - Info: 
+21:18:54.209 - Info: Preparing to unpack .../1-libnvinfer-lean10_10.16.2.10-1+cuda13.2_arm64.deb ...
+21:18:54.209 - Info: 
+21:18:54.222 - Info: Unpacking libnvinfer-lean10 (10.16.2.10-1+cuda13.2) ...
+21:18:54.222 - Info: 
+21:18:57.583 - Info: Selecting previously unselected package libnvinfer10.
+21:18:57.583 - Info: 
+21:18:57.659 - Info: Preparing to unpack .../2-libnvinfer10_10.16.2.10-1+cuda13.2_arm64.deb ...
+21:18:57.659 - Info: 
+21:18:57.667 - Info: Unpacking libnvinfer10 (10.16.2.10-1+cuda13.2) ...
+21:18:57.667 - Info: 
+21:20:34.259 - Info: Selecting previously unselected package libnvinfer-plugin10.
+21:20:34.259 - Info: 
+21:20:34.323 - Info: Preparing to unpack .../3-libnvinfer-plugin10_10.16.2.10-1+cuda13.2_arm64.deb ...
+21:20:34.323 - Info: 
+21:20:34.332 - Info: Unpacking libnvinfer-plugin10 (10.16.2.10-1+cuda13.2) ...
+21:20:34.332 - Info: 
+21:20:35.695 - Info: Selecting previously unselected package libnvinfer-vc-plugin10.
+21:20:35.695 - Info: 
+21:20:35.768 - Info: Preparing to unpack .../4-libnvinfer-vc-plugin10_10.16.2.10-1+cuda13.2_arm64.deb ...
+21:20:35.768 - Info: 
+21:20:35.778 - Info: Unpacking libnvinfer-vc-plugin10 (10.16.2.10-1+cuda13.2) ...
+21:20:35.778 - Info: 
+21:20:35.934 - Info: Selecting previously unselected package libnvonnxparsers10.
+21:20:35.934 - Info: 
+21:20:36.006 - Info: Preparing to unpack .../5-libnvonnxparsers10_10.16.2.10-1+cuda13.2_arm64.deb ...
+21:20:36.006 - Info: 
+21:20:36.010 - Info: Unpacking libnvonnxparsers10 (10.16.2.10-1+cuda13.2) ...
+21:20:36.010 - Info: 
+21:20:36.309 - Info: Selecting previously unselected package tensorrt-libs.
+21:20:36.309 - Info: 
+21:20:36.373 - Info: Preparing to unpack .../6-tensorrt-libs_10.16.2.10-1+cuda13.2_arm64.deb ...
+21:20:36.373 - Info: 
+21:20:36.383 - Info: Unpacking tensorrt-libs (10.16.2.10-1+cuda13.2) ...
+21:20:36.383 - Info: 
+21:20:36.604 - Info: Setting up libnvinfer10 (10.16.2.10-1+cuda13.2) ...
+21:20:36.604 - Info: 
+21:20:36.625 - Info: Setting up libnvinfer-plugin10 (10.16.2.10-1+cuda13.2) ...
+21:20:36.625 - Info: 
+21:20:36.647 - Info: Setting up libnvinfer-vc-plugin10 (10.16.2.10-1+cuda13.2) ...
+21:20:36.647 - Info: 
+21:20:36.666 - Info: Setting up libnvonnxparsers10 (10.16.2.10-1+cuda13.2) ...
+21:20:36.666 - Info: 
+21:20:36.686 - Info: Setting up libnvinfer-dispatch10 (10.16.2.10-1+cuda13.2) ...
+21:20:36.686 - Info: 
+21:20:36.704 - Info: Setting up libnvinfer-lean10 (10.16.2.10-1+cuda13.2) ...
+21:20:36.704 - Info: 
+21:20:36.725 - Info: Setting up tensorrt-libs (10.16.2.10-1+cuda13.2) ...
+21:20:36.725 - Info: 
+21:20:36.743 - Info: Processing triggers for libc-bin (2.39-0ubuntu8.7) ...
+21:20:36.743 - Info: 
+21:20:43.192 - Info: targetDebRepoPackageName nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2
+21:20:43.192 - Info: 
+21:20:43.192 - Info: *begin sudo apt-get purge -y nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2, 5
+21:20:43.192 - Info: 
+21:20:43.365 - Info: 
+21:20:43.365 - Info: Reading package lists... 0%
+21:20:43.414 - Info: 
+21:20:43.414 - Info: Reading package lists... 100%
+21:20:43.414 - Info: 
+21:20:43.414 - Info: Reading package lists... Done
+21:20:43.414 - Info: 
+21:20:43.414 - Info: 
+21:20:43.420 - Info: 
+21:20:43.420 - Info: Building dependency tree... 0%
+21:20:43.420 - Info: 
+21:20:43.420 - Info: Building dependency tree... 0%
+21:20:43.650 - Info: 
+21:20:43.650 - Info: Building dependency tree... 50%
+21:20:43.650 - Info: 
+21:20:43.650 - Info: Building dependency tree... 50%
+21:20:44.121 - Info: 
+21:20:44.121 - Info: Building dependency tree... 83%
+21:20:44.344 - Info: 
+21:20:44.344 - Info: Building dependency tree... Done
+21:20:44.344 - Info: 
+21:20:44.344 - Info: 
+21:20:44.344 - Info: 
+21:20:44.344 - Info: Reading state information... 0% 
+21:20:44.344 - Info: 
+21:20:44.344 - Info: Reading state information... 0%
+21:20:44.349 - Info: 
+21:20:44.349 - Info: Reading state information... Done
+21:20:44.349 - Info: 
+21:20:44.349 - Info: 
+21:20:46.138 - Info: The following packages will be REMOVED:
+21:20:46.138 - Info: 
+21:20:46.139 - Info:   nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2*
+21:20:46.139 - Info: 
+21:20:46.220 - Info: 0 upgraded, 0 newly installed, 1 to remove and 285 not upgraded.
+21:20:46.220 - Info: 
+21:20:46.225 - Info: After this operation, 4,899 MB disk space will be freed.
+21:20:46.225 - Info: 
+21:20:47.796 - Info: (Reading database ... 
+21:20:47.812 - Info: (Reading database ... 5%
+21:20:47.812 - Info: (Reading database ... 10%
+21:20:47.812 - Info: (Reading database ... 15%
+21:20:47.812 - Info: (Reading database ... 20%
+21:20:47.812 - Info: (Reading database ... 25%
+21:20:47.812 - Info: (Reading database ... 30%
+21:20:47.812 - Info: (Reading database ... 35%
+21:20:47.812 - Info: (Reading database ... 40%
+21:20:47.812 - Info: (Reading database ... 45%
+21:20:47.812 - Info: (Reading database ... 50%
+21:20:47.878 - Info: (Reading database ... 55%
+21:20:47.960 - Info: (Reading database ... 60%
+21:20:48.053 - Info: (Reading database ... 65%
+21:20:48.140 - Info: (Reading database ... 70%
+21:20:48.295 - Info: (Reading database ... 75%
+21:20:48.390 - Info: (Reading database ... 80%
+21:20:48.459 - Info: (Reading database ... 85%
+21:20:48.495 - Info: (Reading database ... 90%
+21:20:48.517 - Info: (Reading database ... 95%
+21:20:48.568 - Info: (Reading database ... 100%
+21:20:48.568 - Info: (Reading database ... 201820 files and directories currently installed.)
+21:20:48.568 - Info: 
+21:20:48.587 - Info: Removing nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2 (1.0-1) ...
+21:20:48.587 - Info: 
+21:20:49.560 - Info: (Reading database ... 
+21:20:49.575 - Info: (Reading database ... 5%
+21:20:49.575 - Info: (Reading database ... 10%
+21:20:49.575 - Info: (Reading database ... 15%
+21:20:49.575 - Info: (Reading database ... 20%
+21:20:49.575 - Info: (Reading database ... 25%
+21:20:49.575 - Info: (Reading database ... 30%
+21:20:49.575 - Info: (Reading database ... 35%
+21:20:49.575 - Info: (Reading database ... 40%
+21:20:49.575 - Info: (Reading database ... 45%
+21:20:49.575 - Info: (Reading database ... 50%
+21:20:49.582 - Info: (Reading database ... 55%
+21:20:49.595 - Info: (Reading database ... 60%
+21:20:49.608 - Info: (Reading database ... 65%
+21:20:49.619 - Info: (Reading database ... 70%
+21:20:49.665 - Info: (Reading database ... 75%
+21:20:49.678 - Info: (Reading database ... 80%
+21:20:49.695 - Info: (Reading database ... 85%
+21:20:49.712 - Info: (Reading database ... 90%
+21:20:49.735 - Info: (Reading database ... 95%
+21:20:49.785 - Info: (Reading database ... 100%
+21:20:49.785 - Info: (Reading database ... 201784 files and directories currently installed.)
+21:20:49.785 - Info: 
+21:20:49.803 - Info: Purging configuration files for nv-tensorrt-local-repo-ubuntu2404-10.16.2-cuda-13.2 (1.0-1) ...
+21:20:49.803 - Info: 
+21:20:59.378 - Info: change working directory to /tmp21:20:59.378 - Info: exec_command: ssh jetson@192.168.55.1 "dpkg-query -W -f='\${db:Status-abbrev} \${Version}' tensorrt-libs"21:20:59.828 - Info: [ Package Install Finished Successfully ]21:20:59.828 - Info: exec_command: ssh   jetson@192.168.55.1 "df -B1 / | tail -1 | awk '{ printf \$4 }'"21:21:00.217 - Info: [target] [ 3.09 GB used. Disk Avail: 192.59 GB ]21:21:00.217 - Info: [ NV_L4T_TENSORRT_RUNTIME_SBSA_TARGET_POST_INSTALL_COMP Install took 11m54s ]

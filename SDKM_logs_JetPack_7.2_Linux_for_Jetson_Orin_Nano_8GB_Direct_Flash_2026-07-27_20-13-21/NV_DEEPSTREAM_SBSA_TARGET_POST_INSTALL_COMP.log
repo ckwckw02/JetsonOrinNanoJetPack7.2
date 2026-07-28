@@ -1,0 +1,560 @@
+------ 2026-07-27 21:36:45 ------
+------ SDK: JetPack_7.2_Linux ------
+21:36:45.707 - Info: exec_command: ssh   jetson@192.168.55.1 "df -B1 / | tail -1 | awk '{ printf \$4 }'"21:36:46.093 - Info: NV_DEEPSTREAM_SBSA_TARGET_POST_INSTALL_COMP include 1 package21:36:46.093 - Info: [ Package Install Started ]21:36:46.093 - Info: target deb installer start to install21:36:46.111 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+sudo mkdir -p /opt/nvidia/deb_repos
+sudo chmod 777 /opt/nvidia/deb_repos
+sudo rm -f /opt/nvidia/deb_repos/deepstream-9.1_9.1.0-1_arm64.deb
+**********************21:37:29.989 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+
+exec 3>&1
+exec 1>&2
+exec 2>&3
+function safe_apt_install {
+    export DEBIAN_FRONTEND=noninteractive
+    echo "*begin $1, $2"
+    tmp_log=/tmp/sdkm_apt_install_log.ckw.txt
+    sudo rm -f $tmp_log
+    set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+    MAX_RETRY=3
+    TIMES=1
+    while [ ${CMD_STATUS} -ne 0 ]; do
+        cat $tmp_log > /dev/stderr
+        if [ $TIMES -gt $MAX_RETRY ]; then
+            echo "Unhandled error when running $1: `tr '\n' '; ' <$tmp_log`" 1>&2; exit 1
+        fi
+        if grep -q -e "is locked by another process" -e "E: Could not get lock /var/" -e "Could not open lock" $tmp_log; then
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting $2 seconds for apt to be available"; sleep ${2}
+        elif grep -q -e "apt --fix-broken install" $tmp_log; then
+            echo "safe apt install failed, need to run apt --fix-broken install"
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; sudo apt-get -f -y --allow-downgrades install 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting 5 seconds for apt"; sleep 5
+        else
+            echo "safe apt install failed: $1, exit code: $CMD_STATUS, retry number: $TIMES"
+            echo "will sleep $[ $TIMES*10 ] seconds before next attempt"
+            sleep $[ $TIMES*10 ]
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+        fi
+    done
+    if [ $CMD_STATUS -eq 0 ] && [ $TIMES -ne 1 ]; then
+        echo "safe apt install succeed. retry number: $TIMES."
+    fi
+}
+safe_apt_install "sudo apt-get -y update" 5
+sleep 0.5
+safe_apt_install "sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/deepstream-9.1_9.1.0-1_arm64.deb" 5
+sleep 5
+sudo rm -f /opt/nvidia/deb_repos/deepstream-9.1_9.1.0-1_arm64.deb
+**********************21:37:32.712 - Info: *begin sudo apt-get -y update, 5
+21:37:32.712 - Info: 
+21:37:34.449 - Info: 
+21:37:34.541 - Info: 0% [Working]
+21:37:34.541 - Info:             
+21:37:34.541 - Info: Hit:1 https://download.docker.com/linux/ubuntu noble InRelease
+21:37:34.541 - Info: 
+21:37:34.541 - Info: 
+21:37:34.550 - Info: 0% [Connected to repo.download.nvidia.com (23.49.105.41)] [Connecting to ports.ubuntu.com]
+21:37:34.551 - Info:                                                                                           
+21:37:34.551 - Info: Hit:2 https://repo.download.nvidia.com/jetson/common r39.2 InRelease
+21:37:34.551 - Info: 
+21:37:34.551 - Info: 
+21:37:34.551 - Info:                                                                                           
+21:37:34.609 - Info: 0% [Connecting to ports.ubuntu.com]
+21:37:34.610 - Info:                                    
+21:37:34.610 - Info: Hit:3 https://repo.download.nvidia.com/jetson/som r39.2 InRelease
+21:37:34.610 - Info: 
+21:37:34.610 - Info: 
+21:37:34.670 - Info: 0% [Connecting to ports.ubuntu.com]
+21:37:34.670 - Info:                                    
+21:37:34.670 - Info: Hit:4 https://repo.download.nvidia.com/jetson/ffmpeg r39.2 InRelease
+21:37:34.670 - Info: 
+21:37:34.670 - Info: 
+21:37:34.773 - Info: 0% [Connecting to ports.ubuntu.com]
+21:37:35.038 - Info: 0% [Connecting to ports.ubuntu.com (91.189.91.102)]
+21:37:35.038 - Info:                                                    
+21:37:35.215 - Info: 0% [Waiting for headers]
+21:37:35.216 - Info:                         
+21:37:35.216 - Info: Hit:5 http://ports.ubuntu.com/ubuntu-ports noble InRelease
+21:37:35.216 - Info: 
+21:37:35.216 - Info: 
+21:37:35.216 - Info:                         
+21:37:35.401 - Info: 0% [Working]
+21:37:35.448 - Info: 0% [Waiting for headers]
+21:37:35.448 - Info:                         
+21:37:35.448 - Info: Hit:6 http://ports.ubuntu.com/ubuntu-ports noble-updates InRelease
+21:37:35.448 - Info: 
+21:37:35.448 - Info: 
+21:37:35.448 - Info:                         
+21:37:35.544 - Info: 0% [Working]
+21:37:35.666 - Info: 0% [Waiting for headers]
+21:37:35.681 - Info:                         
+21:37:35.681 - Info: Hit:7 http://ports.ubuntu.com/ubuntu-ports noble-backports InRelease
+21:37:35.681 - Info: 
+21:37:35.681 - Info: 
+21:37:35.681 - Info:                         
+21:37:35.805 - Info: 0% [Working]
+21:37:35.913 - Info: 0% [Waiting for headers]
+21:37:35.913 - Info:                         
+21:37:35.913 - Info: Hit:8 http://ports.ubuntu.com/ubuntu-ports noble-security InRelease
+21:37:35.913 - Info: 
+21:37:35.913 - Info: 
+21:37:35.913 - Info:                         
+21:37:36.037 - Info: 0% [Working]
+21:37:36.038 - Info: 20% [Working]
+21:37:36.038 - Info:              
+21:37:37.224 - Info: 
+21:37:37.224 - Info: Reading package lists... 0%
+21:37:37.240 - Info: 
+21:37:37.241 - Info: Reading package lists... 0%
+21:37:37.245 - Info: 
+21:37:37.245 - Info: Reading package lists... 0%
+21:37:37.245 - Info: 
+21:37:37.245 - Info: Reading package lists... 0%
+21:37:37.248 - Info: 
+21:37:37.248 - Info: Reading package lists... 0%
+21:37:37.249 - Info: 
+21:37:37.249 - Info: Reading package lists... 0%
+21:37:37.249 - Info: 
+21:37:37.250 - Info: Reading package lists... 0%
+21:37:37.250 - Info: 
+21:37:37.250 - Info: Reading package lists... 0%
+21:37:37.251 - Info: 
+21:37:37.251 - Info: Reading package lists... 0%
+21:37:37.251 - Info: 
+21:37:37.251 - Info: Reading package lists... 0%
+21:37:37.257 - Info: 
+21:37:37.257 - Info: Reading package lists... 0%
+21:37:37.327 - Info: 
+21:37:37.327 - Info: Reading package lists... 3%
+21:37:37.327 - Info: 
+21:37:37.327 - Info: Reading package lists... 3%
+21:37:37.339 - Info: 
+21:37:37.339 - Info: Reading package lists... 5%
+21:37:37.339 - Info: 
+21:37:37.339 - Info: Reading package lists... 5%
+21:37:37.991 - Info: 
+21:37:37.991 - Info: Reading package lists... 27%
+21:37:38.509 - Info: 
+21:37:38.509 - Info: Reading package lists... 41%
+21:37:38.509 - Info: 
+21:37:38.509 - Info: Reading package lists... 41%
+21:37:38.687 - Info: 
+21:37:38.687 - Info: Reading package lists... 57%
+21:37:38.687 - Info: 
+21:37:38.687 - Info: Reading package lists... 57%
+21:37:38.694 - Info: 
+21:37:38.694 - Info: Reading package lists... 58%
+21:37:38.694 - Info: 
+21:37:38.694 - Info: Reading package lists... 58%
+21:37:38.695 - Info: 
+21:37:38.695 - Info: Reading package lists... 58%
+21:37:38.695 - Info: 
+21:37:38.695 - Info: Reading package lists... 58%
+21:37:38.704 - Info: 
+21:37:38.704 - Info: Reading package lists... 58%
+21:37:38.714 - Info: 
+21:37:38.714 - Info: Reading package lists... 58%
+21:37:38.715 - Info: 
+21:37:38.715 - Info: Reading package lists... 58%
+21:37:38.718 - Info: 
+21:37:38.718 - Info: Reading package lists... 59%
+21:37:38.718 - Info: 
+21:37:38.718 - Info: Reading package lists... 59%
+21:37:38.815 - Info: 
+21:37:38.815 - Info: Reading package lists... 62%
+21:37:38.815 - Info: 
+21:37:38.815 - Info: Reading package lists... 62%
+21:37:38.835 - Info: 
+21:37:38.835 - Info: Reading package lists... 64%
+21:37:38.835 - Info: 
+21:37:38.835 - Info: Reading package lists... 64%
+21:37:38.982 - Info: 
+21:37:38.982 - Info: Reading package lists... 69%
+21:37:38.982 - Info: 
+21:37:38.982 - Info: Reading package lists... 69%
+21:37:39.006 - Info: 
+21:37:39.006 - Info: Reading package lists... 71%
+21:37:39.006 - Info: 
+21:37:39.006 - Info: Reading package lists... 71%
+21:37:39.136 - Info: 
+21:37:39.136 - Info: Reading package lists... 77%
+21:37:39.136 - Info: 
+21:37:39.136 - Info: Reading package lists... 77%
+21:37:39.171 - Info: 
+21:37:39.171 - Info: Reading package lists... 80%
+21:37:39.171 - Info: 
+21:37:39.171 - Info: Reading package lists... 80%
+21:37:39.176 - Info: 
+21:37:39.176 - Info: Reading package lists... 80%
+21:37:39.176 - Info: 
+21:37:39.176 - Info: Reading package lists... 80%
+21:37:39.184 - Info: 
+21:37:39.184 - Info: Reading package lists... 80%
+21:37:39.184 - Info: 
+21:37:39.184 - Info: Reading package lists... 80%
+21:37:39.188 - Info: 
+21:37:39.188 - Info: Reading package lists... 80%
+21:37:39.188 - Info: 
+21:37:39.188 - Info: Reading package lists... 80%
+21:37:39.188 - Info: 
+21:37:39.188 - Info: Reading package lists... 80%
+21:37:39.188 - Info: 
+21:37:39.188 - Info: Reading package lists... 80%
+21:37:39.192 - Info: 
+21:37:39.193 - Info: Reading package lists... 80%
+21:37:39.193 - Info: 
+21:37:39.193 - Info: Reading package lists... 80%
+21:37:39.193 - Info: 
+21:37:39.193 - Info: Reading package lists... 80%
+21:37:39.193 - Info: 
+21:37:39.193 - Info: Reading package lists... 80%
+21:37:39.193 - Info: 
+21:37:39.193 - Info: Reading package lists... 80%
+21:37:39.193 - Info: 
+21:37:39.193 - Info: Reading package lists... 80%
+21:37:39.194 - Info: 
+21:37:39.194 - Info: Reading package lists... 80%
+21:37:39.194 - Info: 
+21:37:39.194 - Info: Reading package lists... 80%
+21:37:39.225 - Info: 
+21:37:39.225 - Info: Reading package lists... 83%
+21:37:39.225 - Info: 
+21:37:39.226 - Info: Reading package lists... 83%
+21:37:39.241 - Info: 
+21:37:39.241 - Info: Reading package lists... 84%
+21:37:39.241 - Info: 
+21:37:39.241 - Info: Reading package lists... 84%
+21:37:39.287 - Info: 
+21:37:39.287 - Info: Reading package lists... 88%
+21:37:39.287 - Info: 
+21:37:39.287 - Info: Reading package lists... 88%
+21:37:39.304 - Info: 
+21:37:39.304 - Info: Reading package lists... 90%
+21:37:39.304 - Info: 
+21:37:39.304 - Info: Reading package lists... 90%
+21:37:39.366 - Info: 
+21:37:39.367 - Info: Reading package lists... 95%
+21:37:39.367 - Info: 
+21:37:39.367 - Info: Reading package lists... 95%
+21:37:39.400 - Info: 
+21:37:39.400 - Info: Reading package lists... 98%
+21:37:39.400 - Info: 
+21:37:39.400 - Info: Reading package lists... 98%
+21:37:39.403 - Info: 
+21:37:39.403 - Info: Reading package lists... 98%
+21:37:39.403 - Info: 
+21:37:39.403 - Info: Reading package lists... 98%
+21:37:39.486 - Info: 
+21:37:39.486 - Info: Reading package lists... 98%
+21:37:39.486 - Info: 
+21:37:39.486 - Info: Reading package lists... 98%
+21:37:39.498 - Info: 
+21:37:39.498 - Info: Reading package lists... 99%
+21:37:39.608 - Info: 
+21:37:39.608 - Info: Reading package lists... Done
+21:37:39.608 - Info: 
+21:37:39.608 - Info: 
+21:37:40.181 - Info: *begin sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/deepstream-9.1_9.1.0-1_arm64.deb, 5
+21:37:40.181 - Info: 
+21:37:40.340 - Info: 
+21:37:40.340 - Info: Reading package lists... 0%
+21:37:40.461 - Info: 
+21:37:40.461 - Info: Reading package lists... 0%
+21:37:40.473 - Info: 
+21:37:40.473 - Info: Reading package lists... Done
+21:37:40.473 - Info: 
+21:37:40.473 - Info: 
+21:37:40.497 - Info: 
+21:37:40.497 - Info: Building dependency tree... 0%
+21:37:40.497 - Info: 
+21:37:40.497 - Info: Building dependency tree... 0%
+21:37:40.499 - Info: 
+21:37:40.499 - Info: Building dependency tree... 0%
+21:37:40.723 - Info: 
+21:37:40.723 - Info: Building dependency tree... 50%
+21:37:40.723 - Info: 
+21:37:40.723 - Info: Building dependency tree... 50%
+21:37:41.203 - Info: 
+21:37:41.203 - Info: Building dependency tree... 86%
+21:37:41.373 - Info: 
+21:37:41.373 - Info: Building dependency tree... Done
+21:37:41.373 - Info: 
+21:37:41.373 - Info: 
+21:37:41.373 - Info: 
+21:37:41.373 - Info: Reading state information... 0% 
+21:37:41.373 - Info: 
+21:37:41.373 - Info: Reading state information... 0%
+21:37:41.379 - Info: 
+21:37:41.379 - Info: Reading state information... Done
+21:37:41.379 - Info: 
+21:37:41.379 - Info: 
+21:37:41.511 - Info: Note, selecting 'deepstream-9.1' instead of '/opt/nvidia/deb_repos/deepstream-9.1_9.1.0-1_arm64.deb'
+21:37:41.511 - Info: 
+21:37:42.996 - Info: The following additional packages will be installed:
+21:37:42.996 - Info: 
+21:37:42.999 - Info:   libyaml-cpp-dev libyaml-cpp0.8 python3-pip python3-setuptools python3-wheel
+21:37:42.999 - Info: 
+21:37:43.008 - Info: Suggested packages:
+21:37:43.008 - Info: 
+21:37:43.008 - Info:   python-setuptools-doc
+21:37:43.008 - Info: 
+21:37:43.120 - Info: The following NEW packages will be installed:
+21:37:43.120 - Info: 
+21:37:43.128 - Info:   deepstream-9.1 libyaml-cpp-dev libyaml-cpp0.8 python3-pip python3-setuptools python3-wheel
+21:37:43.128 - Info: 
+21:37:43.199 - Info: 0 upgraded, 6 newly installed, 0 to remove and 285 not upgraded.
+21:37:43.199 - Info: 
+21:37:43.205 - Info: Need to get 648 MB of archives.
+21:37:43.205 - Info: 
+21:37:43.205 - Info: After this operation, 902 MB of additional disk space will be used.
+21:37:43.205 - Info: 
+21:37:43.231 - Info: 
+21:37:43.499 - Info: 0% [Working]
+21:37:43.500 - Info:             
+21:37:43.500 - Info: Get:1 https://repo.download.nvidia.com/jetson/common r39.2/main arm64 deepstream-9.1 arm64 9.1.0-1 [646 MB]
+21:37:43.500 - Info: 
+21:37:43.500 - Info: 
+21:37:43.865 - Info: 0% [Connecting to ports.ubuntu.com (91.189.91.104)] [1 deepstream-9.1 17.4 kB/646 MB 0%]
+21:37:43.865 - Info:                                                                                         
+21:37:43.865 - Info: Get:2 http://ports.ubuntu.com/ubuntu-ports noble/main arm64 libyaml-cpp0.8 arm64 0.8.0+dfsg-6build1 [112 kB]
+21:37:43.865 - Info: 
+21:37:43.865 - Info: 
+21:37:43.865 - Info:                                                                                         
+21:37:44.365 - Info: 2% [2 libyaml-cpp0.8 8,396 B/112 kB 7%] [1 deepstream-9.1 18.9 MB/646 MB 3%]
+21:37:44.866 - Info: 6% [2 libyaml-cpp0.8 41.7 kB/112 kB 37%] [1 deepstream-9.1 46.2 MB/646 MB 7%]
+21:37:44.866 - Info:                                                                              
+21:37:45.177 - Info: 12% [1 deepstream-9.1 71.3 MB/646 MB 11%]
+21:37:45.177 - Info:                                          
+21:37:45.177 - Info: Get:3 http://ports.ubuntu.com/ubuntu-ports noble/main arm64 libyaml-cpp-dev arm64 0.8.0+dfsg-6build1 [189 kB]
+21:37:45.177 - Info: 
+21:37:45.177 - Info: 
+21:37:45.613 - Info: 14% [3 libyaml-cpp-dev 2,604 B/189 kB 1%] [1 deepstream-9.1 88.1 MB/646 MB 14%]
+21:37:45.613 - Info:                                                                                
+21:37:45.613 - Info: 20% [1 deepstream-9.1 109 MB/646 MB 17%]
+21:37:45.613 - Info:                                         
+21:37:45.613 - Info: Get:4 http://ports.ubuntu.com/ubuntu-ports noble-updates/main arm64 python3-setuptools all 68.1.2-2ubuntu1.2 [397 kB]
+21:37:45.613 - Info: 
+21:37:45.613 - Info: 
+21:37:46.056 - Info: 20% [4 python3-setuptools 1,224 B/397 kB 0%] [1 deepstream-9.1 109 MB/646 MB 17%]
+21:37:46.056 - Info:                                                                                  
+21:37:46.056 - Info: 27% [1 deepstream-9.1 134 MB/646 MB 21%]
+21:37:46.056 - Info:                                         
+21:37:46.056 - Info: Get:5 http://ports.ubuntu.com/ubuntu-ports noble/universe arm64 python3-wheel all 0.42.0-2 [53.1 kB]
+21:37:46.056 - Info: 
+21:37:46.056 - Info: 
+21:37:46.102 - Info: 27% [5 python3-wheel 2,520 B/53.1 kB 5%] [1 deepstream-9.1 134 MB/646 MB 21%]
+21:37:46.102 - Info:                                                                              
+21:37:46.102 - Info: 30% [Waiting for headers] [1 deepstream-9.1 137 MB/646 MB 21%]
+21:37:46.102 - Info:                                                               
+21:37:46.102 - Info: Get:6 http://ports.ubuntu.com/ubuntu-ports noble-updates/universe arm64 python3-pip all 24.0+dfsg-1ubuntu1.3 [1,320 kB]
+21:37:46.102 - Info: 
+21:37:46.102 - Info: 
+21:37:46.590 - Info: 30% [6 python3-pip 1,302 B/1,320 kB 0%] [1 deepstream-9.1 137 MB/646 MB 21%]
+21:37:46.590 - Info:                                                                             
+21:37:47.090 - Info: 38% [1 deepstream-9.1 168 MB/646 MB 26%]
+21:37:47.591 - Info: 41% [1 deepstream-9.1 197 MB/646 MB 31%]
+21:37:48.092 - Info: 45% [1 deepstream-9.1 227 MB/646 MB 35%]
+21:37:48.593 - Info: 49% [1 deepstream-9.1 256 MB/646 MB 40%]
+21:37:49.093 - Info: 52% [1 deepstream-9.1 287 MB/646 MB 44%]
+21:37:49.594 - Info: 56% [1 deepstream-9.1 316 MB/646 MB 49%]
+21:37:50.095 - Info: 59% [1 deepstream-9.1 344 MB/646 MB 53%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           54.2 MB/s 5s
+21:37:50.614 - Info: 63% [1 deepstream-9.1 373 MB/646 MB 58%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           54.2 MB/s 5s
+21:37:51.098 - Info: 67% [1 deepstream-9.1 402 MB/646 MB 62%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           54.2 MB/s 4s
+21:37:51.599 - Info: 70% [1 deepstream-9.1 433 MB/646 MB 67%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           54.2 MB/s 3s
+21:37:52.099 - Info: 74% [1 deepstream-9.1 463 MB/646 MB 72%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           54.2 MB/s 3s
+21:37:52.600 - Info: 78% [1 deepstream-9.1 495 MB/646 MB 77%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           54.2 MB/s 2s
+21:37:53.102 - Info: 82% [1 deepstream-9.1 524 MB/646 MB 81%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           54.2 MB/s 2s
+21:37:53.602 - Info: 85% [1 deepstream-9.1 550 MB/646 MB 85%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           54.2 MB/s 1s
+21:37:54.103 - Info: 89% [1 deepstream-9.1 581 MB/646 MB 90%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           54.2 MB/s 1s
+21:37:54.605 - Info: 92% [1 deepstream-9.1 610 MB/646 MB 95%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           54.2 MB/s 0s
+21:37:55.106 - Info: 93% [1 deepstream-9.1 616 MB/646 MB 95%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           54.2 MB/s 0s
+21:37:55.607 - Info: 97% [1 deepstream-9.1 646 MB/646 MB 100%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          54.2 MB/s 0s
+21:37:56.109 - Info: 97% [1 deepstream-9.1 646 MB/646 MB 100%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          50.2 MB/s 0s
+21:38:01.623 - Info:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+21:38:01.916 - Info: 97% [1 deepstream-9.1 646 MB/646 MB 100%]
+21:38:01.916 - Info:                                          
+21:38:01.916 - Info: 100% [Working]
+21:38:01.916 - Info:               
+21:38:01.916 - Info: Fetched 648 MB in 19s (34.6 MB/s)
+21:38:01.916 - Info: 
+21:38:03.433 - Info: Selecting previously unselected package libyaml-cpp0.8:arm64.
+21:38:03.433 - Info: 
+21:38:03.433 - Info: (Reading database ... 
+21:38:03.458 - Info: (Reading database ... 5%
+21:38:03.458 - Info: (Reading database ... 10%
+21:38:03.458 - Info: (Reading database ... 15%
+21:38:03.458 - Info: (Reading database ... 20%
+21:38:03.458 - Info: (Reading database ... 25%
+21:38:03.458 - Info: (Reading database ... 30%
+21:38:03.458 - Info: (Reading database ... 35%
+21:38:03.458 - Info: (Reading database ... 40%
+21:38:03.458 - Info: (Reading database ... 45%
+21:38:03.458 - Info: (Reading database ... 50%
+21:38:03.466 - Info: (Reading database ... 55%
+21:38:03.475 - Info: (Reading database ... 60%
+21:38:03.492 - Info: (Reading database ... 65%
+21:38:03.503 - Info: (Reading database ... 70%
+21:38:03.550 - Info: (Reading database ... 75%
+21:38:03.563 - Info: (Reading database ... 80%
+21:38:03.580 - Info: (Reading database ... 85%
+21:38:03.597 - Info: (Reading database ... 90%
+21:38:03.620 - Info: (Reading database ... 95%
+21:38:03.669 - Info: (Reading database ... 100%
+21:38:03.669 - Info: (Reading database ... 202032 files and directories currently installed.)
+21:38:03.669 - Info: 
+21:38:03.688 - Info: Preparing to unpack .../0-libyaml-cpp0.8_0.8.0+dfsg-6build1_arm64.deb ...
+21:38:03.688 - Info: 
+21:38:03.699 - Info: Unpacking libyaml-cpp0.8:arm64 (0.8.0+dfsg-6build1) ...
+21:38:03.699 - Info: 
+21:38:03.805 - Info: Selecting previously unselected package libyaml-cpp-dev:arm64.
+21:38:03.805 - Info: 
+21:38:03.868 - Info: Preparing to unpack .../1-libyaml-cpp-dev_0.8.0+dfsg-6build1_arm64.deb ...
+21:38:03.868 - Info: 
+21:38:03.876 - Info: Unpacking libyaml-cpp-dev:arm64 (0.8.0+dfsg-6build1) ...
+21:38:03.876 - Info: 
+21:38:04.031 - Info: Selecting previously unselected package python3-setuptools.
+21:38:04.031 - Info: 
+21:38:04.100 - Info: Preparing to unpack .../2-python3-setuptools_68.1.2-2ubuntu1.2_all.deb ...
+21:38:04.100 - Info: 
+21:38:04.104 - Info: Unpacking python3-setuptools (68.1.2-2ubuntu1.2) ...
+21:38:04.104 - Info: 
+21:38:04.327 - Info: Selecting previously unselected package python3-wheel.
+21:38:04.327 - Info: 
+21:38:04.394 - Info: Preparing to unpack .../3-python3-wheel_0.42.0-2_all.deb ...
+21:38:04.394 - Info: 
+21:38:04.402 - Info: Unpacking python3-wheel (0.42.0-2) ...
+21:38:04.402 - Info: 
+21:38:04.529 - Info: Selecting previously unselected package python3-pip.
+21:38:04.530 - Info: 
+21:38:04.593 - Info: Preparing to unpack .../4-python3-pip_24.0+dfsg-1ubuntu1.3_all.deb ...
+21:38:04.593 - Info: 
+21:38:04.601 - Info: Unpacking python3-pip (24.0+dfsg-1ubuntu1.3) ...
+21:38:04.601 - Info: 
+21:38:05.121 - Info: Selecting previously unselected package deepstream-9.1.
+21:38:05.121 - Info: 
+21:38:05.186 - Info: Preparing to unpack .../5-deepstream-9.1_9.1.0-1_arm64.deb ...
+21:38:05.186 - Info: 
+21:38:05.195 - Info: Unpacking deepstream-9.1 (9.1.0-1) ...
+21:38:05.195 - Info: 
+21:38:30.761 - Info: Setting up python3-setuptools (68.1.2-2ubuntu1.2) ...
+21:38:30.761 - Info: 
+21:38:31.887 - Info: Setting up libyaml-cpp0.8:arm64 (0.8.0+dfsg-6build1) ...
+21:38:31.887 - Info: 
+21:38:31.916 - Info: Setting up libyaml-cpp-dev:arm64 (0.8.0+dfsg-6build1) ...
+21:38:31.916 - Info: 
+21:38:31.933 - Info: Setting up python3-wheel (0.42.0-2) ...
+21:38:31.933 - Info: 
+21:38:32.352 - Info: Setting up python3-pip (24.0+dfsg-1ubuntu1.3) ...
+21:38:32.352 - Info: 
+21:38:35.014 - Info: Setting up deepstream-9.1 (9.1.0-1) ...
+21:38:35.014 - Info: 
+21:38:35.098 - Info: update-alternatives: using /opt/nvidia/deepstream/deepstream-9.1/lib/gst-plugins to provide /usr/lib/aarch64-linux-gnu/gstreamer-1.0/deepstream (deepstream-plugins) in auto mode
+21:38:35.098 - Info: 
+21:38:35.123 - Info: update-alternatives: using /opt/nvidia/deepstream/deepstream-9.1/bin/deepstream-ipc-test-app to provide /usr/bin/deepstream-ipc-test-app (deepstream-ipc-test-app) in auto mode
+21:38:35.124 - Info: 
+21:38:35.137 - Info: update-alternatives: using /opt/nvidia/deepstream/deepstream-9.1/bin/deepstream-app to provide /usr/bin/deepstream-app (deepstream-app) in auto mode
+21:38:35.137 - Info: 
+21:38:35.146 - Info: update-alternatives: using /opt/nvidia/deepstream/deepstream-9.1/bin/deepstream-test1-app to provide /usr/bin/deepstream-test1-app (deepstream-test1-app) in auto mode
+21:38:35.146 - Info: 
+21:38:35.154 - Info: update-alternatives: using /opt/nvidia/deepstream/deepstream-9.1/bin/deepstream-test2-app to provide /usr/bin/deepstream-test2-app (deepstream-test2-app) in auto mode
+21:38:35.154 - Info: 
+21:38:35.165 - Info: update-alternatives: using /opt/nvidia/deepstream/deepstream-9.1/bin/deepstream-test3-app to provide /usr/bin/deepstream-test3-app (deepstream-test3-app) in auto mode
+21:38:35.165 - Info: 
+21:38:35.175 - Info: update-alternatives: using /opt/nvidia/deepstream/deepstream-9.1/bin/deepstream-test4-app to provide /usr/bin/deepstream-test4-app (deepstream-test4-app) in auto mode
+21:38:35.175 - Info: 
+21:38:35.182 - Info: update-alternatives: using /opt/nvidia/deepstream/deepstream-9.1/bin/deepstream-test5-app to provide /usr/bin/deepstream-test5-app (deepstream-test5-app) in auto mode
+21:38:35.183 - Info: 
+21:38:35.192 - Info: update-alternatives: using /opt/nvidia/deepstream/deepstream-9.1/bin/deepstream-testsr-app to provide /usr/bin/deepstream-testsr-app (deepstream-testsr-app) in auto mode
+21:38:35.192 - Info: 
+21:38:35.200 - Info: update-alternatives: using /opt/nvidia/deepstream/deepstream-9.1/bin/deepstream-transfer-learning-app to provide /usr/bin/deepstream-transfer-learning-app (deepstream-transfer-learning-app) in auto mode
+21:38:35.201 - Info: 
+21:38:35.209 - Info: update-alternatives: using /opt/nvidia/deepstream/deepstream-9.1/bin/deepstream-dynamicsrcbin-test to provide /usr/bin/deepstream-dynamicsrcbin-test (deepstream-dynamicsrcbin-test) in auto mode
+21:38:35.209 - Info: 
+21:38:35.218 - Info: update-alternatives: using /opt/nvidia/deepstream/deepstream-9.1/bin/deepstream-user-metadata-app to provide /usr/bin/deepstream-user-metadata-app (deepstream-user-metadata-app) in auto mode
+21:38:35.218 - Info: 
+21:38:35.226 - Info: update-alternatives: using /opt/nvidia/deepstream/deepstream-9.1/bin/deepstream-dewarper-app to provide /usr/bin/deepstream-dewarper-app (deepstream-dewarper-app) in auto mode
+21:38:35.226 - Info: 
+21:38:35.238 - Info: update-alternatives: using /opt/nvidia/deepstream/deepstream-9.1/bin/deepstream-nvof-app to provide /usr/bin/deepstream-nvof-app (deepstream-nvof-app) in auto mode
+21:38:35.238 - Info: 
+21:38:35.247 - Info: update-alternatives: using /opt/nvidia/deepstream/deepstream-9.1/bin/deepstream-image-decode-app to provide /usr/bin/deepstream-image-decode-app (deepstream-image-decode-app) in auto mode
+21:38:35.247 - Info: 
+21:38:35.258 - Info: update-alternatives: using /opt/nvidia/deepstream/deepstream-9.1/bin/deepstream-gst-metadata-app to provide /usr/bin/deepstream-gst-metadata-app (deepstream-gst-metadata-app) in auto mode
+21:38:35.258 - Info: 
+21:38:35.267 - Info: update-alternatives: using /opt/nvidia/deepstream/deepstream-9.1/bin/deepstream-opencv-test to provide /usr/bin/deepstream-opencv-test (deepstream-opencv-test) in auto mode
+21:38:35.267 - Info: 
+21:38:35.278 - Info: update-alternatives: using /opt/nvidia/deepstream/deepstream-9.1/bin/deepstream-preprocess-test to provide /usr/bin/deepstream-preprocess-test (deepstream-preprocess-test) in auto mode
+21:38:35.278 - Info: 
+21:38:35.287 - Info: update-alternatives: using /opt/nvidia/deepstream/deepstream-9.1/bin/deepstream-image-meta-test to provide /usr/bin/deepstream-image-meta-test (deepstream-image-meta-test) in auto mode
+21:38:35.287 - Info: 
+21:38:35.294 - Info: update-alternatives: using /opt/nvidia/deepstream/deepstream-9.1/bin/deepstream-appsrc-test to provide /usr/bin/deepstream-appsrc-test (deepstream-appsrc-test) in auto mode
+21:38:35.294 - Info: 
+21:38:35.305 - Info: update-alternatives: using /opt/nvidia/deepstream/deepstream-9.1/bin/deepstream-can-orientation-app to provide /usr/bin/deepstream-can-orientation-app (deepstream-can-orientation-app) in auto mode
+21:38:35.305 - Info: 
+21:38:35.315 - Info: update-alternatives: using /opt/nvidia/deepstream/deepstream-9.1/bin/deepstream-nvdsanalytics-test to provide /usr/bin/deepstream-nvdsanalytics-test (deepstream-nvdsanalytics-test) in auto mode
+21:38:35.315 - Info: 
+21:38:35.328 - Info: update-alternatives: using /opt/nvidia/deepstream/deepstream-9.1/bin/deepstream-3d-action-recognition to provide /usr/bin/deepstream-3d-action-recognition (deepstream-3d-action-recognition) in auto mode
+21:38:35.328 - Info: 
+21:38:35.335 - Info: update-alternatives: using /opt/nvidia/deepstream/deepstream-9.1/bin/deepstream-3d-depth-camera to provide /usr/bin/deepstream-3d-depth-camera (deepstream-3d-depth-camera) in auto mode
+21:38:35.335 - Info: 
+21:38:35.343 - Info: update-alternatives: using /opt/nvidia/deepstream/deepstream-9.1/bin/deepstream-lidar-inference-app to provide /usr/bin/deepstream-lidar-inference-app (deepstream-lidar-inference-app) in auto mode
+21:38:35.343 - Info: 
+21:38:35.352 - Info: update-alternatives: using /opt/nvidia/deepstream/deepstream-9.1/bin/deepstream-3d-lidar-sensor-fusion to provide /usr/bin/deepstream-3d-lidar-sensor-fusion (deepstream-3d-lidar-sensor-fusion) in auto mode
+21:38:35.352 - Info: 
+21:38:35.361 - Info: update-alternatives: using /opt/nvidia/deepstream/deepstream-9.1/bin/deepstream-nmos-app to provide /usr/bin/deepstream-nmos-app (deepstream-nmos-app) in auto mode
+21:38:35.361 - Info: 
+21:38:35.372 - Info: update-alternatives: using /opt/nvidia/deepstream/deepstream-9.1/bin/deepstream-server-app to provide /usr/bin/deepstream-server-app (deepstream-server-app) in auto mode
+21:38:35.372 - Info: 
+21:38:35.380 - Info: update-alternatives: using /opt/nvidia/deepstream/deepstream-9.1/bin/deepstream-demuxer-static to provide /usr/bin/deepstream-demuxer-static (deepstream-demuxer-static) in auto mode
+21:38:35.380 - Info: 
+21:38:35.390 - Info: update-alternatives: using /opt/nvidia/deepstream/deepstream-9.1/bin/deepstream-demuxer-dynamic to provide /usr/bin/deepstream-demuxer-dynamic (deepstream-demuxer-dynamic) in auto mode
+21:38:35.390 - Info: 
+21:38:35.398 - Info: update-alternatives: using /opt/nvidia/deepstream/deepstream-9.1/bin/service-maker-3d-action-recognition-app to provide /usr/bin/service-maker-3d-action-recognition-app (service-maker-3d-action-recognition-app) in auto mode
+21:38:35.398 - Info: 
+21:38:35.410 - Info: update-alternatives: using /opt/nvidia/deepstream/deepstream-9.1/bin/service-maker-appsrc-test-app to provide /usr/bin/service-maker-appsrc-test-app (service-maker-appsrc-test-app) in auto mode
+21:38:35.410 - Info: 
+21:38:35.418 - Info: update-alternatives: using /opt/nvidia/deepstream/deepstream-9.1/bin/service-maker-sr-test-app to provide /usr/bin/service-maker-sr-test-app (service-maker-sr-test-app) in auto mode
+21:38:35.418 - Info: 
+21:38:35.431 - Info: update-alternatives: using /opt/nvidia/deepstream/deepstream-9.1/bin/service-maker-test1-app to provide /usr/bin/service-maker-test1-app (service-maker-test1-app) in auto mode
+21:38:35.431 - Info: 
+21:38:35.441 - Info: update-alternatives: using /opt/nvidia/deepstream/deepstream-9.1/bin/service-maker-test2-app to provide /usr/bin/service-maker-test2-app (service-maker-test2-app) in auto mode
+21:38:35.441 - Info: 
+21:38:35.449 - Info: update-alternatives: using /opt/nvidia/deepstream/deepstream-9.1/bin/service-maker-test3-app to provide /usr/bin/service-maker-test3-app (service-maker-test3-app) in auto mode
+21:38:35.449 - Info: 
+21:38:35.457 - Info: update-alternatives: using /opt/nvidia/deepstream/deepstream-9.1/bin/service-maker-test4-app to provide /usr/bin/service-maker-test4-app (service-maker-test4-app) in auto mode
+21:38:35.457 - Info: 
+21:38:35.470 - Info: update-alternatives: using /opt/nvidia/deepstream/deepstream-9.1/bin/service-maker-test5-app to provide /usr/bin/service-maker-test5-app (service-maker-test5-app) in auto mode
+21:38:35.471 - Info: 
+21:38:36.256 - Info: [33mWARNING: The directory '/home/jetson/.cache/pip' or its parent directory is not owned or is not writable by the current user. The cache has been disabled. Check the permissions and owner of that directory. If executing pip with sudo, you should use sudo's -H flag.[0m[33m
+21:38:36.256 - Info: 
+21:38:36.692 - Info: [0mProcessing /opt/nvidia/deepstream/deepstream-9.1/service-maker/python/pyservicemaker-0.0.1-cp312-cp312-linux_aarch64.whl
+21:38:36.692 - Info: 
+21:38:37.536 - Info: Installing collected packages: pyservicemaker
+21:38:37.536 - Info: 
+21:38:37.629 - Info: Successfully installed pyservicemaker-0.0.1
+21:38:37.629 - Info: 
+21:38:37.629 - Info: [33mWARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv[0m[33m
+21:38:37.629 - Info: 
+21:38:37.948 - Info: [0m---------------------------------------------------------------------------------------
+21:38:37.948 - Info: 
+21:38:37.948 - Info: NOTE: sources and samples folders will be found in /opt/nvidia/deepstream/deepstream-9.1
+21:38:37.949 - Info: 
+21:38:37.949 - Info: ---------------------------------------------------------------------------------------
+21:38:37.949 - Info: 
+21:38:37.971 - Info: Processing triggers for man-db (2.12.0-4build2) ...
+21:38:37.971 - Info: 
+21:38:38.244 - Info: Processing triggers for libc-bin (2.39-0ubuntu8.7) ...
+21:38:38.244 - Info: 
+21:38:49.650 - Info: change working directory to /tmp21:38:49.651 - Info: exec_command: ssh jetson@192.168.55.1 "dpkg-query -W -f='\${db:Status-abbrev} \${Version}' deepstream-9.1"21:38:50.092 - Info: [ Package Install Finished Successfully ]21:38:50.092 - Info: exec_command: ssh   jetson@192.168.55.1 "df -B1 / | tail -1 | awk '{ printf \$4 }'"21:38:50.485 - Info: [target] [ 1.46 GB used. Disk Avail: 186.33 GB ]21:38:50.485 - Info: [ NV_DEEPSTREAM_SBSA_TARGET_POST_INSTALL_COMP Install took 2m4s ]

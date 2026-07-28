@@ -1,0 +1,11 @@
+------ 2026-07-27 20:32:54 ------
+------ SDK: JetPack_7.2_Linux ------
+20:32:54.699 - Info: exec_command: ssh   jetson@192.168.55.1 "df -B1 / | tail -1 | awk '{ printf \$4 }'"20:32:55.116 - Info: change working directory to /home/ckw/nvidia/nvidia_sdk/JetPack_7.2_Linux_JETSON_ORIN_NANO_TARGETS20:32:55.116 - Info: [ Component Install Started ]20:32:55.116 - Info: current working directory is /home/ckw/nvidia/nvidia_sdk/JetPack_7.2_Linux_JETSON_ORIN_NANO_TARGETS20:32:55.116 - Info: exec_command [host]:
+**********************
+set +e
+host_datetime=$(date -u)
+ssh -t -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no jetson@192.168.55.1 "sudo date -u -s '$host_datetime'"
+exit 0
+**********************20:32:55.116 - Info: exec_command: /home/ckw/.nvsdkm/replays/scripts/JetPack_7.2_Linux/NV_DATETIME_SETUP_SBSA_TARGET_POST_INSTALL_COMP.sh20:32:55.652 - Info: Mon Jul 27 12:32:55 PM UTC 2026
+20:32:55.652 - Info: 
+20:32:55.697 - Info: [ Component Install Finished Successfully ]20:32:55.697 - Info: exec_command: ssh   jetson@192.168.55.1 "df -B1 / | tail -1 | awk '{ printf \$4 }'"20:32:56.092 - Info: [target] [ 28.00 KB used. Disk Avail: 205.87 GB ]20:32:56.092 - Info: [ NV_DATETIME_SETUP_SBSA_TARGET_POST_INSTALL_COMP Install took 1s ]

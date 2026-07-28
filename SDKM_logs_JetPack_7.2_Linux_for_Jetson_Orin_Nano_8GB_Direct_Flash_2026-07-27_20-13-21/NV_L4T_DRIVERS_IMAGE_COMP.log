@@ -1,0 +1,57 @@
+------ 2026-07-27 09:43:26 ------
+------ SDK: JetPack_7.2_Linux ------
+09:43:26.677 - Info: [host] [ Disk Avail on Partition /dev/sda2: 67.78 GB ]09:43:26.677 - Info: NV_L4T_DRIVERS_IMAGE_COMP include 1 package09:43:26.677 - Info: change working directory to /home/ckw/nvidia/nvidia_sdk/JetPack_7.2_Linux_JETSON_ORIN_NANO_TARGETS09:43:26.677 - Info: [ Package PreInstall Started ]09:43:26.677 - Info: current working directory is /home/ckw/nvidia/nvidia_sdk/JetPack_7.2_Linux_JETSON_ORIN_NANO_TARGETS09:43:26.682 - Info: exec_command [host]:
+**********************
+sudo rm -rf /home/ckw/nvidia/nvidia_sdk/JetPack_7.2_Linux_JETSON_ORIN_NANO_TARGETS/Linux_for_Tegra/
+safe_apt_install "sudo apt-get install -y lbzip2" 5
+**********************09:43:26.682 - Info: exec_command: /home/ckw/.nvsdkm/replays/scripts/JetPack_7.2_Linux/NV_L4T_DRIVERS_IMAGE_COMP.sh09:43:26.803 - Info: *begin sudo apt-get install -y lbzip2, 5
+09:43:27.054 - Info: Reading package lists...
+09:43:28.740 - Info: Building dependency tree...
+09:43:28.752 - Info: Reading state information...
+09:43:29.807 - Info: The following package was automatically installed and is no longer required:
+09:43:29.815 - Info:   libfwupd2
+09:43:29.815 - Info: Use 'sudo apt autoremove' to remove it.
+09:43:29.901 - Info: The following NEW packages will be installed:
+09:43:29.909 - Info:   lbzip2
+09:43:30.492 - Info: 0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.
+09:43:30.492 - Info: Need to get 65.7 kB of archives.
+09:43:30.492 - Info: After this operation, 162 kB of additional disk space will be used.
+09:43:30.492 - Info: Get:1 http://hk.archive.ubuntu.com/ubuntu noble/universe amd64 lbzip2 amd64 2.5-2.3 [65.7 kB]
+09:43:33.250 - Info: Fetched 65.7 kB in 1s (61.4 kB/s)
+09:43:33.359 - Info: Selecting previously unselected package lbzip2.
+09:43:33.359 - Info: 
+09:43:33.367 - Info: (Reading database ... 
+09:43:33.402 - Info: (Reading database ... 5%
+09:43:33.402 - Info: (Reading database ... 10%
+09:43:33.402 - Info: (Reading database ... 15%
+09:43:33.402 - Info: (Reading database ... 20%
+09:43:33.402 - Info: (Reading database ... 25%
+09:43:33.402 - Info: (Reading database ... 30%
+09:43:33.402 - Info: (Reading database ... 35%
+09:43:33.402 - Info: (Reading database ... 40%
+09:43:33.402 - Info: (Reading database ... 45%
+09:43:33.402 - Info: (Reading database ... 50%
+09:43:33.533 - Info: (Reading database ... 55%
+09:43:33.663 - Info: (Reading database ... 60%
+09:43:33.749 - Info: (Reading database ... 65%
+09:43:33.831 - Info: (Reading database ... 70%
+09:43:33.927 - Info: (Reading database ... 75%
+09:43:34.042 - Info: (Reading database ... 80%
+09:43:34.144 - Info: (Reading database ... 85%
+09:43:34.365 - Info: (Reading database ... 90%
+09:43:34.475 - Info: (Reading database ... 95%
+09:43:34.605 - Info: (Reading database ... 100%
+09:43:34.605 - Info: (Reading database ... 163597 files and directories currently installed.)
+09:43:34.605 - Info: 
+09:43:34.613 - Info: Preparing to unpack .../lbzip2_2.5-2.3_amd64.deb ...
+09:43:34.613 - Info: 
+09:43:34.622 - Info: Unpacking lbzip2 (2.5-2.3) ...
+09:43:34.622 - Info: 
+09:43:34.831 - Info: Setting up lbzip2 (2.5-2.3) ...
+09:43:34.831 - Info: 
+09:43:34.842 - Info: Processing triggers for man-db (2.12.0-4build2) ...
+09:43:34.842 - Info: 
+09:43:40.677 - Info: [ Package PreInstall Finished Successfully ]09:43:40.677 - Info: [ Package Install Started ]09:43:40.677 - Info: current working directory is /home/ckw/nvidia/nvidia_sdk/JetPack_7.2_Linux_JETSON_ORIN_NANO_TARGETS09:43:40.677 - Info: exec_command [host]:
+**********************
+tar -I lbzip2 -xf /home/ckw/Downloads/nvidia/sdkm_downloads/Jetson_Linux_R39.2.0_aarch64.tbz2
+**********************09:43:40.677 - Info: exec_command: /home/ckw/.nvsdkm/replays/scripts/JetPack_7.2_Linux/NV_L4T_DRIVERS_IMAGE_COMP.sh09:44:39.537 - Info: [ Package Install Finished Successfully ]09:44:39.537 - Info: [host] [ 1.42 GB used. Disk Avail on Partition /dev/sda2: 66.36 GB ]09:44:39.537 - Info: [ NV_L4T_DRIVERS_IMAGE_COMP Install took 1m13s ]

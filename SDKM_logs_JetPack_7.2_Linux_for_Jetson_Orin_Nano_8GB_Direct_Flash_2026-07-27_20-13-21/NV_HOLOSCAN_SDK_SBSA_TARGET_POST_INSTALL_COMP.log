@@ -1,0 +1,839 @@
+------ 2026-07-27 21:40:08 ------
+------ SDK: JetPack_7.2_Linux ------
+21:40:08.118 - Info: exec_command: ssh   jetson@192.168.55.1 "df -B1 / | tail -1 | awk '{ printf \$4 }'"21:40:08.527 - Info: NV_HOLOSCAN_SDK_SBSA_TARGET_POST_INSTALL_COMP include 2 package21:40:08.528 - Info: [ Package Install Started ]21:40:08.528 - Info: target deb installer start to install21:40:08.528 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+sudo mkdir -p /opt/nvidia/deb_repos
+sudo chmod 777 /opt/nvidia/deb_repos
+sudo rm -f /opt/nvidia/deb_repos/holoscan-cuda-13_4.4.0.1-1_arm64.deb
+**********************21:40:12.922 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+
+exec 3>&1
+exec 1>&2
+exec 2>&3
+function safe_apt_install {
+    export DEBIAN_FRONTEND=noninteractive
+    echo "*begin $1, $2"
+    tmp_log=/tmp/sdkm_apt_install_log.ckw.txt
+    sudo rm -f $tmp_log
+    set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+    MAX_RETRY=3
+    TIMES=1
+    while [ ${CMD_STATUS} -ne 0 ]; do
+        cat $tmp_log > /dev/stderr
+        if [ $TIMES -gt $MAX_RETRY ]; then
+            echo "Unhandled error when running $1: `tr '\n' '; ' <$tmp_log`" 1>&2; exit 1
+        fi
+        if grep -q -e "is locked by another process" -e "E: Could not get lock /var/" -e "Could not open lock" $tmp_log; then
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting $2 seconds for apt to be available"; sleep ${2}
+        elif grep -q -e "apt --fix-broken install" $tmp_log; then
+            echo "safe apt install failed, need to run apt --fix-broken install"
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; sudo apt-get -f -y --allow-downgrades install 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting 5 seconds for apt"; sleep 5
+        else
+            echo "safe apt install failed: $1, exit code: $CMD_STATUS, retry number: $TIMES"
+            echo "will sleep $[ $TIMES*10 ] seconds before next attempt"
+            sleep $[ $TIMES*10 ]
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+        fi
+    done
+    if [ $CMD_STATUS -eq 0 ] && [ $TIMES -ne 1 ]; then
+        echo "safe apt install succeed. retry number: $TIMES."
+    fi
+}
+safe_apt_install "sudo apt-get -y update" 5
+sleep 0.5
+safe_apt_install "sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/holoscan-cuda-13_4.4.0.1-1_arm64.deb" 5
+sleep 5
+sudo rm -f /opt/nvidia/deb_repos/holoscan-cuda-13_4.4.0.1-1_arm64.deb
+**********************21:40:13.719 - Info: *begin sudo apt-get -y update, 5
+21:40:13.719 - Info: 
+21:40:14.014 - Info: 
+21:40:14.089 - Info: 0% [Working]
+21:40:14.089 - Info:             
+21:40:14.089 - Info: Hit:1 https://download.docker.com/linux/ubuntu noble InRelease
+21:40:14.089 - Info: 
+21:40:14.089 - Info: 
+21:40:14.089 - Info: 0% [Connecting to apt.kitware.com (66.194.253.25)] [Waiting for headers] [Connecting to ports.ubuntu.com]
+21:40:14.089 - Info:                                                                                                          
+21:40:14.089 - Info: Hit:2 https://repo.download.nvidia.com/jetson/common r39.2 InRelease
+21:40:14.089 - Info: 
+21:40:14.089 - Info: 
+21:40:14.169 - Info: 0% [Connecting to apt.kitware.com (66.194.253.25)] [Connected to repo.download.nvidia.com (23.49.105.31)] [Connecting to ports.ubuntu.com]
+21:40:14.169 - Info:                                                                                                                                           
+21:40:14.169 - Info: Hit:3 https://repo.download.nvidia.com/jetson/som r39.2 InRelease
+21:40:14.169 - Info: 
+21:40:14.169 - Info: 
+21:40:14.169 - Info:                                                                                                                                           
+21:40:14.212 - Info: 0% [Connecting to apt.kitware.com (66.194.253.25)] [Connecting to ports.ubuntu.com]
+21:40:14.226 - Info: 0% [Connecting to apt.kitware.com (66.194.253.25)] [Waiting for headers] [Connecting to ports.ubuntu.com]
+21:40:14.226 - Info:                                                                                                          
+21:40:14.226 - Info: Hit:4 https://repo.download.nvidia.com/jetson/ffmpeg r39.2 InRelease
+21:40:14.226 - Info: 
+21:40:14.226 - Info: 
+21:40:14.226 - Info:                                                                                                          
+21:40:14.388 - Info: 0% [Connecting to apt.kitware.com (66.194.253.25)] [Connecting to ports.ubuntu.com]
+21:40:14.552 - Info: 0% [Connected to apt.kitware.com (66.194.253.25)] [Connecting to ports.ubuntu.com (91.189.92.19)]
+21:40:14.552 - Info:                                                                                                  
+21:40:14.729 - Info: 0% [Waiting for headers] [Waiting for headers]
+21:40:14.731 - Info:                                               
+21:40:14.732 - Info: Hit:5 http://ports.ubuntu.com/ubuntu-ports noble InRelease
+21:40:14.732 - Info: 
+21:40:14.732 - Info: 
+21:40:14.732 - Info:                                               
+21:40:14.858 - Info: 0% [Waiting for headers]
+21:40:14.946 - Info: 0% [Waiting for headers] [Waiting for headers]
+21:40:14.946 - Info:                                               
+21:40:14.946 - Info: Hit:6 http://ports.ubuntu.com/ubuntu-ports noble-updates InRelease
+21:40:14.946 - Info: 
+21:40:14.946 - Info: 
+21:40:14.947 - Info:                                               
+21:40:15.006 - Info: 0% [Waiting for headers]
+21:40:15.006 - Info:                         
+21:40:15.006 - Info: Hit:7 https://apt.kitware.com/ubuntu noble InRelease
+21:40:15.006 - Info: 
+21:40:15.006 - Info: 
+21:40:15.068 - Info: 0% [Waiting for headers]
+21:40:15.159 - Info:                         
+21:40:15.159 - Info: Hit:8 http://ports.ubuntu.com/ubuntu-ports noble-backports InRelease
+21:40:15.159 - Info: 
+21:40:15.159 - Info: 
+21:40:15.159 - Info:                         
+21:40:15.170 - Info: 0% [Working]
+21:40:15.287 - Info: 0% [Waiting for headers]
+21:40:15.962 - Info:                         
+21:40:15.962 - Info: Hit:9 http://ports.ubuntu.com/ubuntu-ports noble-security InRelease
+21:40:15.962 - Info: 
+21:40:15.962 - Info: 
+21:40:15.962 - Info:                         
+21:40:16.091 - Info: 0% [Working]
+21:40:16.091 - Info: 20% [Working]
+21:40:16.091 - Info:              
+21:40:16.366 - Info: 
+21:40:16.366 - Info: Reading package lists... 0%
+21:40:16.386 - Info: 
+21:40:16.386 - Info: Reading package lists... 0%
+21:40:16.389 - Info: 
+21:40:16.389 - Info: Reading package lists... 0%
+21:40:16.389 - Info: 
+21:40:16.389 - Info: Reading package lists... 0%
+21:40:16.395 - Info: 
+21:40:16.395 - Info: Reading package lists... 0%
+21:40:16.395 - Info: 
+21:40:16.395 - Info: Reading package lists... 0%
+21:40:16.397 - Info: 
+21:40:16.397 - Info: Reading package lists... 0%
+21:40:16.398 - Info: 
+21:40:16.398 - Info: Reading package lists... 0%
+21:40:16.398 - Info: 
+21:40:16.398 - Info: Reading package lists... 0%
+21:40:16.399 - Info: 
+21:40:16.399 - Info: Reading package lists... 0%
+21:40:16.399 - Info: 
+21:40:16.399 - Info: Reading package lists... 0%
+21:40:16.401 - Info: 
+21:40:16.401 - Info: Reading package lists... 0%
+21:40:16.401 - Info: 
+21:40:16.401 - Info: Reading package lists... 0%
+21:40:16.480 - Info: 
+21:40:16.480 - Info: Reading package lists... 4%
+21:40:16.480 - Info: 
+21:40:16.480 - Info: Reading package lists... 4%
+21:40:16.491 - Info: 
+21:40:16.491 - Info: Reading package lists... 5%
+21:40:16.491 - Info: 
+21:40:16.491 - Info: Reading package lists... 5%
+21:40:17.131 - Info: 
+21:40:17.131 - Info: Reading package lists... 27%
+21:40:17.609 - Info: 
+21:40:17.610 - Info: Reading package lists... 41%
+21:40:17.610 - Info: 
+21:40:17.610 - Info: Reading package lists... 41%
+21:40:17.785 - Info: 
+21:40:17.785 - Info: Reading package lists... 57%
+21:40:17.785 - Info: 
+21:40:17.785 - Info: Reading package lists... 57%
+21:40:17.791 - Info: 
+21:40:17.791 - Info: Reading package lists... 58%
+21:40:17.791 - Info: 
+21:40:17.791 - Info: Reading package lists... 58%
+21:40:17.793 - Info: 
+21:40:17.793 - Info: Reading package lists... 58%
+21:40:17.793 - Info: 
+21:40:17.793 - Info: Reading package lists... 58%
+21:40:17.813 - Info: 
+21:40:17.813 - Info: Reading package lists... 58%
+21:40:17.813 - Info: 
+21:40:17.813 - Info: Reading package lists... 58%
+21:40:17.817 - Info: 
+21:40:17.817 - Info: Reading package lists... 59%
+21:40:17.817 - Info: 
+21:40:17.817 - Info: Reading package lists... 59%
+21:40:17.855 - Info: 
+21:40:17.855 - Info: Reading package lists... 60%
+21:40:17.914 - Info: 
+21:40:17.914 - Info: Reading package lists... 62%
+21:40:17.914 - Info: 
+21:40:17.914 - Info: Reading package lists... 62%
+21:40:17.935 - Info: 
+21:40:17.935 - Info: Reading package lists... 64%
+21:40:17.935 - Info: 
+21:40:17.935 - Info: Reading package lists... 64%
+21:40:18.080 - Info: 
+21:40:18.080 - Info: Reading package lists... 69%
+21:40:18.080 - Info: 
+21:40:18.080 - Info: Reading package lists... 69%
+21:40:18.104 - Info: 
+21:40:18.104 - Info: Reading package lists... 71%
+21:40:18.104 - Info: 
+21:40:18.104 - Info: Reading package lists... 71%
+21:40:18.237 - Info: 
+21:40:18.237 - Info: Reading package lists... 77%
+21:40:18.237 - Info: 
+21:40:18.237 - Info: Reading package lists... 77%
+21:40:18.273 - Info: 
+21:40:18.273 - Info: Reading package lists... 80%
+21:40:18.273 - Info: 
+21:40:18.273 - Info: Reading package lists... 80%
+21:40:18.278 - Info: 
+21:40:18.278 - Info: Reading package lists... 80%
+21:40:18.278 - Info: 
+21:40:18.278 - Info: Reading package lists... 80%
+21:40:18.280 - Info: 
+21:40:18.280 - Info: Reading package lists... 80%
+21:40:18.280 - Info: 
+21:40:18.280 - Info: Reading package lists... 80%
+21:40:18.285 - Info: 
+21:40:18.285 - Info: Reading package lists... 80%
+21:40:18.285 - Info: 
+21:40:18.285 - Info: Reading package lists... 80%
+21:40:18.285 - Info: 
+21:40:18.285 - Info: Reading package lists... 80%
+21:40:18.285 - Info: 
+21:40:18.285 - Info: Reading package lists... 80%
+21:40:18.289 - Info: 
+21:40:18.289 - Info: Reading package lists... 80%
+21:40:18.289 - Info: 
+21:40:18.289 - Info: Reading package lists... 80%
+21:40:18.290 - Info: 
+21:40:18.290 - Info: Reading package lists... 80%
+21:40:18.290 - Info: 
+21:40:18.290 - Info: Reading package lists... 80%
+21:40:18.290 - Info: 
+21:40:18.290 - Info: Reading package lists... 80%
+21:40:18.290 - Info: 
+21:40:18.290 - Info: Reading package lists... 80%
+21:40:18.292 - Info: 
+21:40:18.292 - Info: Reading package lists... 80%
+21:40:18.292 - Info: 
+21:40:18.292 - Info: Reading package lists... 80%
+21:40:18.323 - Info: 
+21:40:18.323 - Info: Reading package lists... 83%
+21:40:18.323 - Info: 
+21:40:18.323 - Info: Reading package lists... 83%
+21:40:18.339 - Info: 
+21:40:18.339 - Info: Reading package lists... 84%
+21:40:18.339 - Info: 
+21:40:18.339 - Info: Reading package lists... 84%
+21:40:18.383 - Info: 
+21:40:18.383 - Info: Reading package lists... 88%
+21:40:18.383 - Info: 
+21:40:18.383 - Info: Reading package lists... 88%
+21:40:18.399 - Info: 
+21:40:18.399 - Info: Reading package lists... 90%
+21:40:18.399 - Info: 
+21:40:18.399 - Info: Reading package lists... 90%
+21:40:18.462 - Info: 
+21:40:18.462 - Info: Reading package lists... 95%
+21:40:18.462 - Info: 
+21:40:18.462 - Info: Reading package lists... 95%
+21:40:18.495 - Info: 
+21:40:18.495 - Info: Reading package lists... 98%
+21:40:18.495 - Info: 
+21:40:18.495 - Info: Reading package lists... 98%
+21:40:18.497 - Info: 
+21:40:18.497 - Info: Reading package lists... 98%
+21:40:18.497 - Info: 
+21:40:18.497 - Info: Reading package lists... 98%
+21:40:18.582 - Info: 
+21:40:18.582 - Info: Reading package lists... 98%
+21:40:18.582 - Info: 
+21:40:18.582 - Info: Reading package lists... 98%
+21:40:18.594 - Info: 
+21:40:18.594 - Info: Reading package lists... 99%
+21:40:18.711 - Info: 
+21:40:18.711 - Info: Reading package lists... Done
+21:40:18.711 - Info: 
+21:40:18.711 - Info: 
+21:40:19.283 - Info: *begin sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/holoscan-cuda-13_4.4.0.1-1_arm64.deb, 5
+21:40:19.283 - Info: 
+21:40:19.454 - Info: 
+21:40:19.454 - Info: Reading package lists... 0%
+21:40:19.581 - Info: 
+21:40:19.581 - Info: Reading package lists... 0%
+21:40:19.593 - Info: 
+21:40:19.593 - Info: Reading package lists... Done
+21:40:19.593 - Info: 
+21:40:19.593 - Info: 
+21:40:19.617 - Info: 
+21:40:19.617 - Info: Building dependency tree... 0%
+21:40:19.617 - Info: 
+21:40:19.617 - Info: Building dependency tree... 0%
+21:40:19.620 - Info: 
+21:40:19.620 - Info: Building dependency tree... 0%
+21:40:19.853 - Info: 
+21:40:19.853 - Info: Building dependency tree... 50%
+21:40:19.853 - Info: 
+21:40:19.853 - Info: Building dependency tree... 50%
+21:40:20.320 - Info: 
+21:40:20.320 - Info: Building dependency tree... 85%
+21:40:20.506 - Info: 
+21:40:20.506 - Info: Building dependency tree... Done
+21:40:20.506 - Info: 
+21:40:20.506 - Info: 
+21:40:20.506 - Info: 
+21:40:20.506 - Info: Reading state information... 0% 
+21:40:20.506 - Info: 
+21:40:20.506 - Info: Reading state information... 0%
+21:40:20.511 - Info: 
+21:40:20.511 - Info: Reading state information... Done
+21:40:20.511 - Info: 
+21:40:20.511 - Info: 
+21:40:20.646 - Info: Note, selecting 'holoscan-cuda-13' instead of '/opt/nvidia/deb_repos/holoscan-cuda-13_4.4.0.1-1_arm64.deb'
+21:40:20.646 - Info: 
+21:40:22.165 - Info: The following package was automatically installed and is no longer required:
+21:40:22.166 - Info: 
+21:40:22.169 - Info:   librhash0
+21:40:22.169 - Info: 
+21:40:22.169 - Info: Use 'sudo apt autoremove' to remove it.
+21:40:22.169 - Info: 
+21:40:22.174 - Info: The following additional packages will be installed:
+21:40:22.174 - Info: 
+21:40:22.182 - Info:   cudnn9-cuda-13 cudnn9-cuda-13-2 libcudnn9-static-cuda-13
+21:40:22.182 - Info: 
+21:40:22.190 - Info: Suggested packages:
+21:40:22.190 - Info: 
+21:40:22.190 - Info:   cuda-nvtx-13-0 libcusparselt0-cuda-13 libopenblas0
+21:40:22.190 - Info: 
+21:40:22.190 - Info: Recommended packages:
+21:40:22.190 - Info: 
+21:40:22.190 - Info:   libnvjitlink.so.13 libnccl2
+21:40:22.190 - Info: 
+21:40:22.292 - Info: The following NEW packages will be installed:
+21:40:22.292 - Info: 
+21:40:22.301 - Info:   cudnn9-cuda-13 cudnn9-cuda-13-2 holoscan-cuda-13 libcudnn9-static-cuda-13
+21:40:22.301 - Info: 
+21:40:22.374 - Info: 0 upgraded, 4 newly installed, 0 to remove and 285 not upgraded.
+21:40:22.374 - Info: 
+21:40:22.380 - Info: Need to get 458 MB of archives.
+21:40:22.380 - Info: 
+21:40:22.380 - Info: After this operation, 936 MB of additional disk space will be used.
+21:40:22.380 - Info: 
+21:40:22.393 - Info: 
+21:40:22.567 - Info: 0% [Working]
+21:40:22.567 - Info:             
+21:40:22.567 - Info: Get:1 https://repo.download.nvidia.com/jetson/common r39.2/main arm64 libcudnn9-static-cuda-13 arm64 9.20.0.46-1 [411 MB]
+21:40:22.567 - Info: 
+21:40:22.567 - Info: 
+21:40:23.069 - Info: 0% [1 libcudnn9-static-cuda-13 1,028 B/411 MB 0%]
+21:40:23.568 - Info: 5% [1 libcudnn9-static-cuda-13 27.3 MB/411 MB 7%]
+21:40:24.070 - Info: 10% [1 libcudnn9-static-cuda-13 59.0 MB/411 MB 14%]
+21:40:24.571 - Info: 15% [1 libcudnn9-static-cuda-13 88.4 MB/411 MB 22%]
+21:40:24.571 - Info:                                                    
+21:40:25.071 - Info: 21% [1 libcudnn9-static-cuda-13 119 MB/411 MB 29%]
+21:40:25.575 - Info: 26% [1 libcudnn9-static-cuda-13 147 MB/411 MB 36%]
+21:40:26.077 - Info: 31% [1 libcudnn9-static-cuda-13 175 MB/411 MB 43%]
+21:40:26.577 - Info: 36% [1 libcudnn9-static-cuda-13 204 MB/411 MB 50%]
+21:40:27.077 - Info: 41% [1 libcudnn9-static-cuda-13 233 MB/411 MB 57%]
+21:40:27.578 - Info: 45% [1 libcudnn9-static-cuda-13 260 MB/411 MB 63%]
+21:40:28.079 - Info: 50% [1 libcudnn9-static-cuda-13 288 MB/411 MB 70%]
+21:40:28.581 - Info: 56% [1 libcudnn9-static-cuda-13 319 MB/411 MB 78%]
+21:40:29.081 - Info: 60% [1 libcudnn9-static-cuda-13 342 MB/411 MB 83%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 55.1 MB/s 2s
+21:40:31.085 - Info: 60% [1 libcudnn9-static-cuda-13 343 MB/411 MB 83%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 55.1 MB/s 2s
+21:40:31.585 - Info: 61% [1 libcudnn9-static-cuda-13 348 MB/411 MB 85%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 55.1 MB/s 2s
+21:40:32.087 - Info: 65% [1 libcudnn9-static-cuda-13 372 MB/411 MB 91%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 55.1 MB/s 1s
+21:40:32.586 - Info: 66% [1 libcudnn9-static-cuda-13 378 MB/411 MB 92%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 55.1 MB/s 1s
+21:40:33.089 - Info: 70% [1 libcudnn9-static-cuda-13 403 MB/411 MB 98%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 55.1 MB/s 1s
+21:40:33.589 - Info: 72% [1 libcudnn9-static-cuda-13 411 MB/411 MB 100%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                55.1 MB/s 0s
+21:40:35.093 - Info: 72% [1 libcudnn9-static-cuda-13 411 MB/411 MB 100%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                11.4 MB/s 4s
+21:40:36.539 - Info: 77% [Working]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      11.4 MB/s 4s
+21:40:36.539 - Info:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+21:40:36.539 - Info: Get:2 https://repo.download.nvidia.com/jetson/common r39.2/main arm64 cudnn9-cuda-13-2 arm64 9.20.0.46-1 [12.3 kB]
+21:40:36.539 - Info: 
+21:40:36.539 - Info: 
+21:40:36.539 - Info: 77% [2 cudnn9-cuda-13-2 12.3 kB/12.3 kB 100%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      11.4 MB/s 4s
+21:40:36.607 - Info: 82% [Working]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      11.4 MB/s 4s
+21:40:36.607 - Info:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+21:40:36.607 - Info: Get:3 https://repo.download.nvidia.com/jetson/common r39.2/main arm64 cudnn9-cuda-13 arm64 9.20.0.46-1 [12.3 kB]
+21:40:36.607 - Info: 
+21:40:36.607 - Info: 
+21:40:36.607 - Info: 82% [3 cudnn9-cuda-13 12.3 kB/12.3 kB 100%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        11.4 MB/s 4s
+21:40:37.109 - Info: 87% [Working]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      11.4 MB/s 4s
+21:40:37.610 - Info: 87% [Waiting for headers]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          11.4 MB/s 4s
+21:40:37.713 - Info:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+21:40:37.713 - Info: Get:4 https://repo.download.nvidia.com/jetson/common r39.2/main arm64 holoscan-cuda-13 arm64 4.4.0.1-1 [47.4 MB]
+21:40:37.713 - Info: 
+21:40:37.713 - Info: 
+21:40:38.214 - Info: 87% [4 holoscan-cuda-13 14.1 kB/47.4 MB 0%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        11.4 MB/s 4s
+21:40:38.714 - Info: 87% [4 holoscan-cuda-13 2,066 kB/47.4 MB 4%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       11.4 MB/s 3s
+21:40:39.215 - Info: 87% [4 holoscan-cuda-13 2,327 kB/47.4 MB 5%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       11.4 MB/s 3s
+21:40:39.716 - Info: 87% [4 holoscan-cuda-13 3,110 kB/47.4 MB 7%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       11.4 MB/s 3s
+21:40:40.217 - Info: 88% [4 holoscan-cuda-13 6,291 kB/47.4 MB 13%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      11.4 MB/s 3s
+21:40:40.718 - Info: 88% [4 holoscan-cuda-13 8,572 kB/47.4 MB 18%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      11.4 MB/s 3s
+21:40:41.219 - Info: 89% [4 holoscan-cuda-13 12.6 MB/47.4 MB 27%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     2,058 kB/s 16s
+21:40:41.720 - Info: 90% [4 holoscan-cuda-13 16.0 MB/47.4 MB 34%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     2,058 kB/s 15s
+21:40:42.221 - Info: 90% [4 holoscan-cuda-13 16.8 MB/47.4 MB 35%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     2,058 kB/s 14s
+21:40:42.721 - Info: 90% [4 holoscan-cuda-13 21.0 MB/47.4 MB 44%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     2,058 kB/s 12s
+21:40:43.223 - Info: 90% [4 holoscan-cuda-13 21.2 MB/47.4 MB 45%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     2,058 kB/s 12s
+21:40:43.723 - Info: 91% [4 holoscan-cuda-13 25.2 MB/47.4 MB 53%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     2,058 kB/s 10s
+21:40:44.225 - Info: 91% [4 holoscan-cuda-13 26.4 MB/47.4 MB 56%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     2,058 kB/s 10s
+21:40:44.726 - Info: 92% [4 holoscan-cuda-13 29.6 MB/47.4 MB 62%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      2,058 kB/s 8s
+21:40:45.228 - Info: 93% [4 holoscan-cuda-13 33.6 MB/47.4 MB 71%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      2,058 kB/s 6s
+21:40:45.728 - Info: 93% [4 holoscan-cuda-13 37.7 MB/47.4 MB 80%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      2,058 kB/s 4s
+21:40:46.229 - Info: 94% [4 holoscan-cuda-13 39.8 MB/47.4 MB 84%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      2,058 kB/s 3s
+21:40:46.730 - Info: 94% [4 holoscan-cuda-13 42.5 MB/47.4 MB 90%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      2,058 kB/s 2s
+21:40:47.231 - Info: 95% [4 holoscan-cuda-13 46.1 MB/47.4 MB 97%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      5,581 kB/s 0s
+21:40:47.732 - Info: 95% [4 holoscan-cuda-13 47.4 MB/47.4 MB 100%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     5,581 kB/s 0s
+21:40:53.241 - Info: 95% [4 holoscan-cuda-13 47.4 MB/47.4 MB 100%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       215 kB/s 0s
+21:40:56.113 - Info: 100% [Working]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      215 kB/s 0s
+21:40:56.113 - Info:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+21:40:56.113 - Info: Fetched 458 MB in 34s (13.6 MB/s)
+21:40:56.113 - Info: 
+21:40:58.557 - Info: Selecting previously unselected package libcudnn9-static-cuda-13.
+21:40:58.557 - Info: 
+21:40:58.557 - Info: (Reading database ... 
+21:40:58.590 - Info: (Reading database ... 5%
+21:40:58.590 - Info: (Reading database ... 10%
+21:40:58.590 - Info: (Reading database ... 15%
+21:40:58.590 - Info: (Reading database ... 20%
+21:40:58.591 - Info: (Reading database ... 25%
+21:40:58.591 - Info: (Reading database ... 30%
+21:40:58.591 - Info: (Reading database ... 35%
+21:40:58.591 - Info: (Reading database ... 40%
+21:40:58.591 - Info: (Reading database ... 45%
+21:40:58.591 - Info: (Reading database ... 50%
+21:40:58.611 - Info: (Reading database ... 55%
+21:40:58.626 - Info: (Reading database ... 60%
+21:40:58.641 - Info: (Reading database ... 65%
+21:40:58.652 - Info: (Reading database ... 70%
+21:40:58.698 - Info: (Reading database ... 75%
+21:40:58.711 - Info: (Reading database ... 80%
+21:40:58.729 - Info: (Reading database ... 85%
+21:40:58.746 - Info: (Reading database ... 90%
+21:40:58.768 - Info: (Reading database ... 95%
+21:40:58.817 - Info: (Reading database ... 100%
+21:40:58.817 - Info: (Reading database ... 205199 files and directories currently installed.)
+21:40:58.817 - Info: 
+21:40:58.837 - Info: Preparing to unpack .../libcudnn9-static-cuda-13_9.20.0.46-1_arm64.deb ...
+21:40:58.837 - Info: 
+21:40:58.842 - Info: Unpacking libcudnn9-static-cuda-13 (9.20.0.46-1) ...
+21:40:58.842 - Info: 
+21:41:12.376 - Info: Selecting previously unselected package cudnn9-cuda-13-2.
+21:41:12.376 - Info: 
+21:41:12.446 - Info: Preparing to unpack .../cudnn9-cuda-13-2_9.20.0.46-1_arm64.deb ...
+21:41:12.446 - Info: 
+21:41:12.454 - Info: Unpacking cudnn9-cuda-13-2 (9.20.0.46-1) ...
+21:41:12.454 - Info: 
+21:41:12.566 - Info: Selecting previously unselected package cudnn9-cuda-13.
+21:41:12.566 - Info: 
+21:41:12.625 - Info: Preparing to unpack .../cudnn9-cuda-13_9.20.0.46-1_arm64.deb ...
+21:41:12.625 - Info: 
+21:41:12.801 - Info: Unpacking cudnn9-cuda-13 (9.20.0.46-1) ...
+21:41:12.801 - Info: 
+21:41:13.228 - Info: Selecting previously unselected package holoscan-cuda-13.
+21:41:13.228 - Info: 
+21:41:13.303 - Info: Preparing to unpack .../holoscan-cuda-13_4.4.0.1-1_arm64.deb ...
+21:41:13.303 - Info: 
+21:41:13.308 - Info: Unpacking holoscan-cuda-13 (4.4.0.1-1) ...
+21:41:13.308 - Info: 
+21:41:17.688 - Info: Setting up holoscan-cuda-13 (4.4.0.1-1) ...
+21:41:17.688 - Info: 
+21:41:17.713 - Info: Setting up libcudnn9-static-cuda-13 (9.20.0.46-1) ...
+21:41:17.713 - Info: 
+21:41:17.731 - Info: Setting up cudnn9-cuda-13-2 (9.20.0.46-1) ...
+21:41:17.731 - Info: 
+21:41:17.756 - Info: Setting up cudnn9-cuda-13 (9.20.0.46-1) ...
+21:41:17.756 - Info: 
+21:41:28.790 - Info: change working directory to /tmp21:41:28.790 - Info: exec_command: ssh jetson@192.168.55.1 "dpkg-query -W -f='\${db:Status-abbrev} \${Version}' holoscan-cuda-13"21:41:29.228 - Info: [ Package Install Finished Successfully ]21:41:29.228 - Info: [ Package Install Started ]21:41:29.228 - Info: target deb installer start to install21:41:29.229 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+sudo mkdir -p /opt/nvidia/deb_repos
+sudo chmod 777 /opt/nvidia/deb_repos
+sudo rm -f /opt/nvidia/deb_repos/holoscan_v4.4.0.1_2.deb
+**********************21:41:30.725 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+
+exec 3>&1
+exec 1>&2
+exec 2>&3
+function safe_apt_install {
+    export DEBIAN_FRONTEND=noninteractive
+    echo "*begin $1, $2"
+    tmp_log=/tmp/sdkm_apt_install_log.ckw.txt
+    sudo rm -f $tmp_log
+    set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+    MAX_RETRY=3
+    TIMES=1
+    while [ ${CMD_STATUS} -ne 0 ]; do
+        cat $tmp_log > /dev/stderr
+        if [ $TIMES -gt $MAX_RETRY ]; then
+            echo "Unhandled error when running $1: `tr '\n' '; ' <$tmp_log`" 1>&2; exit 1
+        fi
+        if grep -q -e "is locked by another process" -e "E: Could not get lock /var/" -e "Could not open lock" $tmp_log; then
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting $2 seconds for apt to be available"; sleep ${2}
+        elif grep -q -e "apt --fix-broken install" $tmp_log; then
+            echo "safe apt install failed, need to run apt --fix-broken install"
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; sudo apt-get -f -y --allow-downgrades install 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting 5 seconds for apt"; sleep 5
+        else
+            echo "safe apt install failed: $1, exit code: $CMD_STATUS, retry number: $TIMES"
+            echo "will sleep $[ $TIMES*10 ] seconds before next attempt"
+            sleep $[ $TIMES*10 ]
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+        fi
+    done
+    if [ $CMD_STATUS -eq 0 ] && [ $TIMES -ne 1 ]; then
+        echo "safe apt install succeed. retry number: $TIMES."
+    fi
+}
+safe_apt_install "sudo apt-get -y update" 5
+sleep 0.5
+safe_apt_install "sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/holoscan_v4.4.0.1_2.deb" 5
+sleep 5
+sudo rm -f /opt/nvidia/deb_repos/holoscan_v4.4.0.1_2.deb
+**********************21:41:31.518 - Info: *begin sudo apt-get -y update, 5
+21:41:31.518 - Info: 
+21:41:31.807 - Info: 
+21:41:31.885 - Info: 0% [Working]
+21:41:31.885 - Info:             
+21:41:31.885 - Info: Hit:1 https://download.docker.com/linux/ubuntu noble InRelease
+21:41:31.885 - Info: 
+21:41:31.885 - Info: 
+21:41:31.885 - Info: 0% [Connecting to apt.kitware.com (66.194.253.25)] [Waiting for headers] [Connecting to ports.ubuntu.com]
+21:41:31.885 - Info:                                                                                                          
+21:41:31.885 - Info: Hit:2 https://repo.download.nvidia.com/jetson/common r39.2 InRelease
+21:41:31.885 - Info: 
+21:41:31.885 - Info: 
+21:41:31.937 - Info: 0% [Connecting to apt.kitware.com (66.194.253.25)] [Connected to repo.download.nvidia.com (23.205.151.158)] [Connecting to ports.ubuntu.com]
+21:41:31.937 - Info:                                                                                                                                             
+21:41:31.937 - Info: Hit:3 https://repo.download.nvidia.com/jetson/som r39.2 InRelease
+21:41:31.937 - Info: 
+21:41:31.937 - Info: 
+21:41:32.002 - Info: 0% [Connecting to apt.kitware.com (66.194.253.25)] [Connecting to repo.download.nvidia.com (23.205.151.158)] [Connecting to ports.ubuntu.com]
+21:41:32.002 - Info:                                                                                                                                              
+21:41:32.002 - Info: Hit:4 https://repo.download.nvidia.com/jetson/ffmpeg r39.2 InRelease
+21:41:32.002 - Info: 
+21:41:32.002 - Info: 
+21:41:32.002 - Info:                                                                                                                                              
+21:41:32.021 - Info: 0% [Connecting to apt.kitware.com (66.194.253.25)] [Connecting to ports.ubuntu.com]
+21:41:32.379 - Info: 0% [Connected to apt.kitware.com (66.194.253.25)] [Connecting to ports.ubuntu.com (91.189.91.103)]
+21:41:32.379 - Info:                                                                                                   
+21:41:32.548 - Info: 0% [Waiting for headers] [Waiting for headers]
+21:41:32.574 - Info:                                               
+21:41:32.574 - Info: Hit:5 http://ports.ubuntu.com/ubuntu-ports noble InRelease
+21:41:32.574 - Info: 
+21:41:32.574 - Info: 
+21:41:32.574 - Info:                                               
+21:41:32.704 - Info: 0% [Waiting for headers]
+21:41:32.806 - Info: 0% [Waiting for headers] [Waiting for headers]
+21:41:32.806 - Info:                                               
+21:41:32.806 - Info: Hit:6 http://ports.ubuntu.com/ubuntu-ports noble-updates InRelease
+21:41:32.806 - Info: 
+21:41:32.806 - Info: 
+21:41:32.806 - Info:                                               
+21:41:32.820 - Info: 0% [Waiting for headers]
+21:41:32.820 - Info:                         
+21:41:32.820 - Info: Hit:7 https://apt.kitware.com/ubuntu noble InRelease
+21:41:32.820 - Info: 
+21:41:32.820 - Info: 
+21:41:32.930 - Info: 0% [Waiting for headers]
+21:41:33.037 - Info:                         
+21:41:33.037 - Info: Hit:8 http://ports.ubuntu.com/ubuntu-ports noble-backports InRelease
+21:41:33.037 - Info: 
+21:41:33.037 - Info: 
+21:41:33.037 - Info:                         
+21:41:33.045 - Info: 0% [Working]
+21:41:33.157 - Info: 0% [Waiting for headers]
+21:41:33.270 - Info:                         
+21:41:33.270 - Info: Hit:9 http://ports.ubuntu.com/ubuntu-ports noble-security InRelease
+21:41:33.270 - Info: 
+21:41:33.270 - Info: 
+21:41:33.270 - Info:                         
+21:41:33.389 - Info: 0% [Working]
+21:41:33.389 - Info: 20% [Working]
+21:41:33.389 - Info:              
+21:41:33.633 - Info: 
+21:41:33.633 - Info: Reading package lists... 0%
+21:41:33.650 - Info: 
+21:41:33.650 - Info: Reading package lists... 0%
+21:41:33.654 - Info: 
+21:41:33.654 - Info: Reading package lists... 0%
+21:41:33.654 - Info: 
+21:41:33.654 - Info: Reading package lists... 0%
+21:41:33.659 - Info: 
+21:41:33.659 - Info: Reading package lists... 0%
+21:41:33.659 - Info: 
+21:41:33.659 - Info: Reading package lists... 0%
+21:41:33.661 - Info: 
+21:41:33.661 - Info: Reading package lists... 0%
+21:41:33.662 - Info: 
+21:41:33.662 - Info: Reading package lists... 0%
+21:41:33.662 - Info: 
+21:41:33.662 - Info: Reading package lists... 0%
+21:41:33.664 - Info: 
+21:41:33.664 - Info: Reading package lists... 0%
+21:41:33.664 - Info: 
+21:41:33.664 - Info: Reading package lists... 0%
+21:41:33.666 - Info: 
+21:41:33.666 - Info: Reading package lists... 0%
+21:41:33.666 - Info: 
+21:41:33.666 - Info: Reading package lists... 0%
+21:41:33.748 - Info: 
+21:41:33.748 - Info: Reading package lists... 4%
+21:41:33.748 - Info: 
+21:41:33.748 - Info: Reading package lists... 4%
+21:41:33.763 - Info: 
+21:41:33.763 - Info: Reading package lists... 5%
+21:41:33.763 - Info: 
+21:41:33.763 - Info: Reading package lists... 5%
+21:41:34.375 - Info: 
+21:41:34.375 - Info: Reading package lists... 26%
+21:41:34.915 - Info: 
+21:41:34.915 - Info: Reading package lists... 41%
+21:41:34.915 - Info: 
+21:41:34.915 - Info: Reading package lists... 41%
+21:41:35.077 - Info: 
+21:41:35.077 - Info: Reading package lists... 56%
+21:41:35.091 - Info: 
+21:41:35.091 - Info: Reading package lists... 57%
+21:41:35.091 - Info: 
+21:41:35.092 - Info: Reading package lists... 57%
+21:41:35.098 - Info: 
+21:41:35.098 - Info: Reading package lists... 58%
+21:41:35.098 - Info: 
+21:41:35.098 - Info: Reading package lists... 58%
+21:41:35.099 - Info: 
+21:41:35.099 - Info: Reading package lists... 58%
+21:41:35.099 - Info: 
+21:41:35.099 - Info: Reading package lists... 58%
+21:41:35.119 - Info: 
+21:41:35.119 - Info: Reading package lists... 58%
+21:41:35.119 - Info: 
+21:41:35.119 - Info: Reading package lists... 58%
+21:41:35.122 - Info: 
+21:41:35.122 - Info: Reading package lists... 59%
+21:41:35.122 - Info: 
+21:41:35.122 - Info: Reading package lists... 59%
+21:41:35.219 - Info: 
+21:41:35.219 - Info: Reading package lists... 62%
+21:41:35.219 - Info: 
+21:41:35.219 - Info: Reading package lists... 62%
+21:41:35.238 - Info: 
+21:41:35.238 - Info: Reading package lists... 64%
+21:41:35.238 - Info: 
+21:41:35.238 - Info: Reading package lists... 64%
+21:41:35.385 - Info: 
+21:41:35.385 - Info: Reading package lists... 69%
+21:41:35.385 - Info: 
+21:41:35.385 - Info: Reading package lists... 69%
+21:41:35.410 - Info: 
+21:41:35.410 - Info: Reading package lists... 71%
+21:41:35.410 - Info: 
+21:41:35.410 - Info: Reading package lists... 71%
+21:41:35.542 - Info: 
+21:41:35.542 - Info: Reading package lists... 77%
+21:41:35.542 - Info: 
+21:41:35.542 - Info: Reading package lists... 77%
+21:41:35.577 - Info: 
+21:41:35.577 - Info: Reading package lists... 80%
+21:41:35.577 - Info: 
+21:41:35.577 - Info: Reading package lists... 80%
+21:41:35.583 - Info: 
+21:41:35.583 - Info: Reading package lists... 80%
+21:41:35.583 - Info: 
+21:41:35.583 - Info: Reading package lists... 80%
+21:41:35.584 - Info: 
+21:41:35.584 - Info: Reading package lists... 80%
+21:41:35.584 - Info: 
+21:41:35.584 - Info: Reading package lists... 80%
+21:41:35.589 - Info: 
+21:41:35.589 - Info: Reading package lists... 80%
+21:41:35.589 - Info: 
+21:41:35.589 - Info: Reading package lists... 80%
+21:41:35.590 - Info: 
+21:41:35.590 - Info: Reading package lists... 80%
+21:41:35.590 - Info: 
+21:41:35.590 - Info: Reading package lists... 80%
+21:41:35.593 - Info: 
+21:41:35.593 - Info: Reading package lists... 80%
+21:41:35.593 - Info: 
+21:41:35.593 - Info: Reading package lists... 80%
+21:41:35.594 - Info: 
+21:41:35.594 - Info: Reading package lists... 80%
+21:41:35.594 - Info: 
+21:41:35.594 - Info: Reading package lists... 80%
+21:41:35.594 - Info: 
+21:41:35.594 - Info: Reading package lists... 80%
+21:41:35.594 - Info: 
+21:41:35.594 - Info: Reading package lists... 80%
+21:41:35.595 - Info: 
+21:41:35.595 - Info: Reading package lists... 80%
+21:41:35.595 - Info: 
+21:41:35.595 - Info: Reading package lists... 80%
+21:41:35.627 - Info: 
+21:41:35.627 - Info: Reading package lists... 83%
+21:41:35.627 - Info: 
+21:41:35.627 - Info: Reading package lists... 83%
+21:41:35.643 - Info: 
+21:41:35.643 - Info: Reading package lists... 84%
+21:41:35.643 - Info: 
+21:41:35.643 - Info: Reading package lists... 84%
+21:41:35.688 - Info: 
+21:41:35.688 - Info: Reading package lists... 88%
+21:41:35.688 - Info: 
+21:41:35.688 - Info: Reading package lists... 88%
+21:41:35.704 - Info: 
+21:41:35.704 - Info: Reading package lists... 90%
+21:41:35.704 - Info: 
+21:41:35.704 - Info: Reading package lists... 90%
+21:41:35.771 - Info: 
+21:41:35.771 - Info: Reading package lists... 95%
+21:41:35.771 - Info: 
+21:41:35.771 - Info: Reading package lists... 95%
+21:41:35.779 - Info: 
+21:41:35.779 - Info: Reading package lists... 96%
+21:41:35.805 - Info: 
+21:41:35.805 - Info: Reading package lists... 98%
+21:41:35.805 - Info: 
+21:41:35.805 - Info: Reading package lists... 98%
+21:41:35.807 - Info: 
+21:41:35.807 - Info: Reading package lists... 98%
+21:41:35.807 - Info: 
+21:41:35.807 - Info: Reading package lists... 98%
+21:41:35.893 - Info: 
+21:41:35.893 - Info: Reading package lists... 98%
+21:41:35.893 - Info: 
+21:41:35.893 - Info: Reading package lists... 98%
+21:41:36.017 - Info: 
+21:41:36.017 - Info: Reading package lists... Done
+21:41:36.017 - Info: 
+21:41:36.017 - Info: 
+21:41:36.586 - Info: *begin sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/holoscan_v4.4.0.1_2.deb, 5
+21:41:36.586 - Info: 
+21:41:36.744 - Info: 
+21:41:36.744 - Info: Reading package lists... 0%
+21:41:36.853 - Info: 
+21:41:36.853 - Info: Reading package lists... 0%
+21:41:36.864 - Info: 
+21:41:36.864 - Info: Reading package lists... Done
+21:41:36.864 - Info: 
+21:41:36.864 - Info: 
+21:41:36.888 - Info: 
+21:41:36.888 - Info: Building dependency tree... 0%
+21:41:36.888 - Info: 
+21:41:36.888 - Info: Building dependency tree... 0%
+21:41:36.890 - Info: 
+21:41:36.890 - Info: Building dependency tree... 0%
+21:41:37.112 - Info: 
+21:41:37.112 - Info: Building dependency tree... 50%
+21:41:37.112 - Info: 
+21:41:37.112 - Info: Building dependency tree... 50%
+21:41:37.595 - Info: 
+21:41:37.595 - Info: Building dependency tree... 86%
+21:41:37.768 - Info: 
+21:41:37.768 - Info: Building dependency tree... Done
+21:41:37.768 - Info: 
+21:41:37.768 - Info: 
+21:41:37.768 - Info: 
+21:41:37.768 - Info: Reading state information... 0% 
+21:41:37.768 - Info: 
+21:41:37.768 - Info: Reading state information... 0%
+21:41:37.773 - Info: 
+21:41:37.773 - Info: Reading state information... Done
+21:41:37.773 - Info: 
+21:41:37.773 - Info: 
+21:41:37.909 - Info: Note, selecting 'holoscan' instead of '/opt/nvidia/deb_repos/holoscan_v4.4.0.1_2.deb'
+21:41:37.909 - Info: 
+21:41:39.495 - Info: The following package was automatically installed and is no longer required:
+21:41:39.495 - Info: 
+21:41:39.500 - Info:   librhash0
+21:41:39.500 - Info: 
+21:41:39.500 - Info: Use 'sudo apt autoremove' to remove it.
+21:41:39.500 - Info: 
+21:41:39.600 - Info: The following NEW packages will be installed:
+21:41:39.600 - Info: 
+21:41:39.607 - Info:   holoscan
+21:41:39.607 - Info: 
+21:41:39.677 - Info: 0 upgraded, 1 newly installed, 0 to remove and 285 not upgraded.
+21:41:39.677 - Info: 
+21:41:39.684 - Info: Need to get 558 B of archives.
+21:41:39.684 - Info: 
+21:41:39.684 - Info: After this operation, 0 B of additional disk space will be used.
+21:41:39.684 - Info: 
+21:41:39.697 - Info: 
+21:41:39.762 - Info: 0% [Working]
+21:41:39.762 - Info:             
+21:41:39.762 - Info: Get:1 https://repo.download.nvidia.com/jetson/common r39.2/main arm64 holoscan all 4.4.0-2 [558 B]
+21:41:39.762 - Info: 
+21:41:39.762 - Info: 
+21:41:39.762 - Info: 80% [1 holoscan 558 B/558 B 100%]
+21:41:39.762 - Info:                                  
+21:41:39.762 - Info: 100% [Working]
+21:41:39.762 - Info:               
+21:41:39.762 - Info: Fetched 558 B in 0s (7,133 B/s)
+21:41:39.762 - Info: 
+21:41:41.226 - Info: Selecting previously unselected package holoscan.
+21:41:41.226 - Info: 
+21:41:41.226 - Info: (Reading database ... 
+21:41:41.244 - Info: (Reading database ... 5%
+21:41:41.244 - Info: (Reading database ... 10%
+21:41:41.244 - Info: (Reading database ... 15%
+21:41:41.244 - Info: (Reading database ... 20%
+21:41:41.244 - Info: (Reading database ... 25%
+21:41:41.244 - Info: (Reading database ... 30%
+21:41:41.244 - Info: (Reading database ... 35%
+21:41:41.244 - Info: (Reading database ... 40%
+21:41:41.244 - Info: (Reading database ... 45%
+21:41:41.244 - Info: (Reading database ... 50%
+21:41:41.251 - Info: (Reading database ... 55%
+21:41:41.266 - Info: (Reading database ... 60%
+21:41:41.280 - Info: (Reading database ... 65%
+21:41:41.292 - Info: (Reading database ... 70%
+21:41:41.340 - Info: (Reading database ... 75%
+21:41:41.353 - Info: (Reading database ... 80%
+21:41:41.371 - Info: (Reading database ... 85%
+21:41:41.389 - Info: (Reading database ... 90%
+21:41:41.413 - Info: (Reading database ... 95%
+21:41:41.462 - Info: (Reading database ... 100%
+21:41:41.462 - Info: (Reading database ... 209763 files and directories currently installed.)
+21:41:41.462 - Info: 
+21:41:41.481 - Info: Preparing to unpack .../holoscan_4.4.0-2_all.deb ...
+21:41:41.481 - Info: 
+21:41:41.489 - Info: Unpacking holoscan (4.4.0-2) ...
+21:41:41.489 - Info: 
+21:41:41.701 - Info: Setting up holoscan (4.4.0-2) ...
+21:41:41.701 - Info: 
+21:41:52.617 - Info: change working directory to /tmp21:41:52.617 - Info: exec_command: ssh jetson@192.168.55.1 "dpkg-query -W -f='\${db:Status-abbrev} \${Version}' holoscan"21:41:53.056 - Info: [ Package Install Finished Successfully ]21:41:53.057 - Info: exec_command: ssh   jetson@192.168.55.1 "df -B1 / | tail -1 | awk '{ printf \$4 }'"21:41:53.474 - Info: [target] [ 1.31 GB used. Disk Avail: 185.02 GB ]21:41:53.474 - Info: [ NV_HOLOSCAN_SDK_SBSA_TARGET_POST_INSTALL_COMP Install took 1m44s ]

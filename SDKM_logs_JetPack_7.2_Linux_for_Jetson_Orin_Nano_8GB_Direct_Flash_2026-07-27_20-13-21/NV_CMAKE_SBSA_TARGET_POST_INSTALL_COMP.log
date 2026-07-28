@@ -1,0 +1,893 @@
+------ 2026-07-27 21:38:50 ------
+------ SDK: JetPack_7.2_Linux ------
+21:38:50.739 - Info: exec_command: ssh   jetson@192.168.55.1 "df -B1 / | tail -1 | awk '{ printf \$4 }'"21:38:51.155 - Info: [ Component Install Started ]21:38:51.155 - Info: current working directory is /21:38:51.157 - Info: exec_command [target]:
+**********************
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+
+safe_apt_install "sudo apt-get update " 5
+safe_apt_install "sudo apt-get install -y ca-certificates gpg wget " 5
+wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
+echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ noble main' | sudo tee /etc/apt/sources.list.d/kitware.list >/dev/null
+safe_apt_install "sudo apt-get update " 5
+sudo rm /usr/share/keyrings/kitware-archive-keyring.gpg
+safe_apt_install "sudo apt-get install -y kitware-archive-keyring " 5
+
+if dpkg -l --no-pager cmake; 
+then 
+    safe_apt_install "sudo apt purge -y cmake" 5
+fi
+
+if apt-cache policy cmake | grep "^\s*3.31.9"; 
+then
+    version=$(apt-cache policy cmake | grep "^\s*3.31.9" | awk '{print $1}')
+    safe_apt_install "sudo apt install -y --allow-downgrades cmake=$version cmake-data=$version " 5
+else
+    safe_apt_install "sudo apt install -y --allow-downgrades cmake " 5
+fi
+**********************21:38:51.157 - Info: exec_command: scp  /home/ckw/.nvsdkm/replays/scripts/JetPack_7.2_Linux/NV_CMAKE_SBSA_TARGET_POST_INSTALL_COMP.sh jetson@[192.168.55.1]:~; ssh -t  jetson@192.168.55.1 "set -o pipefail; ~/NV_CMAKE_SBSA_TARGET_POST_INSTALL_COMP.sh | sed 's/^/SDKM_INSTALL_ERROR /' && rm -f ~/NV_CMAKE_SBSA_TARGET_POST_INSTALL_COMP.sh"21:38:51.924 - Info: *begin sudo apt-get update , 5
+21:38:51.924 - Info: 
+21:38:52.230 - Info: 
+21:38:52.308 - Info: 0% [Working]
+21:38:52.308 - Info:             
+21:38:52.308 - Info: Hit:1 https://download.docker.com/linux/ubuntu noble InRelease
+21:38:52.308 - Info: 
+21:38:52.308 - Info: 
+21:38:52.308 - Info: 0% [Waiting for headers] [Connecting to ports.ubuntu.com]
+21:38:52.308 - Info:                                                          
+21:38:52.308 - Info: Hit:2 https://repo.download.nvidia.com/jetson/common r39.2 InRelease
+21:38:52.308 - Info: 
+21:38:52.308 - Info: 
+21:38:52.392 - Info: 0% [Connected to repo.download.nvidia.com (23.49.105.41)] [Connecting to ports.ubuntu.com]
+21:38:52.392 - Info:                                                                                           
+21:38:52.392 - Info: Hit:3 https://repo.download.nvidia.com/jetson/som r39.2 InRelease
+21:38:52.392 - Info: 
+21:38:52.392 - Info: 
+21:38:52.435 - Info: 0% [Connecting to repo.download.nvidia.com (23.49.105.41)] [Connecting to ports.ubuntu.com]
+21:38:52.436 - Info:                                                                                            
+21:38:52.486 - Info: 0% [Connected to repo.download.nvidia.com (23.49.105.41)] [Connecting to ports.ubuntu.com]
+21:38:52.486 - Info:                                                                                           
+21:38:52.486 - Info: Hit:4 https://repo.download.nvidia.com/jetson/ffmpeg r39.2 InRelease
+21:38:52.486 - Info: 
+21:38:52.486 - Info: 
+21:38:52.486 - Info:                                                                                           
+21:38:52.631 - Info: 0% [Connecting to ports.ubuntu.com]
+21:38:52.789 - Info: 0% [Connecting to ports.ubuntu.com (91.189.92.20)]
+21:38:52.789 - Info:                                                   
+21:38:52.944 - Info: 0% [Waiting for headers]
+21:38:52.944 - Info:                         
+21:38:52.944 - Info: Hit:5 http://ports.ubuntu.com/ubuntu-ports noble InRelease
+21:38:52.944 - Info: 
+21:38:52.944 - Info: 
+21:38:52.944 - Info:                         
+21:38:52.954 - Info: 0% [Working]
+21:38:53.074 - Info: 0% [Waiting for headers]
+21:38:53.152 - Info:                         
+21:38:53.152 - Info: Hit:6 http://ports.ubuntu.com/ubuntu-ports noble-updates InRelease
+21:38:53.152 - Info: 
+21:38:53.152 - Info: 
+21:38:53.152 - Info:                         
+21:38:53.267 - Info: 0% [Working]
+21:38:53.358 - Info: 0% [Waiting for headers]
+21:38:53.358 - Info:                         
+21:38:53.358 - Info: Hit:7 http://ports.ubuntu.com/ubuntu-ports noble-backports InRelease
+21:38:53.358 - Info: 
+21:38:53.358 - Info: 
+21:38:53.358 - Info:                         
+21:38:53.487 - Info: 0% [Working]
+21:38:53.565 - Info: 0% [Waiting for headers]
+21:38:53.565 - Info:                         
+21:38:53.565 - Info: Hit:8 http://ports.ubuntu.com/ubuntu-ports noble-security InRelease
+21:38:53.565 - Info: 
+21:38:53.565 - Info: 
+21:38:53.565 - Info:                         
+21:38:53.680 - Info: 0% [Working]
+21:38:53.680 - Info: 20% [Working]
+21:38:53.680 - Info:              
+21:38:53.898 - Info: 
+21:38:53.898 - Info: Reading package lists... 0%
+21:38:53.915 - Info: 
+21:38:53.915 - Info: Reading package lists... 0%
+21:38:53.923 - Info: 
+21:38:53.923 - Info: Reading package lists... 0%
+21:38:53.923 - Info: 
+21:38:53.923 - Info: Reading package lists... 0%
+21:38:53.924 - Info: 
+21:38:53.924 - Info: Reading package lists... 0%
+21:38:53.924 - Info: 
+21:38:53.924 - Info: Reading package lists... 0%
+21:38:53.925 - Info: 
+21:38:53.925 - Info: Reading package lists... 0%
+21:38:53.926 - Info: 
+21:38:53.926 - Info: Reading package lists... 0%
+21:38:53.928 - Info: 
+21:38:53.928 - Info: Reading package lists... 0%
+21:38:53.928 - Info: 
+21:38:53.928 - Info: Reading package lists... 0%
+21:38:53.933 - Info: 
+21:38:53.933 - Info: Reading package lists... 0%
+21:38:54.018 - Info: 
+21:38:54.018 - Info: Reading package lists... 3%
+21:38:54.018 - Info: 
+21:38:54.018 - Info: Reading package lists... 3%
+21:38:54.034 - Info: 
+21:38:54.034 - Info: Reading package lists... 5%
+21:38:54.034 - Info: 
+21:38:54.034 - Info: Reading package lists... 5%
+21:38:54.684 - Info: 
+21:38:54.684 - Info: Reading package lists... 26%
+21:38:55.216 - Info: 
+21:38:55.217 - Info: Reading package lists... 41%
+21:38:55.217 - Info: 
+21:38:55.217 - Info: Reading package lists... 41%
+21:38:55.389 - Info: 
+21:38:55.389 - Info: Reading package lists... 57%
+21:38:55.393 - Info: 
+21:38:55.393 - Info: Reading package lists... 57%
+21:38:55.393 - Info: 
+21:38:55.393 - Info: Reading package lists... 57%
+21:38:55.400 - Info: 
+21:38:55.400 - Info: Reading package lists... 58%
+21:38:55.400 - Info: 
+21:38:55.400 - Info: Reading package lists... 58%
+21:38:55.401 - Info: 
+21:38:55.401 - Info: Reading package lists... 58%
+21:38:55.401 - Info: 
+21:38:55.401 - Info: Reading package lists... 58%
+21:38:55.420 - Info: 
+21:38:55.420 - Info: Reading package lists... 58%
+21:38:55.420 - Info: 
+21:38:55.420 - Info: Reading package lists... 58%
+21:38:55.424 - Info: 
+21:38:55.424 - Info: Reading package lists... 59%
+21:38:55.424 - Info: 
+21:38:55.424 - Info: Reading package lists... 59%
+21:38:55.521 - Info: 
+21:38:55.521 - Info: Reading package lists... 62%
+21:38:55.521 - Info: 
+21:38:55.521 - Info: Reading package lists... 62%
+21:38:55.558 - Info: 
+21:38:55.558 - Info: Reading package lists... 64%
+21:38:55.558 - Info: 
+21:38:55.558 - Info: Reading package lists... 64%
+21:38:55.687 - Info: 
+21:38:55.687 - Info: Reading package lists... 69%
+21:38:55.687 - Info: 
+21:38:55.687 - Info: Reading package lists... 69%
+21:38:55.711 - Info: 
+21:38:55.711 - Info: Reading package lists... 71%
+21:38:55.711 - Info: 
+21:38:55.711 - Info: Reading package lists... 71%
+21:38:55.845 - Info: 
+21:38:55.845 - Info: Reading package lists... 77%
+21:38:55.845 - Info: 
+21:38:55.845 - Info: Reading package lists... 77%
+21:38:55.880 - Info: 
+21:38:55.880 - Info: Reading package lists... 80%
+21:38:55.880 - Info: 
+21:38:55.880 - Info: Reading package lists... 80%
+21:38:55.885 - Info: 
+21:38:55.886 - Info: Reading package lists... 80%
+21:38:55.886 - Info: 
+21:38:55.886 - Info: Reading package lists... 80%
+21:38:55.887 - Info: 
+21:38:55.887 - Info: Reading package lists... 80%
+21:38:55.887 - Info: 
+21:38:55.887 - Info: Reading package lists... 80%
+21:38:55.892 - Info: 
+21:38:55.892 - Info: Reading package lists... 80%
+21:38:55.892 - Info: 
+21:38:55.892 - Info: Reading package lists... 80%
+21:38:55.892 - Info: 
+21:38:55.892 - Info: Reading package lists... 80%
+21:38:55.892 - Info: 
+21:38:55.892 - Info: Reading package lists... 80%
+21:38:55.896 - Info: 
+21:38:55.896 - Info: Reading package lists... 80%
+21:38:55.896 - Info: 
+21:38:55.896 - Info: Reading package lists... 80%
+21:38:55.896 - Info: 
+21:38:55.896 - Info: Reading package lists... 80%
+21:38:55.896 - Info: 
+21:38:55.896 - Info: Reading package lists... 80%
+21:38:55.896 - Info: 
+21:38:55.896 - Info: Reading package lists... 80%
+21:38:55.896 - Info: 
+21:38:55.896 - Info: Reading package lists... 80%
+21:38:55.898 - Info: 
+21:38:55.898 - Info: Reading package lists... 80%
+21:38:55.898 - Info: 
+21:38:55.898 - Info: Reading package lists... 80%
+21:38:55.928 - Info: 
+21:38:55.928 - Info: Reading package lists... 83%
+21:38:55.928 - Info: 
+21:38:55.928 - Info: Reading package lists... 83%
+21:38:55.945 - Info: 
+21:38:55.945 - Info: Reading package lists... 84%
+21:38:55.945 - Info: 
+21:38:55.945 - Info: Reading package lists... 84%
+21:38:55.989 - Info: 
+21:38:55.989 - Info: Reading package lists... 88%
+21:38:55.989 - Info: 
+21:38:55.989 - Info: Reading package lists... 88%
+21:38:56.005 - Info: 
+21:38:56.005 - Info: Reading package lists... 90%
+21:38:56.005 - Info: 
+21:38:56.005 - Info: Reading package lists... 90%
+21:38:56.067 - Info: 
+21:38:56.067 - Info: Reading package lists... 95%
+21:38:56.067 - Info: 
+21:38:56.067 - Info: Reading package lists... 95%
+21:38:56.099 - Info: 
+21:38:56.099 - Info: Reading package lists... 98%
+21:38:56.099 - Info: 
+21:38:56.099 - Info: Reading package lists... 98%
+21:38:56.099 - Info: 
+21:38:56.099 - Info: Reading package lists... 98%
+21:38:56.102 - Info: 
+21:38:56.102 - Info: Reading package lists... 98%
+21:38:56.102 - Info: 
+21:38:56.102 - Info: Reading package lists... 98%
+21:38:56.187 - Info: 
+21:38:56.187 - Info: Reading package lists... 98%
+21:38:56.187 - Info: 
+21:38:56.187 - Info: Reading package lists... 98%
+21:38:56.320 - Info: 
+21:38:56.320 - Info: Reading package lists... Done
+21:38:56.320 - Info: 
+21:38:56.320 - Info: 
+21:38:56.391 - Info: *begin sudo apt-get install -y ca-certificates gpg wget , 5
+21:38:56.391 - Info: 
+21:38:56.553 - Info: 
+21:38:56.553 - Info: Reading package lists... 0%
+21:38:56.590 - Info: 
+21:38:56.590 - Info: Reading package lists... 100%
+21:38:56.590 - Info: 
+21:38:56.590 - Info: Reading package lists... Done
+21:38:56.590 - Info: 
+21:38:56.590 - Info: 
+21:38:56.599 - Info: 
+21:38:56.599 - Info: Building dependency tree... 0%
+21:38:56.599 - Info: 
+21:38:56.599 - Info: Building dependency tree... 0%
+21:38:56.831 - Info: 
+21:38:56.831 - Info: Building dependency tree... 50%
+21:38:56.831 - Info: 
+21:38:56.831 - Info: Building dependency tree... 50%
+21:38:57.291 - Info: 
+21:38:57.292 - Info: Building dependency tree... 81%
+21:38:57.596 - Info: 
+21:38:57.596 - Info: Building dependency tree... Done
+21:38:57.596 - Info: 
+21:38:57.596 - Info: 
+21:38:57.596 - Info: 
+21:38:57.596 - Info: Reading state information... 0% 
+21:38:57.596 - Info: 
+21:38:57.596 - Info: Reading state information... 0%
+21:38:57.601 - Info: 
+21:38:57.601 - Info: Reading state information... Done
+21:38:57.601 - Info: 
+21:38:57.601 - Info: 
+21:38:57.750 - Info: gpg is already the newest version (2.4.4-2ubuntu17.4).
+21:38:57.750 - Info: 
+21:38:57.750 - Info: gpg set to manually installed.
+21:38:57.750 - Info: 
+21:38:59.405 - Info: The following packages will be upgraded:
+21:38:59.405 - Info: 
+21:38:59.413 - Info:   ca-certificates wget
+21:38:59.413 - Info: 
+21:38:59.475 - Info: 2 upgraded, 0 newly installed, 0 to remove and 283 not upgraded.
+21:38:59.475 - Info: 
+21:38:59.480 - Info: Need to get 470 kB of archives.
+21:38:59.480 - Info: 
+21:38:59.480 - Info: After this operation, 54.3 kB disk space will be freed.
+21:38:59.480 - Info: 
+21:38:59.493 - Info: 
+21:38:59.964 - Info: 0% [Working]
+21:38:59.964 - Info:             
+21:38:59.964 - Info: Get:1 http://ports.ubuntu.com/ubuntu-ports noble-updates/main arm64 ca-certificates all 20260601~24.04.1 [139 kB]
+21:38:59.964 - Info: 
+21:38:59.964 - Info: 
+21:39:00.465 - Info: 1% [1 ca-certificates 5,500 B/139 kB 4%]
+21:39:00.911 - Info: 9% [1 ca-certificates 54.7 kB/139 kB 39%]
+21:39:00.911 - Info:                                          
+21:39:01.142 - Info: 34% [Working]
+21:39:01.142 - Info:              
+21:39:01.142 - Info: Get:2 http://ports.ubuntu.com/ubuntu-ports noble-updates/main arm64 wget arm64 1.21.4-1ubuntu4.4 [331 kB]
+21:39:01.142 - Info: 
+21:39:01.142 - Info: 
+21:39:01.644 - Info: 34% [2 wget 2,604 B/331 kB 1%]
+21:39:01.737 - Info: 59% [2 wget 149 kB/331 kB 45%]
+21:39:01.737 - Info:                               
+21:39:01.737 - Info: 100% [Working]
+21:39:01.737 - Info:               
+21:39:01.737 - Info: Fetched 470 kB in 2s (208 kB/s)
+21:39:01.737 - Info: 
+21:39:03.544 - Info: (Reading database ... 
+21:39:03.578 - Info: (Reading database ... 5%
+21:39:03.578 - Info: (Reading database ... 10%
+21:39:03.579 - Info: (Reading database ... 15%
+21:39:03.579 - Info: (Reading database ... 20%
+21:39:03.579 - Info: (Reading database ... 25%
+21:39:03.579 - Info: (Reading database ... 30%
+21:39:03.580 - Info: (Reading database ... 35%
+21:39:03.580 - Info: (Reading database ... 40%
+21:39:03.580 - Info: (Reading database ... 45%
+21:39:03.580 - Info: (Reading database ... 50%
+21:39:03.595 - Info: (Reading database ... 55%
+21:39:03.612 - Info: (Reading database ... 60%
+21:39:03.630 - Info: (Reading database ... 65%
+21:39:03.641 - Info: (Reading database ... 70%
+21:39:03.685 - Info: (Reading database ... 75%
+21:39:03.701 - Info: (Reading database ... 80%
+21:39:03.719 - Info: (Reading database ... 85%
+21:39:03.736 - Info: (Reading database ... 90%
+21:39:03.759 - Info: (Reading database ... 95%
+21:39:03.813 - Info: (Reading database ... 100%
+21:39:03.813 - Info: (Reading database ... 204742 files and directories currently installed.)
+21:39:03.813 - Info: 
+21:39:03.831 - Info: Preparing to unpack .../ca-certificates_20260601~24.04.1_all.deb ...
+21:39:03.831 - Info: 
+21:39:03.855 - Info: Unpacking ca-certificates (20260601~24.04.1) over (20240203) ...
+21:39:03.856 - Info: 
+21:39:04.203 - Info: Preparing to unpack .../wget_1.21.4-1ubuntu4.4_arm64.deb ...
+21:39:04.204 - Info: 
+21:39:04.229 - Info: Unpacking wget (1.21.4-1ubuntu4.4) over (1.21.4-1ubuntu4.1) ...
+21:39:04.229 - Info: 
+21:39:04.498 - Info: Setting up wget (1.21.4-1ubuntu4.4) ...
+21:39:04.498 - Info: 
+21:39:04.532 - Info: Setting up ca-certificates (20260601~24.04.1) ...
+21:39:04.532 - Info: 
+21:39:07.923 - Info: Updating certificates in /etc/ssl/certs...
+21:39:07.923 - Info: 
+21:39:09.366 - Info: rehash: warning: skipping ca-certificates.crt,it does not contain exactly one certificate or CRL
+21:39:09.366 - Info: 
+21:39:09.382 - Info: 14 added, 39 removed; done.
+21:39:09.382 - Info: 
+21:39:09.949 - Info: Processing triggers for man-db (2.12.0-4build2) ...
+21:39:09.949 - Info: 
+21:39:10.144 - Info: Processing triggers for ca-certificates (20260601~24.04.1) ...
+21:39:10.144 - Info: 
+21:39:10.162 - Info: Updating certificates in /etc/ssl/certs...
+21:39:10.162 - Info: 
+21:39:11.016 - Info: 0 added, 0 removed; done.
+21:39:11.016 - Info: 
+21:39:11.016 - Info: Running hooks in /etc/ca-certificates/update.d...
+21:39:11.016 - Info: 
+21:39:11.020 - Info: done.
+21:39:11.020 - Info: 
+21:39:16.969 - Info: SDKM_INSTALL_ERROR gpg: WARNING: unsafe ownership on homedir '/home/jetson/.gnupg'
+21:39:16.969 - Info: 
+21:39:18.158 - Info: *begin sudo apt-get update , 5
+21:39:18.158 - Info: 
+21:39:18.438 - Info: 
+21:39:18.507 - Info: 0% [Working]
+21:39:18.507 - Info:             
+21:39:18.507 - Info: Hit:1 https://download.docker.com/linux/ubuntu noble InRelease
+21:39:18.507 - Info: 
+21:39:18.507 - Info: 
+21:39:18.540 - Info: 0% [Connecting to apt.kitware.com (66.194.253.25)] [Waiting for headers] [Connecting to ports.ubuntu.com (91.189.91.104)]
+21:39:18.540 - Info:                                                                                                                          
+21:39:18.540 - Info: Hit:2 https://repo.download.nvidia.com/jetson/common r39.2 InRelease
+21:39:18.540 - Info: 
+21:39:18.540 - Info: 
+21:39:18.592 - Info: 0% [Connecting to apt.kitware.com (66.194.253.25)] [Connecting to repo.download.nvidia.com (23.49.105.41)] [Connecting to ports.ubuntu.com (91.189.91.104)]
+21:39:18.592 - Info:                                                                                                                                                            
+21:39:18.592 - Info: Hit:3 https://repo.download.nvidia.com/jetson/som r39.2 InRelease
+21:39:18.592 - Info: 
+21:39:18.593 - Info: 
+21:39:18.593 - Info:                                                                                                                                                            
+21:39:18.640 - Info: 0% [Connecting to apt.kitware.com (66.194.253.25)] [Connecting to ports.ubuntu.com (91.189.91.104)]
+21:39:18.644 - Info: 0% [Connecting to apt.kitware.com (66.194.253.25)] [Waiting for headers] [Connecting to ports.ubuntu.com (91.189.91.104)]
+21:39:18.644 - Info:                                                                                                                          
+21:39:18.644 - Info: Hit:4 https://repo.download.nvidia.com/jetson/ffmpeg r39.2 InRelease
+21:39:18.644 - Info: 
+21:39:18.644 - Info: 
+21:39:18.644 - Info:                                                                                                                          
+21:39:18.828 - Info: 0% [Connecting to apt.kitware.com (66.194.253.25)] [Connecting to ports.ubuntu.com (91.189.91.104)]
+21:39:18.828 - Info:                                                                                                    
+21:39:18.914 - Info: 0% [Connected to apt.kitware.com (66.194.253.25)] [Waiting for headers]
+21:39:18.914 - Info:                                                                        
+21:39:18.914 - Info: Hit:5 http://ports.ubuntu.com/ubuntu-ports noble InRelease
+21:39:18.914 - Info: 
+21:39:18.914 - Info: 
+21:39:18.993 - Info: 0% [Connected to apt.kitware.com (66.194.253.25)] [Waiting for headers]
+21:39:18.993 - Info:                                                                        
+21:39:19.145 - Info: 0% [Waiting for headers] [Waiting for headers]
+21:39:19.145 - Info:                                               
+21:39:19.145 - Info: Hit:6 http://ports.ubuntu.com/ubuntu-ports noble-updates InRelease
+21:39:19.145 - Info: 
+21:39:19.145 - Info: 
+21:39:19.145 - Info:                                               
+21:39:19.170 - Info: 0% [Waiting for headers]
+21:39:19.296 - Info: 0% [Waiting for headers] [Waiting for headers]
+21:39:19.376 - Info:                                               
+21:39:19.376 - Info: Hit:7 http://ports.ubuntu.com/ubuntu-ports noble-backports InRelease
+21:39:19.376 - Info: 
+21:39:19.376 - Info: 
+21:39:19.376 - Info:                                               
+21:39:19.419 - Info: 0% [Waiting for headers]
+21:39:19.419 - Info: 0% [Waiting for headers] [Waiting for headers]
+21:39:19.419 - Info:                                               
+21:39:19.419 - Info: Get:8 https://apt.kitware.com/ubuntu noble InRelease [15.5 kB]
+21:39:19.419 - Info: 
+21:39:19.419 - Info: 
+21:39:19.544 - Info: 0% [8 InRelease 7,908 B/15.5 kB 51%] [Waiting for headers]
+21:39:19.610 - Info:                                                           
+21:39:19.610 - Info: Hit:9 http://ports.ubuntu.com/ubuntu-ports noble-security InRelease
+21:39:19.610 - Info: 
+21:39:19.610 - Info: 
+21:39:19.610 - Info:                                                           
+21:39:19.640 - Info: 0% [8 InRelease 7,908 B/15.5 kB 51%]
+21:39:19.640 - Info:                                     
+21:39:19.739 - Info: 0% [Working]
+21:39:20.074 - Info: 34% [Working]
+21:39:20.074 - Info:              
+21:39:20.074 - Info: Get:10 https://apt.kitware.com/ubuntu noble/main arm64 Packages [75.0 kB]
+21:39:20.074 - Info: 
+21:39:20.074 - Info: 
+21:39:20.319 - Info: 41% [10 Packages 7,872 B/75.0 kB 10%]
+21:39:20.320 - Info:                                      
+21:39:20.320 - Info: 100% [Working]
+21:39:20.359 - Info: 100% [10 Packages store 0 B]
+21:39:20.359 - Info:                             
+21:39:20.359 - Info: 100% [Working]
+21:39:20.360 - Info:               
+21:39:20.360 - Info: Fetched 90.6 kB in 2s (46.0 kB/s)
+21:39:20.360 - Info: 
+21:39:20.637 - Info: 
+21:39:20.637 - Info: Reading package lists... 0%
+21:39:20.654 - Info: 
+21:39:20.654 - Info: Reading package lists... 0%
+21:39:20.658 - Info: 
+21:39:20.658 - Info: Reading package lists... 0%
+21:39:20.658 - Info: 
+21:39:20.658 - Info: Reading package lists... 0%
+21:39:20.663 - Info: 
+21:39:20.663 - Info: Reading package lists... 0%
+21:39:20.663 - Info: 
+21:39:20.663 - Info: Reading package lists... 0%
+21:39:20.665 - Info: 
+21:39:20.665 - Info: Reading package lists... 0%
+21:39:20.666 - Info: 
+21:39:20.666 - Info: Reading package lists... 0%
+21:39:20.666 - Info: 
+21:39:20.666 - Info: Reading package lists... 0%
+21:39:20.667 - Info: 
+21:39:20.667 - Info: Reading package lists... 0%
+21:39:20.667 - Info: 
+21:39:20.667 - Info: Reading package lists... 0%
+21:39:20.669 - Info: 
+21:39:20.669 - Info: Reading package lists... 0%
+21:39:20.669 - Info: 
+21:39:20.669 - Info: Reading package lists... 0%
+21:39:20.743 - Info: 
+21:39:20.743 - Info: Reading package lists... 4%
+21:39:20.743 - Info: 
+21:39:20.743 - Info: Reading package lists... 4%
+21:39:20.755 - Info: 
+21:39:20.755 - Info: Reading package lists... 5%
+21:39:20.755 - Info: 
+21:39:20.755 - Info: Reading package lists... 5%
+21:39:21.394 - Info: 
+21:39:21.394 - Info: Reading package lists... 27%
+21:39:21.869 - Info: 
+21:39:21.869 - Info: Reading package lists... 41%
+21:39:21.869 - Info: 
+21:39:21.869 - Info: Reading package lists... 41%
+21:39:22.044 - Info: 
+21:39:22.044 - Info: Reading package lists... 57%
+21:39:22.044 - Info: 
+21:39:22.044 - Info: Reading package lists... 57%
+21:39:22.050 - Info: 
+21:39:22.050 - Info: Reading package lists... 58%
+21:39:22.050 - Info: 
+21:39:22.050 - Info: Reading package lists... 58%
+21:39:22.051 - Info: 
+21:39:22.051 - Info: Reading package lists... 58%
+21:39:22.051 - Info: 
+21:39:22.051 - Info: Reading package lists... 58%
+21:39:22.072 - Info: 
+21:39:22.072 - Info: Reading package lists... 58%
+21:39:22.072 - Info: 
+21:39:22.072 - Info: Reading package lists... 58%
+21:39:22.079 - Info: 
+21:39:22.079 - Info: Reading package lists... 59%
+21:39:22.079 - Info: 
+21:39:22.079 - Info: Reading package lists... 59%
+21:39:22.117 - Info: 
+21:39:22.117 - Info: Reading package lists... 60%
+21:39:22.176 - Info: 
+21:39:22.176 - Info: Reading package lists... 62%
+21:39:22.176 - Info: 
+21:39:22.176 - Info: Reading package lists... 62%
+21:39:22.194 - Info: 
+21:39:22.194 - Info: Reading package lists... 64%
+21:39:22.194 - Info: 
+21:39:22.194 - Info: Reading package lists... 64%
+21:39:22.339 - Info: 
+21:39:22.339 - Info: Reading package lists... 69%
+21:39:22.339 - Info: 
+21:39:22.339 - Info: Reading package lists... 69%
+21:39:22.362 - Info: 
+21:39:22.363 - Info: Reading package lists... 71%
+21:39:22.363 - Info: 
+21:39:22.363 - Info: Reading package lists... 71%
+21:39:22.494 - Info: 
+21:39:22.494 - Info: Reading package lists... 77%
+21:39:22.494 - Info: 
+21:39:22.494 - Info: Reading package lists... 77%
+21:39:22.528 - Info: 
+21:39:22.528 - Info: Reading package lists... 80%
+21:39:22.528 - Info: 
+21:39:22.528 - Info: Reading package lists... 80%
+21:39:22.533 - Info: 
+21:39:22.533 - Info: Reading package lists... 80%
+21:39:22.533 - Info: 
+21:39:22.533 - Info: Reading package lists... 80%
+21:39:22.535 - Info: 
+21:39:22.535 - Info: Reading package lists... 80%
+21:39:22.535 - Info: 
+21:39:22.535 - Info: Reading package lists... 80%
+21:39:22.540 - Info: 
+21:39:22.540 - Info: Reading package lists... 80%
+21:39:22.540 - Info: 
+21:39:22.540 - Info: Reading package lists... 80%
+21:39:22.540 - Info: 
+21:39:22.540 - Info: Reading package lists... 80%
+21:39:22.540 - Info: 
+21:39:22.540 - Info: Reading package lists... 80%
+21:39:22.544 - Info: 
+21:39:22.544 - Info: Reading package lists... 80%
+21:39:22.544 - Info: 
+21:39:22.544 - Info: Reading package lists... 80%
+21:39:22.547 - Info: 
+21:39:22.547 - Info: Reading package lists... 80%
+21:39:22.547 - Info: 
+21:39:22.547 - Info: Reading package lists... 80%
+21:39:22.547 - Info: 
+21:39:22.547 - Info: Reading package lists... 80%
+21:39:22.547 - Info: 
+21:39:22.547 - Info: Reading package lists... 80%
+21:39:22.547 - Info: 
+21:39:22.547 - Info: Reading package lists... 80%
+21:39:22.547 - Info: 
+21:39:22.547 - Info: Reading package lists... 80%
+21:39:22.577 - Info: 
+21:39:22.577 - Info: Reading package lists... 83%
+21:39:22.577 - Info: 
+21:39:22.577 - Info: Reading package lists... 83%
+21:39:22.594 - Info: 
+21:39:22.594 - Info: Reading package lists... 84%
+21:39:22.594 - Info: 
+21:39:22.594 - Info: Reading package lists... 84%
+21:39:22.637 - Info: 
+21:39:22.637 - Info: Reading package lists... 88%
+21:39:22.637 - Info: 
+21:39:22.637 - Info: Reading package lists... 88%
+21:39:22.653 - Info: 
+21:39:22.654 - Info: Reading package lists... 90%
+21:39:22.654 - Info: 
+21:39:22.654 - Info: Reading package lists... 90%
+21:39:22.716 - Info: 
+21:39:22.716 - Info: Reading package lists... 95%
+21:39:22.716 - Info: 
+21:39:22.716 - Info: Reading package lists... 95%
+21:39:22.747 - Info: 
+21:39:22.747 - Info: Reading package lists... 98%
+21:39:22.747 - Info: 
+21:39:22.747 - Info: Reading package lists... 98%
+21:39:22.750 - Info: 
+21:39:22.750 - Info: Reading package lists... 98%
+21:39:22.750 - Info: 
+21:39:22.750 - Info: Reading package lists... 98%
+21:39:22.835 - Info: 
+21:39:22.835 - Info: Reading package lists... 98%
+21:39:22.835 - Info: 
+21:39:22.835 - Info: Reading package lists... 98%
+21:39:22.846 - Info: 
+21:39:22.846 - Info: Reading package lists... 99%
+21:39:22.982 - Info: 
+21:39:22.982 - Info: Reading package lists... Done
+21:39:22.982 - Info: 
+21:39:22.982 - Info: 
+21:39:23.149 - Info: *begin sudo apt-get install -y kitware-archive-keyring , 5
+21:39:23.149 - Info: 
+21:39:23.310 - Info: 
+21:39:23.310 - Info: Reading package lists... 0%
+21:39:23.355 - Info: 
+21:39:23.355 - Info: Reading package lists... 100%
+21:39:23.355 - Info: 
+21:39:23.355 - Info: Reading package lists... Done
+21:39:23.355 - Info: 
+21:39:23.355 - Info: 
+21:39:23.361 - Info: 
+21:39:23.361 - Info: Building dependency tree... 0%
+21:39:23.361 - Info: 
+21:39:23.361 - Info: Building dependency tree... 0%
+21:39:23.600 - Info: 
+21:39:23.600 - Info: Building dependency tree... 50%
+21:39:23.600 - Info: 
+21:39:23.600 - Info: Building dependency tree... 50%
+21:39:24.057 - Info: 
+21:39:24.057 - Info: Building dependency tree... 81%
+21:39:24.311 - Info: 
+21:39:24.311 - Info: Building dependency tree... Done
+21:39:24.311 - Info: 
+21:39:24.311 - Info: 
+21:39:24.311 - Info: 
+21:39:24.311 - Info: Reading state information... 0% 
+21:39:24.311 - Info: 
+21:39:24.311 - Info: Reading state information... 0%
+21:39:24.317 - Info: 
+21:39:24.317 - Info: Reading state information... Done
+21:39:24.317 - Info: 
+21:39:24.317 - Info: 
+21:39:26.088 - Info: The following NEW packages will be installed:
+21:39:26.088 - Info: 
+21:39:26.095 - Info:   kitware-archive-keyring
+21:39:26.095 - Info: 
+21:39:26.169 - Info: 0 upgraded, 1 newly installed, 0 to remove and 285 not upgraded.
+21:39:26.169 - Info: 
+21:39:26.174 - Info: Need to get 30.7 kB of archives.
+21:39:26.174 - Info: 
+21:39:26.174 - Info: After this operation, 49.2 kB of additional disk space will be used.
+21:39:26.174 - Info: 
+21:39:26.187 - Info: 
+21:39:26.688 - Info: 0% [Working]
+21:39:27.179 - Info: 0% [Waiting for headers]
+21:39:27.179 - Info:                         
+21:39:27.179 - Info: Get:1 https://apt.kitware.com/ubuntu noble/main arm64 kitware-archive-keyring all 2026.06.22 [30.7 kB]
+21:39:27.179 - Info: 
+21:39:27.179 - Info: 
+21:39:27.410 - Info: 20% [1 kitware-archive-keyring 7,855 B/30.7 kB 26%]
+21:39:27.411 - Info:                                                    
+21:39:27.411 - Info: 100% [Working]
+21:39:27.411 - Info:               
+21:39:27.411 - Info: Fetched 30.7 kB in 1s (24.9 kB/s)
+21:39:27.411 - Info: 
+21:39:28.946 - Info: Selecting previously unselected package kitware-archive-keyring.
+21:39:28.946 - Info: 
+21:39:28.946 - Info: (Reading database ... 
+21:39:28.968 - Info: (Reading database ... 5%
+21:39:28.968 - Info: (Reading database ... 10%
+21:39:28.968 - Info: (Reading database ... 15%
+21:39:28.968 - Info: (Reading database ... 20%
+21:39:28.968 - Info: (Reading database ... 25%
+21:39:28.968 - Info: (Reading database ... 30%
+21:39:28.968 - Info: (Reading database ... 35%
+21:39:28.968 - Info: (Reading database ... 40%
+21:39:28.968 - Info: (Reading database ... 45%
+21:39:28.968 - Info: (Reading database ... 50%
+21:39:28.977 - Info: (Reading database ... 55%
+21:39:28.992 - Info: (Reading database ... 60%
+21:39:29.008 - Info: (Reading database ... 65%
+21:39:29.021 - Info: (Reading database ... 70%
+21:39:29.068 - Info: (Reading database ... 75%
+21:39:29.080 - Info: (Reading database ... 80%
+21:39:29.097 - Info: (Reading database ... 85%
+21:39:29.115 - Info: (Reading database ... 90%
+21:39:29.138 - Info: (Reading database ... 95%
+21:39:29.191 - Info: (Reading database ... 100%
+21:39:29.191 - Info: (Reading database ... 204717 files and directories currently installed.)
+21:39:29.191 - Info: 
+21:39:29.210 - Info: Preparing to unpack .../kitware-archive-keyring_2026.06.22_all.deb ...
+21:39:29.210 - Info: 
+21:39:29.249 - Info: Unpacking kitware-archive-keyring (2026.06.22) ...
+21:39:29.249 - Info: 
+21:39:29.447 - Info: Setting up kitware-archive-keyring (2026.06.22) ...
+21:39:29.447 - Info: 
+21:39:36.346 - Info: Desired=Unknown/Install/Remove/Purge/Hold
+21:39:36.346 - Info: 
+21:39:36.346 - Info: | Status=Not/Inst/Conf-files/Unpacked/halF-conf/Half-inst/trig-aWait/Trig-pend
+21:39:36.346 - Info: 
+21:39:36.346 - Info: |/ Err?=(none)/Reinst-required (Status,Err: uppercase=bad)
+21:39:36.346 - Info: 
+21:39:36.346 - Info: ||/ Name           Version        Architecture Description
+21:39:36.346 - Info: 
+21:39:36.346 - Info: +++-==============-==============-============-=======================================
+21:39:36.346 - Info: 
+21:39:36.346 - Info: ii  cmake          3.28.3-1build7 arm64        cross-platform, open-source make system
+21:39:36.346 - Info: 
+21:39:36.348 - Info: *begin sudo apt purge -y cmake, 5
+21:39:36.348 - Info: 
+21:39:36.519 - Info: 
+21:39:36.519 - Info: Reading package lists... 0%
+21:39:36.564 - Info: 
+21:39:36.564 - Info: Reading package lists... 100%
+21:39:36.564 - Info: 
+21:39:36.564 - Info: Reading package lists... Done
+21:39:36.564 - Info: 
+21:39:36.564 - Info: 
+21:39:36.570 - Info: 
+21:39:36.570 - Info: Building dependency tree... 0%
+21:39:36.570 - Info: 
+21:39:36.570 - Info: Building dependency tree... 0%
+21:39:36.801 - Info: 
+21:39:36.802 - Info: Building dependency tree... 50%
+21:39:36.802 - Info: 
+21:39:36.802 - Info: Building dependency tree... 50%
+21:39:37.273 - Info: 
+21:39:37.273 - Info: Building dependency tree... 83%
+21:39:37.501 - Info: 
+21:39:37.501 - Info: Building dependency tree... Done
+21:39:37.501 - Info: 
+21:39:37.501 - Info: 
+21:39:37.501 - Info: 
+21:39:37.501 - Info: Reading state information... 0% 
+21:39:37.501 - Info: 
+21:39:37.501 - Info: Reading state information... 0%
+21:39:37.506 - Info: 
+21:39:37.506 - Info: Reading state information... Done
+21:39:37.506 - Info: 
+21:39:37.506 - Info: 
+21:39:39.297 - Info: The following packages were automatically installed and are no longer required:
+21:39:39.297 - Info: 
+21:39:39.303 - Info:   cmake-data librhash0
+21:39:39.303 - Info: 
+21:39:39.303 - Info: Use 'sudo apt autoremove' to remove them.
+21:39:39.303 - Info: 
+21:39:39.653 - Info: The following packages will be REMOVED:
+21:39:39.653 - Info: 
+21:39:39.660 - Info:   cmake*
+21:39:39.661 - Info: 
+21:39:39.856 - Info: 0 upgraded, 0 newly installed, 1 to remove and 284 not upgraded.
+21:39:39.856 - Info: 
+21:39:39.966 - Info: After this operation, 33.2 MB disk space will be freed.
+21:39:39.966 - Info: 
+21:39:41.467 - Info: 
+21:39:41.511 - Info: 7[0;29r8[1A(Reading database ... 
+21:39:41.527 - Info: (Reading database ... 5%
+21:39:41.527 - Info: (Reading database ... 10%
+21:39:41.527 - Info: (Reading database ... 15%
+21:39:41.527 - Info: (Reading database ... 20%
+21:39:41.527 - Info: (Reading database ... 25%
+21:39:41.527 - Info: (Reading database ... 30%
+21:39:41.527 - Info: (Reading database ... 35%
+21:39:41.527 - Info: (Reading database ... 40%
+21:39:41.527 - Info: (Reading database ... 45%
+21:39:41.527 - Info: (Reading database ... 50%
+21:39:41.533 - Info: (Reading database ... 55%
+21:39:41.541 - Info: (Reading database ... 60%
+21:39:41.557 - Info: (Reading database ... 65%
+21:39:41.569 - Info: (Reading database ... 70%
+21:39:41.614 - Info: (Reading database ... 75%
+21:39:41.627 - Info: (Reading database ... 80%
+21:39:41.644 - Info: (Reading database ... 85%
+21:39:41.661 - Info: (Reading database ... 90%
+21:39:41.684 - Info: (Reading database ... 95%
+21:39:41.737 - Info: (Reading database ... 100%
+21:39:41.737 - Info: (Reading database ... 204722 files and directories currently installed.)
+21:39:41.737 - Info: 
+21:39:41.756 - Info: Removing cmake (3.28.3-1build7) ...
+21:39:41.756 - Info: 
+21:39:41.992 - Info: 7[30;0f[42m[30mProgress: [  0%][49m[39m [..........................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................] 87[30;0f[42m[30mProgress: [ 20%][49m[39m [###########################################################################################################################################################################################################################################################################################################################################################################################################...............................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................] 87[30;0f[42m[30mProgress: [ 40%][49m[39m [#######################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################...................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................] 87[30;0f[42m[30mProgress: [ 60%][49m[39m [##################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################........................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................] 87[30;0f[42m[30mProgress: [ 80%][49m[39m [##############################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################............................................................................................................................................................................................................................................................................................................................................................................................................] 8Processing triggers for man-db (2.12.0-4build2) ...
+21:39:41.992 - Info: 
+21:39:42.633 - Info: 
+21:39:42.633 - Info: 
+21:39:48.226 - Info: 7[0;30r8[1A[J     3.31.9-0kitware1ubuntu24.04.1 500
+21:39:48.226 - Info: 
+21:39:48.330 - Info: *begin sudo apt install -y --allow-downgrades cmake=3.31.9-0kitware1ubuntu24.04.1 cmake-data=3.31.9-0kitware1ubuntu24.04.1 , 5
+21:39:48.330 - Info: 
+21:39:48.491 - Info: 
+21:39:48.491 - Info: Reading package lists... 0%
+21:39:48.529 - Info: 
+21:39:48.529 - Info: Reading package lists... 100%
+21:39:48.529 - Info: 
+21:39:48.529 - Info: Reading package lists... Done
+21:39:48.529 - Info: 
+21:39:48.529 - Info: 
+21:39:48.535 - Info: 
+21:39:48.535 - Info: Building dependency tree... 0%
+21:39:48.535 - Info: 
+21:39:48.535 - Info: Building dependency tree... 0%
+21:39:48.766 - Info: 
+21:39:48.766 - Info: Building dependency tree... 50%
+21:39:48.766 - Info: 
+21:39:48.766 - Info: Building dependency tree... 50%
+21:39:49.233 - Info: 
+21:39:49.233 - Info: Building dependency tree... 83%
+21:39:49.456 - Info: 
+21:39:49.456 - Info: Building dependency tree... Done
+21:39:49.456 - Info: 
+21:39:49.456 - Info: 
+21:39:49.456 - Info: 
+21:39:49.456 - Info: Reading state information... 0% 
+21:39:49.456 - Info: 
+21:39:49.456 - Info: Reading state information... 0%
+21:39:49.460 - Info: 
+21:39:49.460 - Info: Reading state information... Done
+21:39:49.460 - Info: 
+21:39:49.460 - Info: 
+21:39:51.247 - Info: The following package was automatically installed and is no longer required:
+21:39:51.247 - Info: 
+21:39:51.251 - Info:   librhash0
+21:39:51.251 - Info: 
+21:39:51.251 - Info: Use 'sudo apt autoremove' to remove it.
+21:39:51.251 - Info: 
+21:39:51.263 - Info: Suggested packages:
+21:39:51.264 - Info: 
+21:39:51.264 - Info:   cmake-doc ninja-build
+21:39:51.264 - Info: 
+21:39:51.465 - Info: The following NEW packages will be installed:
+21:39:51.465 - Info: 
+21:39:51.472 - Info:   cmake
+21:39:51.472 - Info: 
+21:39:51.476 - Info: The following packages will be upgraded:
+21:39:51.476 - Info: 
+21:39:51.484 - Info:   cmake-data
+21:39:51.484 - Info: 
+21:39:51.674 - Info: 1 upgraded, 1 newly installed, 0 to remove and 283 not upgraded.
+21:39:51.674 - Info: 
+21:39:51.788 - Info: Need to get 14.0 MB of archives.
+21:39:51.788 - Info: 
+21:39:51.788 - Info: After this operation, 32.6 MB of additional disk space will be used.
+21:39:51.788 - Info: 
+21:39:51.804 - Info: [33m
+21:39:52.307 - Info: 0% [Working][0m[33m
+21:39:52.806 - Info: 0% [Connected to apt.kitware.com (66.194.253.25)][0m[33m
+21:39:52.806 - Info:                                                  
+21:39:52.838 - Info: 0% [Waiting for headers][0m
+21:39:52.838 - Info:                         
+21:39:52.838 - Info: Get:1 https://apt.kitware.com/ubuntu noble/main arm64 cmake-data all 3.31.9-0kitware1ubuntu24.04.1 [2,288 kB]
+21:39:52.838 - Info: 
+21:39:52.838 - Info: [33m
+21:39:53.338 - Info: 0% [1 cmake-data 7,851 B/2,288 kB 0%][0m[33m
+21:39:53.839 - Info: 1% [1 cmake-data 95.9 kB/2,288 kB 4%][0m[33m
+21:39:54.340 - Info: 2% [1 cmake-data 392 kB/2,288 kB 17%][0m[33m
+21:39:54.458 - Info: 9% [1 cmake-data 1,640 kB/2,288 kB 72%][0m[33m
+21:39:54.458 - Info:                                        
+21:39:54.686 - Info: 23% [Working][0m
+21:39:54.686 - Info:              
+21:39:54.686 - Info: Get:2 https://apt.kitware.com/ubuntu noble/main arm64 cmake arm64 3.31.9-0kitware1ubuntu24.04.1 [11.7 MB]
+21:39:54.686 - Info: 
+21:39:54.686 - Info: [33m
+21:39:55.187 - Info: 23% [2 cmake 63.9 kB/11.7 MB 1%][0m[33m
+21:39:55.598 - Info: 64% [2 cmake 7,148 kB/11.7 MB 61%][0m[33m
+21:39:55.598 - Info:                                   
+21:39:55.598 - Info: 100% [Working][0m
+21:39:55.598 - Info:               
+21:39:55.598 - Info: Fetched 14.0 MB in 4s (3,671 kB/s)
+21:39:55.598 - Info: 
+21:39:57.695 - Info: 
+21:39:57.788 - Info: 7[0;29r8[1A(Reading database ... 
+21:39:57.814 - Info: (Reading database ... 5%
+21:39:57.815 - Info: (Reading database ... 10%
+21:39:57.815 - Info: (Reading database ... 15%
+21:39:57.815 - Info: (Reading database ... 20%
+21:39:57.815 - Info: (Reading database ... 25%
+21:39:57.815 - Info: (Reading database ... 30%
+21:39:57.815 - Info: (Reading database ... 35%
+21:39:57.815 - Info: (Reading database ... 40%
+21:39:57.815 - Info: (Reading database ... 45%
+21:39:57.815 - Info: (Reading database ... 50%
+21:39:57.827 - Info: (Reading database ... 55%
+21:39:57.836 - Info: (Reading database ... 60%
+21:39:57.852 - Info: (Reading database ... 65%
+21:39:57.862 - Info: (Reading database ... 70%
+21:39:57.909 - Info: (Reading database ... 75%
+21:39:57.923 - Info: (Reading database ... 80%
+21:39:57.940 - Info: (Reading database ... 85%
+21:39:57.958 - Info: (Reading database ... 90%
+21:39:57.981 - Info: (Reading database ... 95%
+21:39:58.035 - Info: (Reading database ... 100%
+21:39:58.036 - Info: (Reading database ... 204709 files and directories currently installed.)
+21:39:58.036 - Info: 
+21:39:58.054 - Info: Preparing to unpack .../cmake-data_3.31.9-0kitware1ubuntu24.04.1_all.deb ...
+21:39:58.054 - Info: 
+21:39:58.124 - Info: 7[30;0f[42m[30mProgress: [  0%][49m[39m [..........................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................] 87[30;0f[42m[30mProgress: [ 11%][49m[39m [###########################################################################################################################################################################################################################...............................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................] 8Unpacking cmake-data (3.31.9-0kitware1ubuntu24.04.1) over (3.28.3-1build7) ...
+21:39:58.125 - Info: 
+21:39:59.985 - Info: 7[30;0f[42m[30mProgress: [ 22%][49m[39m [#######################################################################################################################################################################################################################################################################################################################################################################################################################################################...................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................] 8Selecting previously unselected package cmake.
+21:39:59.985 - Info: 
+21:40:00.057 - Info: Preparing to unpack .../cmake_3.31.9-0kitware1ubuntu24.04.1_arm64.deb ...
+21:40:00.057 - Info: 
+21:40:00.062 - Info: 7[30;0f[42m[30mProgress: [ 33%][49m[39m [###################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################.......................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................] 8Unpacking cmake (3.31.9-0kitware1ubuntu24.04.1) ...
+21:40:00.062 - Info: 
+21:40:01.170 - Info: 7[30;0f[42m[30mProgress: [ 44%][49m[39m [###############################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################...........................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................] 8Setting up cmake-data (3.31.9-0kitware1ubuntu24.04.1) ...
+21:40:01.170 - Info: 
+21:40:01.282 - Info: 7[30;0f[42m[30mProgress: [ 56%][49m[39m [##########################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................] 87[30;0f[42m[30mProgress: [ 67%][49m[39m [######################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################....................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................] 8Setting up cmake (3.31.9-0kitware1ubuntu24.04.1) ...
+21:40:01.282 - Info: 
+21:40:01.309 - Info: 7[30;0f[42m[30mProgress: [ 78%][49m[39m [##################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################........................................................................................................................................................................................................................................................................................................................................................................................................................................................] 87[30;0f[42m[30mProgress: [ 89%][49m[39m [##############################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################............................................................................................................................................................................................................................] 8Processing triggers for man-db (2.12.0-4build2) ...
+21:40:01.309 - Info: 
+21:40:01.843 - Info: 
+21:40:01.843 - Info: 
+21:40:07.394 - Info: [ Component Install Finished Successfully ]21:40:07.394 - Info: exec_command: ssh   jetson@192.168.55.1 "df -B1 / | tail -1 | awk '{ printf \$4 }'"21:40:07.783 - Info: [target] [ 2.02 MB used. Disk Avail: 186.33 GB ]21:40:07.783 - Info: [ NV_CMAKE_SBSA_TARGET_POST_INSTALL_COMP Install took 1m17s ]

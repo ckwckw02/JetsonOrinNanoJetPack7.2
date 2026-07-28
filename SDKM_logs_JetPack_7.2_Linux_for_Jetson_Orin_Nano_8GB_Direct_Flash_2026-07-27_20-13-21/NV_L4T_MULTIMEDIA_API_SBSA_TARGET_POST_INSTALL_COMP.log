@@ -1,0 +1,362 @@
+------ 2026-07-27 20:45:44 ------
+------ SDK: JetPack_7.2_Linux ------
+20:45:44.623 - Info: exec_command: ssh   jetson@192.168.55.1 "df -B1 / | tail -1 | awk '{ printf \$4 }'"20:45:45.022 - Info: NV_L4T_MULTIMEDIA_API_SBSA_TARGET_POST_INSTALL_COMP include 1 package20:45:45.022 - Info: [ Package Install Started ]20:45:45.022 - Info: target deb installer start to install20:45:45.023 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+sudo mkdir -p /opt/nvidia/deb_repos
+sudo chmod 777 /opt/nvidia/deb_repos
+sudo rm -f /opt/nvidia/deb_repos/nvidia-l4t-jetson-multimedia-api_39.2.0-20260601141651_arm64.deb
+**********************20:45:51.084 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+
+exec 3>&1
+exec 1>&2
+exec 2>&3
+function safe_apt_install {
+    export DEBIAN_FRONTEND=noninteractive
+    echo "*begin $1, $2"
+    tmp_log=/tmp/sdkm_apt_install_log.ckw.txt
+    sudo rm -f $tmp_log
+    set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+    MAX_RETRY=3
+    TIMES=1
+    while [ ${CMD_STATUS} -ne 0 ]; do
+        cat $tmp_log > /dev/stderr
+        if [ $TIMES -gt $MAX_RETRY ]; then
+            echo "Unhandled error when running $1: `tr '\n' '; ' <$tmp_log`" 1>&2; exit 1
+        fi
+        if grep -q -e "is locked by another process" -e "E: Could not get lock /var/" -e "Could not open lock" $tmp_log; then
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting $2 seconds for apt to be available"; sleep ${2}
+        elif grep -q -e "apt --fix-broken install" $tmp_log; then
+            echo "safe apt install failed, need to run apt --fix-broken install"
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; sudo apt-get -f -y --allow-downgrades install 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting 5 seconds for apt"; sleep 5
+        else
+            echo "safe apt install failed: $1, exit code: $CMD_STATUS, retry number: $TIMES"
+            echo "will sleep $[ $TIMES*10 ] seconds before next attempt"
+            sleep $[ $TIMES*10 ]
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+        fi
+    done
+    if [ $CMD_STATUS -eq 0 ] && [ $TIMES -ne 1 ]; then
+        echo "safe apt install succeed. retry number: $TIMES."
+    fi
+}
+safe_apt_install "sudo apt-get -y update" 5
+sleep 0.5
+safe_apt_install "sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/nvidia-l4t-jetson-multimedia-api_39.2.0-20260601141651_arm64.deb" 5
+sleep 5
+sudo rm -f /opt/nvidia/deb_repos/nvidia-l4t-jetson-multimedia-api_39.2.0-20260601141651_arm64.deb
+**********************20:45:51.882 - Info: *begin sudo apt-get -y update, 5
+20:45:51.882 - Info: 
+20:45:52.160 - Info: 
+20:45:52.228 - Info: 0% [Working]
+20:45:52.228 - Info:             
+20:45:52.228 - Info: Hit:1 https://download.docker.com/linux/ubuntu noble InRelease
+20:45:52.228 - Info: 
+20:45:52.228 - Info: 
+20:45:52.233 - Info: 0% [Connected to repo.download.nvidia.com (23.205.151.185)] [Connecting to ports.ubuntu.com (91.189.91.104)]
+20:45:52.233 - Info:                                                                                                             
+20:45:52.233 - Info: Hit:2 https://repo.download.nvidia.com/jetson/common r39.2 InRelease
+20:45:52.233 - Info: 
+20:45:52.233 - Info: 
+20:45:52.233 - Info:                                                                                                             
+20:45:52.326 - Info: 0% [Connecting to ports.ubuntu.com (91.189.91.104)]
+20:45:52.326 - Info:                                                    
+20:45:52.326 - Info: Hit:3 https://repo.download.nvidia.com/jetson/som r39.2 InRelease
+20:45:52.326 - Info: 
+20:45:52.326 - Info: 
+20:45:52.355 - Info: 0% [Connecting to ports.ubuntu.com (91.189.91.104)]
+20:45:52.389 - Info: 0% [Connected to repo.download.nvidia.com (23.205.151.185)] [Connecting to ports.ubuntu.com (91.189.91.104)]
+20:45:52.389 - Info:                                                                                                             
+20:45:52.389 - Info: Hit:4 https://repo.download.nvidia.com/jetson/ffmpeg r39.2 InRelease
+20:45:52.389 - Info: 
+20:45:52.389 - Info: 
+20:45:52.389 - Info:                                                                                                             
+20:45:52.549 - Info: 0% [Connecting to ports.ubuntu.com (91.189.91.104)]
+20:45:52.549 - Info:                                                    
+20:45:52.620 - Info: 0% [Waiting for headers]
+20:45:52.621 - Info:                         
+20:45:52.621 - Info: Hit:5 http://ports.ubuntu.com/ubuntu-ports noble InRelease
+20:45:52.621 - Info: 
+20:45:52.621 - Info: 
+20:45:52.621 - Info:                         
+20:45:52.721 - Info: 0% [Working]
+20:45:52.848 - Info: 0% [Waiting for headers]
+20:45:52.849 - Info:                         
+20:45:52.849 - Info: Hit:6 http://ports.ubuntu.com/ubuntu-ports noble-updates InRelease
+20:45:52.849 - Info: 
+20:45:52.849 - Info: 
+20:45:52.849 - Info:                         
+20:45:52.909 - Info: 0% [Working]
+20:45:53.035 - Info: 0% [Waiting for headers]
+20:45:53.075 - Info:                         
+20:45:53.075 - Info: Hit:7 http://ports.ubuntu.com/ubuntu-ports noble-backports InRelease
+20:45:53.075 - Info: 
+20:45:53.075 - Info: 
+20:45:53.075 - Info:                         
+20:45:53.154 - Info: 0% [Working]
+20:45:53.273 - Info: 0% [Waiting for headers]
+20:45:53.302 - Info:                         
+20:45:53.302 - Info: Hit:8 http://ports.ubuntu.com/ubuntu-ports noble-security InRelease
+20:45:53.302 - Info: 
+20:45:53.302 - Info: 
+20:45:53.302 - Info:                         
+20:45:53.414 - Info: 0% [Working]
+20:45:53.414 - Info: 20% [Working]
+20:45:53.414 - Info:              
+20:46:03.254 - Info: 
+20:46:03.254 - Info: Reading package lists... 0%
+20:46:03.271 - Info: 
+20:46:03.271 - Info: Reading package lists... 0%
+20:46:03.276 - Info: 
+20:46:03.276 - Info: Reading package lists... 0%
+20:46:03.276 - Info: 
+20:46:03.276 - Info: Reading package lists... 0%
+20:46:03.280 - Info: 
+20:46:03.280 - Info: Reading package lists... 0%
+20:46:03.280 - Info: 
+20:46:03.280 - Info: Reading package lists... 0%
+20:46:03.281 - Info: 
+20:46:03.281 - Info: Reading package lists... 0%
+20:46:03.281 - Info: 
+20:46:03.281 - Info: Reading package lists... 0%
+20:46:03.283 - Info: 
+20:46:03.283 - Info: Reading package lists... 0%
+20:46:03.283 - Info: 
+20:46:03.283 - Info: Reading package lists... 0%
+20:46:03.289 - Info: 
+20:46:03.289 - Info: Reading package lists... 0%
+20:46:03.359 - Info: 
+20:46:03.359 - Info: Reading package lists... 3%
+20:46:03.359 - Info: 
+20:46:03.359 - Info: Reading package lists... 3%
+20:46:03.371 - Info: 
+20:46:03.371 - Info: Reading package lists... 5%
+20:46:03.371 - Info: 
+20:46:03.371 - Info: Reading package lists... 5%
+20:46:04.007 - Info: 
+20:46:04.007 - Info: Reading package lists... 27%
+20:46:04.470 - Info: 
+20:46:04.470 - Info: Reading package lists... 41%
+20:46:04.470 - Info: 
+20:46:04.470 - Info: Reading package lists... 41%
+20:46:04.638 - Info: 
+20:46:04.639 - Info: Reading package lists... 57%
+20:46:04.639 - Info: 
+20:46:04.639 - Info: Reading package lists... 57%
+20:46:04.645 - Info: 
+20:46:04.645 - Info: Reading package lists... 58%
+20:46:04.645 - Info: 
+20:46:04.645 - Info: Reading package lists... 58%
+20:46:04.646 - Info: 
+20:46:04.646 - Info: Reading package lists... 58%
+20:46:04.646 - Info: 
+20:46:04.646 - Info: Reading package lists... 58%
+20:46:04.666 - Info: 
+20:46:04.666 - Info: Reading package lists... 58%
+20:46:04.666 - Info: 
+20:46:04.666 - Info: Reading package lists... 58%
+20:46:04.669 - Info: 
+20:46:04.669 - Info: Reading package lists... 59%
+20:46:04.669 - Info: 
+20:46:04.669 - Info: Reading package lists... 59%
+20:46:04.708 - Info: 
+20:46:04.708 - Info: Reading package lists... 60%
+20:46:04.765 - Info: 
+20:46:04.765 - Info: Reading package lists... 62%
+20:46:04.765 - Info: 
+20:46:04.765 - Info: Reading package lists... 62%
+20:46:04.783 - Info: 
+20:46:04.783 - Info: Reading package lists... 64%
+20:46:04.783 - Info: 
+20:46:04.783 - Info: Reading package lists... 64%
+20:46:04.927 - Info: 
+20:46:04.927 - Info: Reading package lists... 69%
+20:46:04.927 - Info: 
+20:46:04.927 - Info: Reading package lists... 69%
+20:46:04.950 - Info: 
+20:46:04.950 - Info: Reading package lists... 71%
+20:46:04.950 - Info: 
+20:46:04.950 - Info: Reading package lists... 71%
+20:46:05.082 - Info: 
+20:46:05.082 - Info: Reading package lists... 77%
+20:46:05.082 - Info: 
+20:46:05.082 - Info: Reading package lists... 77%
+20:46:05.117 - Info: 
+20:46:05.117 - Info: Reading package lists... 80%
+20:46:05.117 - Info: 
+20:46:05.117 - Info: Reading package lists... 80%
+20:46:05.122 - Info: 
+20:46:05.122 - Info: Reading package lists... 80%
+20:46:05.122 - Info: 
+20:46:05.122 - Info: Reading package lists... 80%
+20:46:05.124 - Info: 
+20:46:05.124 - Info: Reading package lists... 80%
+20:46:05.124 - Info: 
+20:46:05.124 - Info: Reading package lists... 80%
+20:46:05.129 - Info: 
+20:46:05.129 - Info: Reading package lists... 80%
+20:46:05.129 - Info: 
+20:46:05.129 - Info: Reading package lists... 80%
+20:46:05.129 - Info: 
+20:46:05.129 - Info: Reading package lists... 80%
+20:46:05.129 - Info: 
+20:46:05.129 - Info: Reading package lists... 80%
+20:46:05.133 - Info: 
+20:46:05.133 - Info: Reading package lists... 80%
+20:46:05.133 - Info: 
+20:46:05.133 - Info: Reading package lists... 80%
+20:46:05.134 - Info: 
+20:46:05.134 - Info: Reading package lists... 80%
+20:46:05.134 - Info: 
+20:46:05.134 - Info: Reading package lists... 80%
+20:46:05.134 - Info: 
+20:46:05.134 - Info: Reading package lists... 80%
+20:46:05.134 - Info: 
+20:46:05.134 - Info: Reading package lists... 80%
+20:46:05.135 - Info: 
+20:46:05.135 - Info: Reading package lists... 80%
+20:46:05.135 - Info: 
+20:46:05.135 - Info: Reading package lists... 80%
+20:46:05.166 - Info: 
+20:46:05.166 - Info: Reading package lists... 83%
+20:46:05.166 - Info: 
+20:46:05.166 - Info: Reading package lists... 83%
+20:46:05.181 - Info: 
+20:46:05.181 - Info: Reading package lists... 84%
+20:46:05.181 - Info: 
+20:46:05.181 - Info: Reading package lists... 84%
+20:46:05.225 - Info: 
+20:46:05.225 - Info: Reading package lists... 88%
+20:46:05.225 - Info: 
+20:46:05.225 - Info: Reading package lists... 88%
+20:46:05.242 - Info: 
+20:46:05.242 - Info: Reading package lists... 90%
+20:46:05.242 - Info: 
+20:46:05.242 - Info: Reading package lists... 90%
+20:46:05.303 - Info: 
+20:46:05.303 - Info: Reading package lists... 95%
+20:46:05.303 - Info: 
+20:46:05.303 - Info: Reading package lists... 95%
+20:46:05.334 - Info: 
+20:46:05.335 - Info: Reading package lists... 98%
+20:46:05.335 - Info: 
+20:46:05.335 - Info: Reading package lists... 98%
+20:46:05.337 - Info: 
+20:46:05.337 - Info: Reading package lists... 98%
+20:46:05.337 - Info: 
+20:46:05.337 - Info: Reading package lists... 98%
+20:46:05.420 - Info: 
+20:46:05.420 - Info: Reading package lists... 98%
+20:46:05.420 - Info: 
+20:46:05.420 - Info: Reading package lists... 98%
+20:46:05.430 - Info: 
+20:46:05.430 - Info: Reading package lists... 99%
+20:46:05.542 - Info: 
+20:46:05.542 - Info: Reading package lists... Done
+20:46:05.543 - Info: 
+20:46:05.543 - Info: 
+20:46:06.112 - Info: *begin sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/nvidia-l4t-jetson-multimedia-api_39.2.0-20260601141651_arm64.deb, 5
+20:46:06.112 - Info: 
+20:46:06.276 - Info: 
+20:46:06.276 - Info: Reading package lists... 0%
+20:46:06.384 - Info: 
+20:46:06.384 - Info: Reading package lists... 0%
+20:46:06.396 - Info: 
+20:46:06.396 - Info: Reading package lists... Done
+20:46:06.396 - Info: 
+20:46:06.396 - Info: 
+20:46:06.419 - Info: 
+20:46:06.419 - Info: Building dependency tree... 0%
+20:46:06.419 - Info: 
+20:46:06.419 - Info: Building dependency tree... 0%
+20:46:06.421 - Info: 
+20:46:06.421 - Info: Building dependency tree... 0%
+20:46:06.642 - Info: 
+20:46:06.642 - Info: Building dependency tree... 50%
+20:46:06.642 - Info: 
+20:46:06.642 - Info: Building dependency tree... 50%
+20:46:07.122 - Info: 
+20:46:07.122 - Info: Building dependency tree... 85%
+20:46:07.309 - Info: 
+20:46:07.309 - Info: Building dependency tree... Done
+20:46:07.309 - Info: 
+20:46:07.309 - Info: 
+20:46:07.309 - Info: 
+20:46:07.309 - Info: Reading state information... 0% 
+20:46:07.309 - Info: 
+20:46:07.309 - Info: Reading state information... 0%
+20:46:07.314 - Info: 
+20:46:07.314 - Info: Reading state information... Done
+20:46:07.314 - Info: 
+20:46:07.314 - Info: 
+20:46:07.450 - Info: Note, selecting 'nvidia-l4t-jetson-multimedia-api' instead of '/opt/nvidia/deb_repos/nvidia-l4t-jetson-multimedia-api_39.2.0-20260601141651_arm64.deb'
+20:46:07.450 - Info: 
+20:46:09.105 - Info: The following NEW packages will be installed:
+20:46:09.105 - Info: 
+20:46:09.106 - Info:   nvidia-l4t-jetson-multimedia-api
+20:46:09.106 - Info: 
+20:46:09.177 - Info: 0 upgraded, 1 newly installed, 0 to remove and 285 not upgraded.
+20:46:09.177 - Info: 
+20:46:09.183 - Info: Need to get 75.4 MB of archives.
+20:46:09.183 - Info: 
+20:46:09.183 - Info: After this operation, 97.3 MB of additional disk space will be used.
+20:46:09.183 - Info: 
+20:46:09.195 - Info: 
+20:46:09.300 - Info: 0% [Working]
+20:46:09.300 - Info:             
+20:46:09.300 - Info: Get:1 https://repo.download.nvidia.com/jetson/common r39.2/main arm64 nvidia-l4t-jetson-multimedia-api arm64 39.2.0-20260601141651 [75.4 MB]
+20:46:09.300 - Info: 
+20:46:09.300 - Info: 
+20:46:09.801 - Info: 0% [1 nvidia-l4t-jetson-multimedia-api 15.7 kB/75.4 MB 0%]
+20:46:10.301 - Info: 39% [1 nvidia-l4t-jetson-multimedia-api 36.9 MB/75.4 MB 49%]
+20:46:10.803 - Info: 80% [1 nvidia-l4t-jetson-multimedia-api 75.4 MB/75.4 MB 100%]
+20:46:12.110 - Info:                                                              
+20:46:12.110 - Info: 100% [Working]
+20:46:12.110 - Info:               
+20:46:12.110 - Info: Fetched 75.4 MB in 3s (25.7 MB/s)
+20:46:12.110 - Info: 
+20:46:13.572 - Info: Selecting previously unselected package nvidia-l4t-jetson-multimedia-api.
+20:46:13.572 - Info: 
+20:46:13.572 - Info: (Reading database ... 
+20:46:13.593 - Info: (Reading database ... 5%
+20:46:13.593 - Info: (Reading database ... 10%
+20:46:13.593 - Info: (Reading database ... 15%
+20:46:13.593 - Info: (Reading database ... 20%
+20:46:13.593 - Info: (Reading database ... 25%
+20:46:13.593 - Info: (Reading database ... 30%
+20:46:13.593 - Info: (Reading database ... 35%
+20:46:13.593 - Info: (Reading database ... 40%
+20:46:13.593 - Info: (Reading database ... 45%
+20:46:13.593 - Info: (Reading database ... 50%
+20:46:13.599 - Info: (Reading database ... 55%
+20:46:13.611 - Info: (Reading database ... 60%
+20:46:13.622 - Info: (Reading database ... 65%
+20:46:13.638 - Info: (Reading database ... 70%
+20:46:13.675 - Info: (Reading database ... 75%
+20:46:13.686 - Info: (Reading database ... 80%
+20:46:13.702 - Info: (Reading database ... 85%
+20:46:13.719 - Info: (Reading database ... 90%
+20:46:13.730 - Info: (Reading database ... 95%
+20:46:13.779 - Info: (Reading database ... 100%
+20:46:13.779 - Info: (Reading database ... 188629 files and directories currently installed.)
+20:46:13.779 - Info: 
+20:46:13.797 - Info: Preparing to unpack .../nvidia-l4t-jetson-multimedia-api_39.2.0-20260601141651_arm64.deb ...
+20:46:13.797 - Info: 
+20:46:13.803 - Info: Unpacking nvidia-l4t-jetson-multimedia-api (39.2.0-20260601141651) ...
+20:46:13.803 - Info: 
+20:46:16.603 - Info: Setting up nvidia-l4t-jetson-multimedia-api (39.2.0-20260601141651) ...
+20:46:16.603 - Info: 
+20:46:27.624 - Info: change working directory to /tmp20:46:27.624 - Info: exec_command: ssh jetson@192.168.55.1 "dpkg-query -W -f='\${db:Status-abbrev} \${Version}' nvidia-l4t-jetson-multimedia-api"20:46:28.048 - Info: [ Package Install Finished Successfully ]20:46:28.048 - Info: exec_command: ssh   jetson@192.168.55.1 "df -B1 / | tail -1 | awk '{ printf \$4 }'"20:46:28.438 - Info: [target] [ 168.43 MB used. Disk Avail: 205.10 GB ]20:46:28.439 - Info: [ NV_L4T_MULTIMEDIA_API_SBSA_TARGET_POST_INSTALL_COMP Install took 43s ]

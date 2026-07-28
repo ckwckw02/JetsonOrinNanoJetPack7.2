@@ -1,0 +1,2220 @@
+------ 2026-07-27 20:33:26 ------
+------ SDK: JetPack_7.2_Linux ------
+20:33:26.789 - Info: exec_command: ssh   jetson@192.168.55.1 "df -B1 / | tail -1 | awk '{ printf \$4 }'"20:33:27.176 - Info: NV_L4T_DOCKER_SBSA_TARGET_POST_INSTALL_COMP include 4 package20:33:27.176 - Info: [ Package PreInstall Started ]20:33:27.176 - Info: current working directory is /home/ckw/nvidia/nvidia_sdk/JetPack_7.2_Linux_JETSON_ORIN_NANO_TARGETS20:33:27.177 - Info: exec_command [target]:
+**********************
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+
+safe_apt_install "sudo apt-get install -y curl" 5
+sudo systemctl stop docker 2>/dev/null || true
+sudo systemctl stop containerd 2>/dev/null || true
+# Remove conflicting packages
+echo Remove conflicting packages
+echo 'for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do sudo apt-get remove -qq -y $pkg || true; done'
+for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do sudo apt-get remove -qq -y $pkg || true; done
+
+# Remove old docker packages
+echo 'Remove old docker packages'
+echo 'for pkg in docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-ce-rootless-extras; do sudo apt-get remove -qq -y $pkg || true; done'
+for pkg in docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-ce-rootless-extras; do sudo apt-get remove -qq -y $pkg || true; done
+
+DOCKER_APT_REPO="https://download.docker.com/linux/ubuntu"
+if [[ -n '{{VAR_DOCKER_APT_REPO}}' && '{{VAR_DOCKER_APT_REPO}}' != '{{'VAR_DOCKER_APT_REPO'}}' ]]; then
+  DOCKER_APT_REPO='{{VAR_DOCKER_APT_REPO}}'
+  ## Remove trailing slash if any
+  DOCKER_APT_REPO=${DOCKER_APT_REPO%/}
+  echo "Set DOCKER_APT_REPO to ${DOCKER_APT_REPO}"
+fi
+# Add Docker's official GPG key:
+safe_apt_install "sudo apt-get update" 5
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL ${DOCKER_APT_REPO}/gpg | sudo gpg --dearmor --yes -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+# Add the repository to Apt sources:
+echo \
+  "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] ${DOCKER_APT_REPO} \
+  "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+safe_apt_install "sudo apt-get update" 5
+safe_apt_install "sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin" 5
+
+echo Docker service installed
+**********************20:33:27.177 - Info: exec_command: scp  /home/ckw/.nvsdkm/replays/scripts/JetPack_7.2_Linux/NV_L4T_DOCKER_SBSA_TARGET_POST_INSTALL_COMP.sh jetson@[192.168.55.1]:~; ssh -t  jetson@192.168.55.1 "set -o pipefail; ~/NV_L4T_DOCKER_SBSA_TARGET_POST_INSTALL_COMP.sh | sed 's/^/SDKM_INSTALL_ERROR /' && rm -f ~/NV_L4T_DOCKER_SBSA_TARGET_POST_INSTALL_COMP.sh"20:33:27.952 - Info: *begin sudo apt-get install -y curl, 5
+20:33:27.952 - Info: 
+20:33:28.119 - Info: 
+20:33:28.119 - Info: Reading package lists... 0%
+20:33:28.156 - Info: 
+20:33:28.156 - Info: Reading package lists... 100%
+20:33:28.156 - Info: 
+20:33:28.156 - Info: Reading package lists... Done
+20:33:28.156 - Info: 
+20:33:28.156 - Info: 
+20:33:28.163 - Info: 
+20:33:28.163 - Info: Building dependency tree... 0%
+20:33:28.163 - Info: 
+20:33:28.163 - Info: Building dependency tree... 0%
+20:33:28.395 - Info: 
+20:33:28.395 - Info: Building dependency tree... 50%
+20:33:28.395 - Info: 
+20:33:28.395 - Info: Building dependency tree... 50%
+20:33:28.863 - Info: 
+20:33:28.863 - Info: Building dependency tree... 83%
+20:33:29.125 - Info: 
+20:33:29.125 - Info: Building dependency tree... Done
+20:33:29.125 - Info: 
+20:33:29.125 - Info: 
+20:33:29.125 - Info: 
+20:33:29.125 - Info: Reading state information... 0% 
+20:33:29.125 - Info: 
+20:33:29.125 - Info: Reading state information... 0%
+20:33:29.130 - Info: 
+20:33:29.130 - Info: Reading state information... Done
+20:33:29.130 - Info: 
+20:33:29.130 - Info: 
+20:33:30.848 - Info: The following additional packages will be installed:
+20:33:30.848 - Info: 
+20:33:30.854 - Info:   libcurl3t64-gnutls libcurl4t64
+20:33:30.854 - Info: 
+20:33:30.965 - Info: The following packages will be upgraded:
+20:33:30.965 - Info: 
+20:33:30.973 - Info:   curl libcurl3t64-gnutls libcurl4t64
+20:33:30.973 - Info: 
+20:33:31.037 - Info: 3 upgraded, 0 newly installed, 0 to remove and 285 not upgraded.
+20:33:31.037 - Info: 
+20:33:31.041 - Info: Need to get 886 kB of archives.
+20:33:31.041 - Info: 
+20:33:31.041 - Info: After this operation, 0 B of additional disk space will be used.
+20:33:31.041 - Info: 
+20:33:31.054 - Info: 
+20:33:31.556 - Info: 0% [Working]
+20:33:31.838 - Info: 0% [Connecting to ports.ubuntu.com (91.189.91.103)]
+20:33:31.838 - Info:                                                    
+20:33:31.838 - Info: Get:1 http://ports.ubuntu.com/ubuntu-ports noble-updates/main arm64 curl arm64 8.5.0-2ubuntu10.11 [222 kB]
+20:33:31.838 - Info: 
+20:33:31.838 - Info: 
+20:33:31.838 - Info:                                                    
+20:33:32.320 - Info: 0% [1 curl 4,096 B/222 kB 2%]
+20:33:32.822 - Info: 3% [1 curl 37.4 kB/222 kB 17%]
+20:33:33.218 - Info: 10% [1 curl 111 kB/222 kB 50%]
+20:33:33.218 - Info:                               
+20:33:33.449 - Info: 27% [Working]
+20:33:33.449 - Info:              
+20:33:33.449 - Info: Get:2 http://ports.ubuntu.com/ubuntu-ports noble-updates/main arm64 libcurl4t64 arm64 8.5.0-2ubuntu10.11 [335 kB]
+20:33:33.449 - Info: 
+20:33:33.449 - Info: 
+20:33:33.950 - Info: 27% [2 libcurl4t64 2,604 B/335 kB 1%]
+20:33:34.215 - Info: 41% [2 libcurl4t64 158 kB/335 kB 47%]
+20:33:34.215 - Info:                                      
+20:33:34.215 - Info: 64% [Working]
+20:33:34.215 - Info:              
+20:33:34.215 - Info: Get:3 http://ports.ubuntu.com/ubuntu-ports noble-updates/main arm64 libcurl3t64-gnutls arm64 8.5.0-2ubuntu10.11 [329 kB]
+20:33:34.215 - Info: 
+20:33:34.215 - Info: 
+20:33:34.674 - Info: 64% [3 libcurl3t64-gnutls 1,580 B/329 kB 0%]
+20:33:34.675 - Info:                                             
+20:33:34.675 - Info: 100% [Working]
+20:33:34.675 - Info:               
+20:33:34.675 - Info: Fetched 886 kB in 4s (244 kB/s)
+20:33:34.675 - Info: 
+20:33:36.135 - Info: (Reading database ... 
+20:33:36.154 - Info: (Reading database ... 5%
+20:33:36.154 - Info: (Reading database ... 10%
+20:33:36.154 - Info: (Reading database ... 15%
+20:33:36.154 - Info: (Reading database ... 20%
+20:33:36.154 - Info: (Reading database ... 25%
+20:33:36.154 - Info: (Reading database ... 30%
+20:33:36.154 - Info: (Reading database ... 35%
+20:33:36.154 - Info: (Reading database ... 40%
+20:33:36.154 - Info: (Reading database ... 45%
+20:33:36.154 - Info: (Reading database ... 50%
+20:33:36.157 - Info: (Reading database ... 55%
+20:33:36.171 - Info: (Reading database ... 60%
+20:33:36.184 - Info: (Reading database ... 65%
+20:33:36.203 - Info: (Reading database ... 70%
+20:33:36.240 - Info: (Reading database ... 75%
+20:33:36.252 - Info: (Reading database ... 80%
+20:33:36.270 - Info: (Reading database ... 85%
+20:33:36.286 - Info: (Reading database ... 90%
+20:33:36.296 - Info: (Reading database ... 95%
+20:33:36.341 - Info: (Reading database ... 100%
+20:33:36.341 - Info: (Reading database ... 182997 files and directories currently installed.)
+20:33:36.341 - Info: 
+20:33:36.359 - Info: Preparing to unpack .../curl_8.5.0-2ubuntu10.11_arm64.deb ...
+20:33:36.359 - Info: 
+20:33:36.378 - Info: Unpacking curl (8.5.0-2ubuntu10.11) over (8.5.0-2ubuntu10.9) ...
+20:33:36.378 - Info: 
+20:33:36.589 - Info: Preparing to unpack .../libcurl4t64_8.5.0-2ubuntu10.11_arm64.deb ...
+20:33:36.590 - Info: 
+20:33:36.620 - Info: Unpacking libcurl4t64:arm64 (8.5.0-2ubuntu10.11) over (8.5.0-2ubuntu10.9) ...
+20:33:36.620 - Info: 
+20:33:36.859 - Info: Preparing to unpack .../libcurl3t64-gnutls_8.5.0-2ubuntu10.11_arm64.deb ...
+20:33:36.859 - Info: 
+20:33:36.885 - Info: Unpacking libcurl3t64-gnutls:arm64 (8.5.0-2ubuntu10.11) over (8.5.0-2ubuntu10.9) ...
+20:33:36.885 - Info: 
+20:33:37.118 - Info: Setting up libcurl4t64:arm64 (8.5.0-2ubuntu10.11) ...
+20:33:37.118 - Info: 
+20:33:37.343 - Info: Setting up libcurl3t64-gnutls:arm64 (8.5.0-2ubuntu10.11) ...
+20:33:37.343 - Info: 
+20:33:37.369 - Info: Setting up curl (8.5.0-2ubuntu10.11) ...
+20:33:37.369 - Info: 
+20:33:37.392 - Info: Processing triggers for man-db (2.12.0-4build2) ...
+20:33:37.392 - Info: 
+20:33:37.669 - Info: Processing triggers for libc-bin (2.39-0ubuntu8.7) ...
+20:33:37.669 - Info: 
+20:33:43.610 - Info: Remove conflicting packages
+20:33:43.610 - Info: 
+20:33:43.610 - Info: for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do sudo apt-get remove -qq -y $pkg || true; done
+20:33:43.610 - Info: 
+20:34:03.935 - Info: Remove old docker packages
+20:34:03.935 - Info: 
+20:34:03.935 - Info: for pkg in docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-ce-rootless-extras; do sudo apt-get remove -qq -y $pkg || true; done
+20:34:03.935 - Info: 
+20:34:11.401 - Info: SDKM_INSTALL_ERROR E: Unable to locate package containerd.io
+20:34:11.401 - Info: SDKM_INSTALL_ERROR E: Couldn't find any package by glob 'containerd.io'
+20:34:11.401 - Info: SDKM_INSTALL_ERROR E: Couldn't find any package by regex 'containerd.io'
+20:34:12.616 - Info: SDKM_INSTALL_ERROR E: Unable to locate package docker-buildx-plugin
+20:34:13.843 - Info: SDKM_INSTALL_ERROR E: Unable to locate package docker-compose-plugin
+20:34:15.064 - Info: SDKM_INSTALL_ERROR E: Unable to locate package docker-ce-rootless-extras
+20:34:15.104 - Info: *begin sudo apt-get update, 5
+20:34:15.104 - Info: 
+20:34:15.374 - Info: 
+20:34:15.492 - Info: 0% [Working]
+20:34:15.492 - Info:             
+20:34:15.492 - Info: Hit:1 https://repo.download.nvidia.com/jetson/common r39.2 InRelease
+20:34:15.492 - Info: 
+20:34:15.492 - Info: 
+20:34:15.577 - Info: 0% [Connecting to ports.ubuntu.com (91.189.92.21)]
+20:34:15.577 - Info:                                                   
+20:34:15.577 - Info: Hit:2 https://repo.download.nvidia.com/jetson/som r39.2 InRelease
+20:34:15.577 - Info: 
+20:34:15.577 - Info: 
+20:34:15.642 - Info: 0% [Connecting to ports.ubuntu.com (91.189.92.21)]
+20:34:15.642 - Info:                                                   
+20:34:15.642 - Info: Hit:3 https://repo.download.nvidia.com/jetson/ffmpeg r39.2 InRelease
+20:34:15.642 - Info: 
+20:34:15.642 - Info: 
+20:34:15.642 - Info:                                                   
+20:34:15.707 - Info: 0% [Waiting for headers]
+20:34:15.797 - Info:                         
+20:34:15.797 - Info: Hit:4 http://ports.ubuntu.com/ubuntu-ports noble InRelease
+20:34:15.797 - Info: 
+20:34:15.797 - Info: 
+20:34:15.797 - Info:                         
+20:34:15.863 - Info: 0% [Working]
+20:34:16.005 - Info: 0% [Waiting for headers]
+20:34:16.005 - Info:                         
+20:34:16.005 - Info: Hit:5 http://ports.ubuntu.com/ubuntu-ports noble-updates InRelease
+20:34:16.005 - Info: 
+20:34:16.005 - Info: 
+20:34:16.005 - Info:                         
+20:34:16.017 - Info: 0% [Working]
+20:34:16.149 - Info: 0% [Waiting for headers]
+20:34:16.212 - Info:                         
+20:34:16.212 - Info: Hit:6 http://ports.ubuntu.com/ubuntu-ports noble-backports InRelease
+20:34:16.212 - Info: 
+20:34:16.213 - Info: 
+20:34:16.213 - Info:                         
+20:34:16.267 - Info: 0% [Working]
+20:34:16.386 - Info: 0% [Waiting for headers]
+20:34:16.421 - Info:                         
+20:34:16.421 - Info: Hit:7 http://ports.ubuntu.com/ubuntu-ports noble-security InRelease
+20:34:16.421 - Info: 
+20:34:16.421 - Info: 
+20:34:16.421 - Info:                         
+20:34:16.545 - Info: 0% [Working]
+20:34:16.545 - Info: 20% [Working]
+20:34:16.545 - Info:              
+20:34:16.752 - Info: 
+20:34:16.752 - Info: Reading package lists... 0%
+20:34:16.769 - Info: 
+20:34:16.769 - Info: Reading package lists... 0%
+20:34:16.774 - Info: 
+20:34:16.774 - Info: Reading package lists... 0%
+20:34:16.774 - Info: 
+20:34:16.774 - Info: Reading package lists... 0%
+20:34:16.775 - Info: 
+20:34:16.775 - Info: Reading package lists... 0%
+20:34:16.776 - Info: 
+20:34:16.776 - Info: Reading package lists... 0%
+20:34:16.778 - Info: 
+20:34:16.778 - Info: Reading package lists... 0%
+20:34:16.778 - Info: 
+20:34:16.778 - Info: Reading package lists... 0%
+20:34:16.789 - Info: 
+20:34:16.789 - Info: Reading package lists... 0%
+20:34:16.853 - Info: 
+20:34:16.854 - Info: Reading package lists... 3%
+20:34:16.854 - Info: 
+20:34:16.854 - Info: Reading package lists... 3%
+20:34:16.864 - Info: 
+20:34:16.864 - Info: Reading package lists... 5%
+20:34:16.864 - Info: 
+20:34:16.864 - Info: Reading package lists... 5%
+20:34:17.549 - Info: 
+20:34:17.549 - Info: Reading package lists... 27%
+20:34:18.028 - Info: 
+20:34:18.028 - Info: Reading package lists... 41%
+20:34:18.028 - Info: 
+20:34:18.028 - Info: Reading package lists... 41%
+20:34:18.194 - Info: 
+20:34:18.194 - Info: Reading package lists... 57%
+20:34:18.194 - Info: 
+20:34:18.194 - Info: Reading package lists... 57%
+20:34:18.200 - Info: 
+20:34:18.200 - Info: Reading package lists... 58%
+20:34:18.200 - Info: 
+20:34:18.201 - Info: Reading package lists... 58%
+20:34:18.201 - Info: 
+20:34:18.201 - Info: Reading package lists... 58%
+20:34:18.201 - Info: 
+20:34:18.201 - Info: Reading package lists... 58%
+20:34:18.221 - Info: 
+20:34:18.221 - Info: Reading package lists... 58%
+20:34:18.221 - Info: 
+20:34:18.221 - Info: Reading package lists... 58%
+20:34:18.224 - Info: 
+20:34:18.224 - Info: Reading package lists... 59%
+20:34:18.224 - Info: 
+20:34:18.224 - Info: Reading package lists... 59%
+20:34:18.264 - Info: 
+20:34:18.264 - Info: Reading package lists... 60%
+20:34:18.318 - Info: 
+20:34:18.318 - Info: Reading package lists... 62%
+20:34:18.318 - Info: 
+20:34:18.318 - Info: Reading package lists... 62%
+20:34:18.354 - Info: 
+20:34:18.354 - Info: Reading package lists... 64%
+20:34:18.354 - Info: 
+20:34:18.354 - Info: Reading package lists... 64%
+20:34:18.482 - Info: 
+20:34:18.482 - Info: Reading package lists... 69%
+20:34:18.482 - Info: 
+20:34:18.482 - Info: Reading package lists... 69%
+20:34:18.505 - Info: 
+20:34:18.505 - Info: Reading package lists... 71%
+20:34:18.505 - Info: 
+20:34:18.505 - Info: Reading package lists... 71%
+20:34:18.632 - Info: 
+20:34:18.632 - Info: Reading package lists... 77%
+20:34:18.632 - Info: 
+20:34:18.632 - Info: Reading package lists... 77%
+20:34:18.666 - Info: 
+20:34:18.666 - Info: Reading package lists... 80%
+20:34:18.666 - Info: 
+20:34:18.666 - Info: Reading package lists... 80%
+20:34:18.671 - Info: 
+20:34:18.671 - Info: Reading package lists... 80%
+20:34:18.671 - Info: 
+20:34:18.671 - Info: Reading package lists... 80%
+20:34:18.673 - Info: 
+20:34:18.673 - Info: Reading package lists... 80%
+20:34:18.673 - Info: 
+20:34:18.673 - Info: Reading package lists... 80%
+20:34:18.678 - Info: 
+20:34:18.678 - Info: Reading package lists... 80%
+20:34:18.678 - Info: 
+20:34:18.678 - Info: Reading package lists... 80%
+20:34:18.678 - Info: 
+20:34:18.678 - Info: Reading package lists... 80%
+20:34:18.678 - Info: 
+20:34:18.678 - Info: Reading package lists... 80%
+20:34:18.682 - Info: 
+20:34:18.682 - Info: Reading package lists... 80%
+20:34:18.682 - Info: 
+20:34:18.682 - Info: Reading package lists... 80%
+20:34:18.683 - Info: 
+20:34:18.683 - Info: Reading package lists... 80%
+20:34:18.683 - Info: 
+20:34:18.683 - Info: Reading package lists... 80%
+20:34:18.683 - Info: 
+20:34:18.683 - Info: Reading package lists... 80%
+20:34:18.683 - Info: 
+20:34:18.683 - Info: Reading package lists... 80%
+20:34:18.683 - Info: 
+20:34:18.683 - Info: Reading package lists... 80%
+20:34:18.683 - Info: 
+20:34:18.683 - Info: Reading package lists... 80%
+20:34:18.714 - Info: 
+20:34:18.714 - Info: Reading package lists... 83%
+20:34:18.714 - Info: 
+20:34:18.714 - Info: Reading package lists... 83%
+20:34:18.728 - Info: 
+20:34:18.728 - Info: Reading package lists... 84%
+20:34:18.728 - Info: 
+20:34:18.728 - Info: Reading package lists... 84%
+20:34:18.770 - Info: 
+20:34:18.770 - Info: Reading package lists... 88%
+20:34:18.770 - Info: 
+20:34:18.770 - Info: Reading package lists... 88%
+20:34:18.787 - Info: 
+20:34:18.787 - Info: Reading package lists... 90%
+20:34:18.787 - Info: 
+20:34:18.787 - Info: Reading package lists... 90%
+20:34:18.848 - Info: 
+20:34:18.848 - Info: Reading package lists... 95%
+20:34:18.848 - Info: 
+20:34:18.848 - Info: Reading package lists... 95%
+20:34:18.879 - Info: 
+20:34:18.879 - Info: Reading package lists... 98%
+20:34:18.879 - Info: 
+20:34:18.879 - Info: Reading package lists... 98%
+20:34:18.881 - Info: 
+20:34:18.881 - Info: Reading package lists... 98%
+20:34:18.881 - Info: 
+20:34:18.881 - Info: Reading package lists... 98%
+20:34:18.960 - Info: 
+20:34:18.961 - Info: Reading package lists... 98%
+20:34:18.961 - Info: 
+20:34:18.961 - Info: Reading package lists... 98%
+20:34:18.971 - Info: 
+20:34:18.971 - Info: Reading package lists... 99%
+20:34:19.078 - Info: 
+20:34:19.078 - Info: Reading package lists... Done
+20:34:19.078 - Info: 
+20:34:19.078 - Info: 
+20:34:19.562 - Info: *begin sudo apt-get update, 5
+20:34:19.562 - Info: 
+20:34:19.842 - Info: 
+20:34:19.889 - Info: 0% [Working]
+20:34:19.889 - Info:             
+20:34:19.889 - Info: Get:1 https://download.docker.com/linux/ubuntu noble InRelease [48.5 kB]
+20:34:19.889 - Info: 
+20:34:19.889 - Info: 
+20:34:19.908 - Info: 0% [1 InRelease 15.9 kB/48.5 kB 33%] [Waiting for headers] [Connecting to ports.ubuntu.com (91.189.92.19)]
+20:34:19.908 - Info:                                                                                                           
+20:34:19.908 - Info: 0% [Waiting for headers] [Connecting to ports.ubuntu.com (91.189.92.19)]
+20:34:19.908 - Info:                                                                         
+20:34:19.908 - Info: Hit:2 https://repo.download.nvidia.com/jetson/common r39.2 InRelease
+20:34:19.908 - Info: 
+20:34:19.908 - Info: 
+20:34:20.000 - Info: 0% [Connecting to repo.download.nvidia.com (23.205.151.185)] [Connecting to ports.ubuntu.com (91.189.92.19)]
+20:34:20.000 - Info:                                                                                                             
+20:34:20.000 - Info: Hit:3 https://repo.download.nvidia.com/jetson/som r39.2 InRelease
+20:34:20.000 - Info: 
+20:34:20.000 - Info: 
+20:34:20.000 - Info:                                                                                                             
+20:34:20.026 - Info: 0% [Connecting to ports.ubuntu.com (91.189.92.19)]
+20:34:20.039 - Info: 0% [Connected to repo.download.nvidia.com (23.205.151.185)] [Connecting to ports.ubuntu.com (91.189.92.19)]
+20:34:20.039 - Info:                                                                                                            
+20:34:20.039 - Info: Get:4 https://download.docker.com/linux/ubuntu noble/stable arm64 Packages [59.0 kB]
+20:34:20.039 - Info: 
+20:34:20.052 - Info: 
+20:34:20.053 - Info: 0% [Connected to repo.download.nvidia.com (23.205.151.185)] [Connecting to ports.ubuntu.com (91.189.92.19)]
+20:34:20.053 - Info:                                                                                                            
+20:34:20.058 - Info: 0% [4 Packages store 0 B] [Waiting for headers] [Connecting to ports.ubuntu.com (91.189.92.19)]
+20:34:20.059 - Info:                                                                                                
+20:34:20.059 - Info: Hit:5 https://repo.download.nvidia.com/jetson/ffmpeg r39.2 InRelease
+20:34:20.059 - Info: 
+20:34:20.059 - Info: 
+20:34:20.059 - Info:                                                                                                
+20:34:20.091 - Info: 0% [4 Packages store 0 B] [Connecting to ports.ubuntu.com (91.189.92.19)]
+20:34:20.091 - Info:                                                                          
+20:34:20.219 - Info: 0% [Waiting for headers]
+20:34:20.277 - Info:                         
+20:34:20.277 - Info: Hit:6 http://ports.ubuntu.com/ubuntu-ports noble InRelease
+20:34:20.277 - Info: 
+20:34:20.277 - Info: 
+20:34:20.277 - Info:                         
+20:34:20.380 - Info: 0% [Working]
+20:34:20.550 - Info: 0% [Waiting for headers]
+20:34:21.180 - Info:                         
+20:34:21.180 - Info: Hit:7 http://ports.ubuntu.com/ubuntu-ports noble-updates InRelease
+20:34:21.180 - Info: 
+20:34:21.180 - Info: 
+20:34:21.295 - Info: 0% [Waiting for headers]
+20:34:21.391 - Info:                         
+20:34:21.391 - Info: Hit:8 http://ports.ubuntu.com/ubuntu-ports noble-backports InRelease
+20:34:21.391 - Info: 
+20:34:21.391 - Info: 
+20:34:21.391 - Info:                         
+20:34:21.494 - Info: 0% [Working]
+20:34:21.605 - Info: 0% [Waiting for headers]
+20:34:21.605 - Info:                         
+20:34:21.605 - Info: Hit:9 http://ports.ubuntu.com/ubuntu-ports noble-security InRelease
+20:34:21.605 - Info: 
+20:34:21.605 - Info: 
+20:34:21.605 - Info:                         
+20:34:21.724 - Info: 0% [Working]
+20:34:21.724 - Info: 100% [Working]
+20:34:21.724 - Info:               
+20:34:21.724 - Info: Fetched 107 kB in 2s (55.9 kB/s)
+20:34:21.724 - Info: 
+20:34:21.971 - Info: 
+20:34:21.971 - Info: Reading package lists... 0%
+20:34:21.989 - Info: 
+20:34:21.989 - Info: Reading package lists... 0%
+20:34:21.993 - Info: 
+20:34:21.993 - Info: Reading package lists... 0%
+20:34:21.993 - Info: 
+20:34:21.993 - Info: Reading package lists... 0%
+20:34:21.997 - Info: 
+20:34:21.997 - Info: Reading package lists... 0%
+20:34:21.997 - Info: 
+20:34:21.997 - Info: Reading package lists... 0%
+20:34:21.998 - Info: 
+20:34:21.999 - Info: Reading package lists... 0%
+20:34:21.999 - Info: 
+20:34:21.999 - Info: Reading package lists... 0%
+20:34:22.000 - Info: 
+20:34:22.000 - Info: Reading package lists... 0%
+20:34:22.000 - Info: 
+20:34:22.000 - Info: Reading package lists... 0%
+20:34:22.005 - Info: 
+20:34:22.005 - Info: Reading package lists... 0%
+20:34:22.076 - Info: 
+20:34:22.076 - Info: Reading package lists... 3%
+20:34:22.076 - Info: 
+20:34:22.076 - Info: Reading package lists... 3%
+20:34:22.088 - Info: 
+20:34:22.088 - Info: Reading package lists... 5%
+20:34:22.088 - Info: 
+20:34:22.088 - Info: Reading package lists... 5%
+20:34:22.730 - Info: 
+20:34:22.730 - Info: Reading package lists... 27%
+20:34:23.193 - Info: 
+20:34:23.193 - Info: Reading package lists... 41%
+20:34:23.193 - Info: 
+20:34:23.193 - Info: Reading package lists... 41%
+20:34:23.359 - Info: 
+20:34:23.359 - Info: Reading package lists... 57%
+20:34:23.359 - Info: 
+20:34:23.359 - Info: Reading package lists... 57%
+20:34:23.364 - Info: 
+20:34:23.364 - Info: Reading package lists... 58%
+20:34:23.364 - Info: 
+20:34:23.364 - Info: Reading package lists... 58%
+20:34:23.366 - Info: 
+20:34:23.366 - Info: Reading package lists... 58%
+20:34:23.366 - Info: 
+20:34:23.366 - Info: Reading package lists... 58%
+20:34:23.386 - Info: 
+20:34:23.386 - Info: Reading package lists... 58%
+20:34:23.386 - Info: 
+20:34:23.386 - Info: Reading package lists... 58%
+20:34:23.390 - Info: 
+20:34:23.390 - Info: Reading package lists... 59%
+20:34:23.390 - Info: 
+20:34:23.390 - Info: Reading package lists... 59%
+20:34:23.456 - Info: 
+20:34:23.456 - Info: Reading package lists... 61%
+20:34:23.485 - Info: 
+20:34:23.485 - Info: Reading package lists... 62%
+20:34:23.485 - Info: 
+20:34:23.485 - Info: Reading package lists... 62%
+20:34:23.503 - Info: 
+20:34:23.503 - Info: Reading package lists... 64%
+20:34:23.503 - Info: 
+20:34:23.503 - Info: Reading package lists... 64%
+20:34:23.661 - Info: 
+20:34:23.661 - Info: Reading package lists... 69%
+20:34:23.661 - Info: 
+20:34:23.661 - Info: Reading package lists... 69%
+20:34:23.684 - Info: 
+20:34:23.684 - Info: Reading package lists... 71%
+20:34:23.684 - Info: 
+20:34:23.684 - Info: Reading package lists... 71%
+20:34:23.811 - Info: 
+20:34:23.811 - Info: Reading package lists... 77%
+20:34:23.811 - Info: 
+20:34:23.811 - Info: Reading package lists... 77%
+20:34:23.847 - Info: 
+20:34:23.847 - Info: Reading package lists... 80%
+20:34:23.847 - Info: 
+20:34:23.847 - Info: Reading package lists... 80%
+20:34:23.850 - Info: 
+20:34:23.850 - Info: Reading package lists... 80%
+20:34:23.850 - Info: 
+20:34:23.850 - Info: Reading package lists... 80%
+20:34:23.852 - Info: 
+20:34:23.852 - Info: Reading package lists... 80%
+20:34:23.852 - Info: 
+20:34:23.852 - Info: Reading package lists... 80%
+20:34:23.857 - Info: 
+20:34:23.858 - Info: Reading package lists... 80%
+20:34:23.858 - Info: 
+20:34:23.858 - Info: Reading package lists... 80%
+20:34:23.858 - Info: 
+20:34:23.858 - Info: Reading package lists... 80%
+20:34:23.858 - Info: 
+20:34:23.858 - Info: Reading package lists... 80%
+20:34:23.861 - Info: 
+20:34:23.861 - Info: Reading package lists... 80%
+20:34:23.861 - Info: 
+20:34:23.861 - Info: Reading package lists... 80%
+20:34:23.862 - Info: 
+20:34:23.862 - Info: Reading package lists... 80%
+20:34:23.862 - Info: 
+20:34:23.862 - Info: Reading package lists... 80%
+20:34:23.863 - Info: 
+20:34:23.863 - Info: Reading package lists... 80%
+20:34:23.863 - Info: 
+20:34:23.863 - Info: Reading package lists... 80%
+20:34:23.863 - Info: 
+20:34:23.863 - Info: Reading package lists... 80%
+20:34:23.864 - Info: 
+20:34:23.864 - Info: Reading package lists... 80%
+20:34:23.894 - Info: 
+20:34:23.894 - Info: Reading package lists... 83%
+20:34:23.894 - Info: 
+20:34:23.894 - Info: Reading package lists... 83%
+20:34:23.910 - Info: 
+20:34:23.910 - Info: Reading package lists... 84%
+20:34:23.910 - Info: 
+20:34:23.910 - Info: Reading package lists... 84%
+20:34:23.951 - Info: 
+20:34:23.952 - Info: Reading package lists... 88%
+20:34:23.952 - Info: 
+20:34:23.952 - Info: Reading package lists... 88%
+20:34:23.968 - Info: 
+20:34:23.969 - Info: Reading package lists... 90%
+20:34:23.969 - Info: 
+20:34:23.969 - Info: Reading package lists... 90%
+20:34:24.030 - Info: 
+20:34:24.030 - Info: Reading package lists... 95%
+20:34:24.030 - Info: 
+20:34:24.030 - Info: Reading package lists... 95%
+20:34:24.063 - Info: 
+20:34:24.063 - Info: Reading package lists... 98%
+20:34:24.063 - Info: 
+20:34:24.063 - Info: Reading package lists... 98%
+20:34:24.065 - Info: 
+20:34:24.065 - Info: Reading package lists... 98%
+20:34:24.065 - Info: 
+20:34:24.065 - Info: Reading package lists... 98%
+20:34:24.146 - Info: 
+20:34:24.146 - Info: Reading package lists... 98%
+20:34:24.146 - Info: 
+20:34:24.146 - Info: Reading package lists... 98%
+20:34:24.158 - Info: 
+20:34:24.158 - Info: Reading package lists... 99%
+20:34:24.284 - Info: 
+20:34:24.284 - Info: Reading package lists... Done
+20:34:24.284 - Info: 
+20:34:24.284 - Info: 
+20:34:24.360 - Info: *begin sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin, 5
+20:34:24.360 - Info: 
+20:34:24.517 - Info: 
+20:34:24.517 - Info: Reading package lists... 0%
+20:34:24.548 - Info: 
+20:34:24.548 - Info: Reading package lists... 100%
+20:34:24.548 - Info: 
+20:34:24.548 - Info: Reading package lists... Done
+20:34:24.548 - Info: 
+20:34:24.548 - Info: 
+20:34:24.555 - Info: 
+20:34:24.555 - Info: Building dependency tree... 0%
+20:34:24.555 - Info: 
+20:34:24.555 - Info: Building dependency tree... 0%
+20:34:24.787 - Info: 
+20:34:24.787 - Info: Building dependency tree... 50%
+20:34:24.787 - Info: 
+20:34:24.787 - Info: Building dependency tree... 50%
+20:34:25.250 - Info: 
+20:34:25.250 - Info: Building dependency tree... 82%
+20:34:25.488 - Info: 
+20:34:25.488 - Info: Building dependency tree... Done
+20:34:25.488 - Info: 
+20:34:25.488 - Info: 
+20:34:25.488 - Info: 
+20:34:25.488 - Info: Reading state information... 0% 
+20:34:25.488 - Info: 
+20:34:25.488 - Info: Reading state information... 0%
+20:34:25.493 - Info: 
+20:34:25.493 - Info: Reading state information... Done
+20:34:25.493 - Info: 
+20:34:25.493 - Info: 
+20:34:27.182 - Info: The following additional packages will be installed:
+20:34:27.182 - Info: 
+20:34:27.189 - Info:   docker-ce-rootless-extras
+20:34:27.189 - Info: 
+20:34:27.196 - Info: Suggested packages:
+20:34:27.196 - Info: 
+20:34:27.196 - Info:   cgroupfs-mount | cgroup-lite docker-model-plugin
+20:34:27.196 - Info: 
+20:34:27.280 - Info: The following NEW packages will be installed:
+20:34:27.280 - Info: 
+20:34:27.288 - Info:   containerd.io docker-buildx-plugin docker-ce docker-ce-cli docker-ce-rootless-extras docker-compose-plugin
+20:34:27.288 - Info: 
+20:34:27.359 - Info: 0 upgraded, 6 newly installed, 0 to remove and 285 not upgraded.
+20:34:27.359 - Info: 
+20:34:27.363 - Info: Need to get 86.1 MB of archives.
+20:34:27.363 - Info: 
+20:34:27.363 - Info: After this operation, 357 MB of additional disk space will be used.
+20:34:27.363 - Info: 
+20:34:27.375 - Info: 
+20:34:27.437 - Info: 0% [Working]
+20:34:27.437 - Info:             
+20:34:27.437 - Info: Get:1 https://download.docker.com/linux/ubuntu noble/stable arm64 containerd.io arm64 2.2.6-1~ubuntu.24.04~noble [20.2 MB]
+20:34:27.437 - Info: 
+20:34:27.437 - Info: 
+20:34:27.938 - Info: 0% [1 containerd.io 15.9 kB/20.2 MB 0%]
+20:34:27.983 - Info: 19% [1 containerd.io 20.2 MB/20.2 MB 100%]
+20:34:27.983 - Info:                                           
+20:34:27.991 - Info: 22% [Working]
+20:34:27.991 - Info:              
+20:34:27.991 - Info: Get:2 https://download.docker.com/linux/ubuntu noble/stable arm64 docker-ce-cli arm64 5:29.6.2-1~ubuntu.24.04~noble [15.2 MB]
+20:34:27.991 - Info: 
+20:34:27.991 - Info: 
+20:34:28.405 - Info: 22% [2 docker-ce-cli 0 B/15.2 MB 0%]
+20:34:28.405 - Info:                                     
+20:34:28.405 - Info: 40% [Working]
+20:34:28.405 - Info:              
+20:34:28.405 - Info: Get:3 https://download.docker.com/linux/ubuntu noble/stable arm64 docker-ce arm64 5:29.6.2-1~ubuntu.24.04~noble [19.9 MB]
+20:34:28.405 - Info: 
+20:34:28.405 - Info: 
+20:34:28.908 - Info: 40% [3 docker-ce 19.4 kB/19.9 MB 0%]
+20:34:28.918 - Info: 58% [3 docker-ce 19.9 MB/19.9 MB 100%]
+20:34:28.919 - Info:                                       
+20:34:28.919 - Info: 61% [Working]
+20:34:28.919 - Info:              
+20:34:28.919 - Info: Get:4 https://download.docker.com/linux/ubuntu noble/stable arm64 docker-buildx-plugin arm64 0.35.0-1~ubuntu.24.04~noble [14.8 MB]
+20:34:28.919 - Info: 
+20:34:28.919 - Info: 
+20:34:29.298 - Info: 61% [4 docker-buildx-plugin 18.4 kB/14.8 MB 0%]
+20:34:29.298 - Info:                                                
+20:34:29.298 - Info: 78% [Working]
+20:34:29.298 - Info:              
+20:34:29.298 - Info: Get:5 https://download.docker.com/linux/ubuntu noble/stable arm64 docker-ce-rootless-extras arm64 5:29.6.2-1~ubuntu.24.04~noble [9,120 kB]
+20:34:29.298 - Info: 
+20:34:29.298 - Info: 
+20:34:29.559 - Info: 78% [5 docker-ce-rootless-extras 20.5 kB/9,120 kB 0%]
+20:34:29.559 - Info:                                                      
+20:34:29.559 - Info: 90% [Working]
+20:34:29.559 - Info:              
+20:34:29.559 - Info: Get:6 https://download.docker.com/linux/ubuntu noble/stable arm64 docker-compose-plugin arm64 5.3.1-1~ubuntu.24.04~noble [6,901 kB]
+20:34:29.559 - Info: 
+20:34:29.559 - Info: 
+20:34:29.749 - Info: 90% [6 docker-compose-plugin 24.9 kB/6,901 kB 0%]
+20:34:29.749 - Info:                                                  
+20:34:29.749 - Info: 100% [Working]
+20:34:29.749 - Info:               
+20:34:29.749 - Info: Fetched 86.1 MB in 2s (36.1 MB/s)
+20:34:29.749 - Info: 
+20:34:31.227 - Info: Selecting previously unselected package containerd.io.
+20:34:31.227 - Info: 
+20:34:31.227 - Info: (Reading database ... 
+20:34:31.250 - Info: (Reading database ... 5%
+20:34:31.250 - Info: (Reading database ... 10%
+20:34:31.250 - Info: (Reading database ... 15%
+20:34:31.250 - Info: (Reading database ... 20%
+20:34:31.250 - Info: (Reading database ... 25%
+20:34:31.250 - Info: (Reading database ... 30%
+20:34:31.250 - Info: (Reading database ... 35%
+20:34:31.250 - Info: (Reading database ... 40%
+20:34:31.250 - Info: (Reading database ... 45%
+20:34:31.250 - Info: (Reading database ... 50%
+20:34:31.258 - Info: (Reading database ... 55%
+20:34:31.275 - Info: (Reading database ... 60%
+20:34:31.287 - Info: (Reading database ... 65%
+20:34:31.305 - Info: (Reading database ... 70%
+20:34:31.341 - Info: (Reading database ... 75%
+20:34:31.354 - Info: (Reading database ... 80%
+20:34:31.370 - Info: (Reading database ... 85%
+20:34:31.386 - Info: (Reading database ... 90%
+20:34:31.395 - Info: (Reading database ... 95%
+20:34:31.439 - Info: (Reading database ... 100%
+20:34:31.439 - Info: (Reading database ... 182997 files and directories currently installed.)
+20:34:31.440 - Info: 
+20:34:31.457 - Info: Preparing to unpack .../0-containerd.io_2.2.6-1~ubuntu.24.04~noble_arm64.deb ...
+20:34:31.457 - Info: 
+20:34:31.471 - Info: Unpacking containerd.io (2.2.6-1~ubuntu.24.04~noble) ...
+20:34:31.471 - Info: 
+20:34:33.502 - Info: Selecting previously unselected package docker-ce-cli.
+20:34:33.502 - Info: 
+20:34:33.573 - Info: Preparing to unpack .../1-docker-ce-cli_5%3a29.6.2-1~ubuntu.24.04~noble_arm64.deb ...
+20:34:33.573 - Info: 
+20:34:33.597 - Info: Unpacking docker-ce-cli (5:29.6.2-1~ubuntu.24.04~noble) ...
+20:34:33.597 - Info: 
+20:34:35.403 - Info: Selecting previously unselected package docker-ce.
+20:34:35.403 - Info: 
+20:34:35.478 - Info: Preparing to unpack .../2-docker-ce_5%3a29.6.2-1~ubuntu.24.04~noble_arm64.deb ...
+20:34:35.478 - Info: 
+20:34:35.500 - Info: Unpacking docker-ce (5:29.6.2-1~ubuntu.24.04~noble) ...
+20:34:35.500 - Info: 
+20:34:37.566 - Info: Selecting previously unselected package docker-buildx-plugin.
+20:34:37.566 - Info: 
+20:34:37.636 - Info: Preparing to unpack .../3-docker-buildx-plugin_0.35.0-1~ubuntu.24.04~noble_arm64.deb ...
+20:34:37.636 - Info: 
+20:34:37.647 - Info: Unpacking docker-buildx-plugin (0.35.0-1~ubuntu.24.04~noble) ...
+20:34:37.647 - Info: 
+20:34:50.202 - Info: Selecting previously unselected package docker-ce-rootless-extras.
+20:34:50.202 - Info: 
+20:34:50.270 - Info: Preparing to unpack .../4-docker-ce-rootless-extras_5%3a29.6.2-1~ubuntu.24.04~noble_arm64.deb ...
+20:34:50.270 - Info: 
+20:34:50.279 - Info: Unpacking docker-ce-rootless-extras (5:29.6.2-1~ubuntu.24.04~noble) ...
+20:34:50.279 - Info: 
+20:34:51.195 - Info: Selecting previously unselected package docker-compose-plugin.
+20:34:51.196 - Info: 
+20:34:51.264 - Info: Preparing to unpack .../5-docker-compose-plugin_5.3.1-1~ubuntu.24.04~noble_arm64.deb ...
+20:34:51.264 - Info: 
+20:34:51.274 - Info: Unpacking docker-compose-plugin (5.3.1-1~ubuntu.24.04~noble) ...
+20:34:51.274 - Info: 
+20:34:52.501 - Info: Setting up docker-buildx-plugin (0.35.0-1~ubuntu.24.04~noble) ...
+20:34:52.502 - Info: 
+20:34:52.520 - Info: Setting up containerd.io (2.2.6-1~ubuntu.24.04~noble) ...
+20:34:52.520 - Info: 
+20:34:52.802 - Info: Created symlink /etc/systemd/system/multi-user.target.wants/containerd.service → /usr/lib/systemd/system/containerd.service.
+20:34:52.802 - Info: 
+20:34:52.802 - Info: 
+20:34:53.758 - Info: Setting up docker-compose-plugin (5.3.1-1~ubuntu.24.04~noble) ...
+20:34:53.758 - Info: 
+20:34:53.776 - Info: Setting up docker-ce-cli (5:29.6.2-1~ubuntu.24.04~noble) ...
+20:34:53.776 - Info: 
+20:34:53.803 - Info: Setting up docker-ce-rootless-extras (5:29.6.2-1~ubuntu.24.04~noble) ...
+20:34:53.803 - Info: 
+20:34:53.821 - Info: Setting up docker-ce (5:29.6.2-1~ubuntu.24.04~noble) ...
+20:34:53.821 - Info: 
+20:34:54.860 - Info: Created symlink /etc/systemd/system/multi-user.target.wants/docker.service → /usr/lib/systemd/system/docker.service.
+20:34:54.861 - Info: 
+20:34:54.861 - Info: 
+20:34:55.110 - Info: Created symlink /etc/systemd/system/sockets.target.wants/docker.socket → /usr/lib/systemd/system/docker.socket.
+20:34:55.110 - Info: 
+20:34:55.110 - Info: 
+20:34:57.061 - Info: Processing triggers for man-db (2.12.0-4build2) ...
+20:34:57.061 - Info: 
+20:35:03.016 - Info: Docker service installed
+20:35:03.016 - Info: 
+20:35:03.020 - Info: [ Package PreInstall Finished Successfully ]20:35:03.020 - Info: [ Package Install Started ]20:35:03.020 - Info: target deb installer start to install20:35:03.020 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+sudo mkdir -p /opt/nvidia/deb_repos
+sudo chmod 777 /opt/nvidia/deb_repos
+sudo rm -f /opt/nvidia/deb_repos/libnvidia-container1_1.19.1-1_arm64.deb
+**********************20:35:04.522 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+
+exec 3>&1
+exec 1>&2
+exec 2>&3
+function safe_apt_install {
+    export DEBIAN_FRONTEND=noninteractive
+    echo "*begin $1, $2"
+    tmp_log=/tmp/sdkm_apt_install_log.ckw.txt
+    sudo rm -f $tmp_log
+    set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+    MAX_RETRY=3
+    TIMES=1
+    while [ ${CMD_STATUS} -ne 0 ]; do
+        cat $tmp_log > /dev/stderr
+        if [ $TIMES -gt $MAX_RETRY ]; then
+            echo "Unhandled error when running $1: `tr '\n' '; ' <$tmp_log`" 1>&2; exit 1
+        fi
+        if grep -q -e "is locked by another process" -e "E: Could not get lock /var/" -e "Could not open lock" $tmp_log; then
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting $2 seconds for apt to be available"; sleep ${2}
+        elif grep -q -e "apt --fix-broken install" $tmp_log; then
+            echo "safe apt install failed, need to run apt --fix-broken install"
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; sudo apt-get -f -y --allow-downgrades install 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting 5 seconds for apt"; sleep 5
+        else
+            echo "safe apt install failed: $1, exit code: $CMD_STATUS, retry number: $TIMES"
+            echo "will sleep $[ $TIMES*10 ] seconds before next attempt"
+            sleep $[ $TIMES*10 ]
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+        fi
+    done
+    if [ $CMD_STATUS -eq 0 ] && [ $TIMES -ne 1 ]; then
+        echo "safe apt install succeed. retry number: $TIMES."
+    fi
+}
+safe_apt_install "sudo apt-get -y update" 5
+sleep 0.5
+safe_apt_install "sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/libnvidia-container1_1.19.1-1_arm64.deb" 5
+sleep 5
+sudo rm -f /opt/nvidia/deb_repos/libnvidia-container1_1.19.1-1_arm64.deb
+**********************20:35:05.301 - Info: *begin sudo apt-get -y update, 5
+20:35:05.301 - Info: 
+20:35:05.581 - Info: 
+20:35:05.646 - Info: 0% [Working]
+20:35:05.646 - Info:             
+20:35:05.646 - Info: Hit:1 https://download.docker.com/linux/ubuntu noble InRelease
+20:35:05.646 - Info: 
+20:35:05.646 - Info: 
+20:35:05.652 - Info: 0% [Connected to repo.download.nvidia.com (23.205.151.187)] [Connecting to ports.ubuntu.com]
+20:35:05.652 - Info:                                                                                             
+20:35:05.652 - Info: Hit:2 https://repo.download.nvidia.com/jetson/common r39.2 InRelease
+20:35:05.652 - Info: 
+20:35:05.652 - Info: 
+20:35:05.652 - Info:                                                                                             
+20:35:05.744 - Info: 0% [Connecting to ports.ubuntu.com]
+20:35:05.745 - Info:                                    
+20:35:05.745 - Info: Hit:3 https://repo.download.nvidia.com/jetson/som r39.2 InRelease
+20:35:05.745 - Info: 
+20:35:05.745 - Info: 
+20:35:05.775 - Info: 0% [Connecting to repo.download.nvidia.com (23.205.151.187)] [Connecting to ports.ubuntu.com]
+20:35:05.775 - Info:                                                                                              
+20:35:05.804 - Info: 0% [Connected to repo.download.nvidia.com (23.205.151.187)] [Connecting to ports.ubuntu.com]
+20:35:05.804 - Info:                                                                                             
+20:35:05.804 - Info: Hit:4 https://repo.download.nvidia.com/jetson/ffmpeg r39.2 InRelease
+20:35:05.804 - Info: 
+20:35:05.804 - Info: 
+20:35:05.804 - Info:                                                                                             
+20:35:05.960 - Info: 0% [Connecting to ports.ubuntu.com]
+20:35:06.129 - Info: 0% [Connecting to ports.ubuntu.com (91.189.92.21)]
+20:35:06.129 - Info:                                                   
+20:35:06.299 - Info: 0% [Waiting for headers]
+20:35:06.302 - Info:                         
+20:35:06.303 - Info: Hit:5 http://ports.ubuntu.com/ubuntu-ports noble InRelease
+20:35:06.303 - Info: 
+20:35:06.303 - Info: 
+20:35:06.303 - Info:                         
+20:35:06.431 - Info: 0% [Working]
+20:35:06.518 - Info: 0% [Waiting for headers]
+20:35:06.518 - Info:                         
+20:35:06.518 - Info: Hit:6 http://ports.ubuntu.com/ubuntu-ports noble-updates InRelease
+20:35:06.518 - Info: 
+20:35:06.518 - Info: 
+20:35:06.518 - Info:                         
+20:35:06.634 - Info: 0% [Working]
+20:35:06.732 - Info: 0% [Waiting for headers]
+20:35:06.732 - Info:                         
+20:35:06.732 - Info: Hit:7 http://ports.ubuntu.com/ubuntu-ports noble-backports InRelease
+20:35:06.732 - Info: 
+20:35:06.732 - Info: 
+20:35:06.732 - Info:                         
+20:35:06.849 - Info: 0% [Working]
+20:35:06.945 - Info: 0% [Waiting for headers]
+20:35:06.945 - Info:                         
+20:35:06.945 - Info: Hit:8 http://ports.ubuntu.com/ubuntu-ports noble-security InRelease
+20:35:06.945 - Info: 
+20:35:06.945 - Info: 
+20:35:06.945 - Info:                         
+20:35:07.061 - Info: 0% [Working]
+20:35:07.061 - Info: 20% [Working]
+20:35:07.061 - Info:              
+20:35:07.248 - Info: 
+20:35:07.248 - Info: Reading package lists... 0%
+20:35:07.269 - Info: 
+20:35:07.269 - Info: Reading package lists... 0%
+20:35:07.277 - Info: 
+20:35:07.277 - Info: Reading package lists... 0%
+20:35:07.277 - Info: 
+20:35:07.277 - Info: Reading package lists... 0%
+20:35:07.280 - Info: 
+20:35:07.280 - Info: Reading package lists... 0%
+20:35:07.280 - Info: 
+20:35:07.280 - Info: Reading package lists... 0%
+20:35:07.286 - Info: 
+20:35:07.286 - Info: Reading package lists... 0%
+20:35:07.286 - Info: 
+20:35:07.286 - Info: Reading package lists... 0%
+20:35:07.286 - Info: 
+20:35:07.286 - Info: Reading package lists... 0%
+20:35:07.286 - Info: 
+20:35:07.286 - Info: Reading package lists... 0%
+20:35:07.290 - Info: 
+20:35:07.290 - Info: Reading package lists... 0%
+20:35:07.373 - Info: 
+20:35:07.373 - Info: Reading package lists... 3%
+20:35:07.373 - Info: 
+20:35:07.373 - Info: Reading package lists... 3%
+20:35:07.386 - Info: 
+20:35:07.386 - Info: Reading package lists... 5%
+20:35:07.386 - Info: 
+20:35:07.386 - Info: Reading package lists... 5%
+20:35:08.033 - Info: 
+20:35:08.033 - Info: Reading package lists... 27%
+20:35:08.490 - Info: 
+20:35:08.490 - Info: Reading package lists... 41%
+20:35:08.490 - Info: 
+20:35:08.490 - Info: Reading package lists... 41%
+20:35:08.655 - Info: 
+20:35:08.655 - Info: Reading package lists... 57%
+20:35:08.655 - Info: 
+20:35:08.655 - Info: Reading package lists... 57%
+20:35:08.661 - Info: 
+20:35:08.661 - Info: Reading package lists... 58%
+20:35:08.661 - Info: 
+20:35:08.661 - Info: Reading package lists... 58%
+20:35:08.662 - Info: 
+20:35:08.662 - Info: Reading package lists... 58%
+20:35:08.662 - Info: 
+20:35:08.662 - Info: Reading package lists... 58%
+20:35:08.681 - Info: 
+20:35:08.681 - Info: Reading package lists... 58%
+20:35:08.682 - Info: 
+20:35:08.682 - Info: Reading package lists... 58%
+20:35:08.685 - Info: 
+20:35:08.685 - Info: Reading package lists... 59%
+20:35:08.685 - Info: 
+20:35:08.685 - Info: Reading package lists... 59%
+20:35:08.752 - Info: 
+20:35:08.752 - Info: Reading package lists... 61%
+20:35:08.779 - Info: 
+20:35:08.779 - Info: Reading package lists... 62%
+20:35:08.779 - Info: 
+20:35:08.779 - Info: Reading package lists... 62%
+20:35:08.799 - Info: 
+20:35:08.799 - Info: Reading package lists... 64%
+20:35:08.799 - Info: 
+20:35:08.799 - Info: Reading package lists... 64%
+20:35:08.942 - Info: 
+20:35:08.942 - Info: Reading package lists... 69%
+20:35:08.942 - Info: 
+20:35:08.942 - Info: Reading package lists... 69%
+20:35:08.965 - Info: 
+20:35:08.965 - Info: Reading package lists... 71%
+20:35:08.965 - Info: 
+20:35:08.965 - Info: Reading package lists... 71%
+20:35:09.093 - Info: 
+20:35:09.093 - Info: Reading package lists... 77%
+20:35:09.093 - Info: 
+20:35:09.093 - Info: Reading package lists... 77%
+20:35:09.128 - Info: 
+20:35:09.128 - Info: Reading package lists... 80%
+20:35:09.128 - Info: 
+20:35:09.128 - Info: Reading package lists... 80%
+20:35:09.133 - Info: 
+20:35:09.133 - Info: Reading package lists... 80%
+20:35:09.133 - Info: 
+20:35:09.133 - Info: Reading package lists... 80%
+20:35:09.142 - Info: 
+20:35:09.142 - Info: Reading package lists... 80%
+20:35:09.142 - Info: 
+20:35:09.142 - Info: Reading package lists... 80%
+20:35:09.148 - Info: 
+20:35:09.148 - Info: Reading package lists... 80%
+20:35:09.148 - Info: 
+20:35:09.148 - Info: Reading package lists... 80%
+20:35:09.148 - Info: 
+20:35:09.148 - Info: Reading package lists... 80%
+20:35:09.148 - Info: 
+20:35:09.148 - Info: Reading package lists... 80%
+20:35:09.152 - Info: 
+20:35:09.152 - Info: Reading package lists... 80%
+20:35:09.152 - Info: 
+20:35:09.152 - Info: Reading package lists... 80%
+20:35:09.152 - Info: 
+20:35:09.152 - Info: Reading package lists... 80%
+20:35:09.152 - Info: 
+20:35:09.152 - Info: Reading package lists... 80%
+20:35:09.152 - Info: 
+20:35:09.152 - Info: Reading package lists... 80%
+20:35:09.152 - Info: 
+20:35:09.152 - Info: Reading package lists... 80%
+20:35:09.155 - Info: 
+20:35:09.155 - Info: Reading package lists... 80%
+20:35:09.155 - Info: 
+20:35:09.155 - Info: Reading package lists... 80%
+20:35:09.183 - Info: 
+20:35:09.183 - Info: Reading package lists... 83%
+20:35:09.183 - Info: 
+20:35:09.183 - Info: Reading package lists... 83%
+20:35:09.199 - Info: 
+20:35:09.199 - Info: Reading package lists... 84%
+20:35:09.199 - Info: 
+20:35:09.199 - Info: Reading package lists... 84%
+20:35:09.240 - Info: 
+20:35:09.240 - Info: Reading package lists... 88%
+20:35:09.241 - Info: 
+20:35:09.241 - Info: Reading package lists... 88%
+20:35:09.256 - Info: 
+20:35:09.256 - Info: Reading package lists... 90%
+20:35:09.256 - Info: 
+20:35:09.256 - Info: Reading package lists... 90%
+20:35:09.316 - Info: 
+20:35:09.316 - Info: Reading package lists... 95%
+20:35:09.316 - Info: 
+20:35:09.316 - Info: Reading package lists... 95%
+20:35:09.347 - Info: 
+20:35:09.347 - Info: Reading package lists... 98%
+20:35:09.347 - Info: 
+20:35:09.347 - Info: Reading package lists... 98%
+20:35:09.351 - Info: 
+20:35:09.352 - Info: Reading package lists... 98%
+20:35:09.352 - Info: 
+20:35:09.352 - Info: Reading package lists... 98%
+20:35:09.431 - Info: 
+20:35:09.431 - Info: Reading package lists... 98%
+20:35:09.431 - Info: 
+20:35:09.431 - Info: Reading package lists... 98%
+20:35:09.548 - Info: 
+20:35:09.549 - Info: Reading package lists... Done
+20:35:09.549 - Info: 
+20:35:09.549 - Info: 
+20:35:10.124 - Info: *begin sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/libnvidia-container1_1.19.1-1_arm64.deb, 5
+20:35:10.124 - Info: 
+20:35:10.296 - Info: 
+20:35:10.297 - Info: Reading package lists... 0%
+20:35:10.379 - Info: 
+20:35:10.379 - Info: Reading package lists... 0%
+20:35:10.390 - Info: 
+20:35:10.391 - Info: Reading package lists... Done
+20:35:10.391 - Info: 
+20:35:10.391 - Info: 
+20:35:10.414 - Info: 
+20:35:10.414 - Info: Building dependency tree... 0%
+20:35:10.414 - Info: 
+20:35:10.414 - Info: Building dependency tree... 0%
+20:35:10.416 - Info: 
+20:35:10.416 - Info: Building dependency tree... 0%
+20:35:10.655 - Info: 
+20:35:10.655 - Info: Building dependency tree... 50%
+20:35:10.655 - Info: 
+20:35:10.655 - Info: Building dependency tree... 50%
+20:35:11.119 - Info: 
+20:35:11.119 - Info: Building dependency tree... 81%
+20:35:11.356 - Info: 
+20:35:11.356 - Info: Building dependency tree... Done
+20:35:11.356 - Info: 
+20:35:11.356 - Info: 
+20:35:11.356 - Info: 
+20:35:11.356 - Info: Reading state information... 0% 
+20:35:11.356 - Info: 
+20:35:11.356 - Info: Reading state information... 0%
+20:35:11.360 - Info: 
+20:35:11.360 - Info: Reading state information... Done
+20:35:11.361 - Info: 
+20:35:11.361 - Info: 
+20:35:11.493 - Info: Note, selecting 'libnvidia-container1' instead of '/opt/nvidia/deb_repos/libnvidia-container1_1.19.1-1_arm64.deb'
+20:35:11.493 - Info: 
+20:35:13.051 - Info: The following NEW packages will be installed:
+20:35:13.051 - Info: 
+20:35:13.057 - Info:   libnvidia-container1
+20:35:13.057 - Info: 
+20:35:13.127 - Info: 0 upgraded, 1 newly installed, 0 to remove and 285 not upgraded.
+20:35:13.127 - Info: 
+20:35:13.132 - Info: Need to get 1,017 kB of archives.
+20:35:13.132 - Info: 
+20:35:13.132 - Info: After this operation, 3,581 kB of additional disk space will be used.
+20:35:13.132 - Info: 
+20:35:13.145 - Info: 
+20:35:13.245 - Info: 0% [Working]
+20:35:13.245 - Info:             
+20:35:13.246 - Info: Get:1 https://repo.download.nvidia.com/jetson/common r39.2/main arm64 libnvidia-container1 arm64 1.19.1-1 [1,017 kB]
+20:35:13.246 - Info: 
+20:35:13.246 - Info: 
+20:35:13.279 - Info: 1% [1 libnvidia-container1 15.7 kB/1,017 kB 2%]
+20:35:13.279 - Info:                                                
+20:35:13.279 - Info: 100% [Working]
+20:35:13.279 - Info:               
+20:35:13.279 - Info: Fetched 1,017 kB in 0s (6,940 kB/s)
+20:35:13.279 - Info: 
+20:35:14.742 - Info: Selecting previously unselected package libnvidia-container1:arm64.
+20:35:14.742 - Info: 
+20:35:14.742 - Info: (Reading database ... 
+20:35:14.764 - Info: (Reading database ... 5%
+20:35:14.764 - Info: (Reading database ... 10%
+20:35:14.764 - Info: (Reading database ... 15%
+20:35:14.764 - Info: (Reading database ... 20%
+20:35:14.764 - Info: (Reading database ... 25%
+20:35:14.764 - Info: (Reading database ... 30%
+20:35:14.764 - Info: (Reading database ... 35%
+20:35:14.764 - Info: (Reading database ... 40%
+20:35:14.764 - Info: (Reading database ... 45%
+20:35:14.764 - Info: (Reading database ... 50%
+20:35:14.771 - Info: (Reading database ... 55%
+20:35:14.784 - Info: (Reading database ... 60%
+20:35:14.796 - Info: (Reading database ... 65%
+20:35:14.812 - Info: (Reading database ... 70%
+20:35:14.848 - Info: (Reading database ... 75%
+20:35:14.860 - Info: (Reading database ... 80%
+20:35:14.876 - Info: (Reading database ... 85%
+20:35:14.892 - Info: (Reading database ... 90%
+20:35:14.901 - Info: (Reading database ... 95%
+20:35:14.946 - Info: (Reading database ... 100%
+20:35:14.946 - Info: (Reading database ... 183225 files and directories currently installed.)
+20:35:14.946 - Info: 
+20:35:14.964 - Info: Preparing to unpack .../libnvidia-container1_1.19.1-1_arm64.deb ...
+20:35:14.964 - Info: 
+20:35:14.982 - Info: Unpacking libnvidia-container1:arm64 (1.19.1-1) ...
+20:35:14.982 - Info: 
+20:35:15.340 - Info: Setting up libnvidia-container1:arm64 (1.19.1-1) ...
+20:35:15.340 - Info: 
+20:35:15.385 - Info: Processing triggers for libc-bin (2.39-0ubuntu8.7) ...
+20:35:15.385 - Info: 
+20:35:26.297 - Info: change working directory to /tmp20:35:26.297 - Info: exec_command: ssh jetson@192.168.55.1 "dpkg-query -W -f='\${db:Status-abbrev} \${Version}' libnvidia-container1"20:35:26.705 - Info: [ Package Install Finished Successfully ]20:35:26.705 - Info: [ Package Install Started ]20:35:26.705 - Info: target deb installer start to install20:35:26.705 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+sudo mkdir -p /opt/nvidia/deb_repos
+sudo chmod 777 /opt/nvidia/deb_repos
+sudo rm -f /opt/nvidia/deb_repos/libnvidia-container-tools_1.19.1-1_arm64.deb
+**********************20:35:28.127 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+
+exec 3>&1
+exec 1>&2
+exec 2>&3
+function safe_apt_install {
+    export DEBIAN_FRONTEND=noninteractive
+    echo "*begin $1, $2"
+    tmp_log=/tmp/sdkm_apt_install_log.ckw.txt
+    sudo rm -f $tmp_log
+    set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+    MAX_RETRY=3
+    TIMES=1
+    while [ ${CMD_STATUS} -ne 0 ]; do
+        cat $tmp_log > /dev/stderr
+        if [ $TIMES -gt $MAX_RETRY ]; then
+            echo "Unhandled error when running $1: `tr '\n' '; ' <$tmp_log`" 1>&2; exit 1
+        fi
+        if grep -q -e "is locked by another process" -e "E: Could not get lock /var/" -e "Could not open lock" $tmp_log; then
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting $2 seconds for apt to be available"; sleep ${2}
+        elif grep -q -e "apt --fix-broken install" $tmp_log; then
+            echo "safe apt install failed, need to run apt --fix-broken install"
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; sudo apt-get -f -y --allow-downgrades install 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting 5 seconds for apt"; sleep 5
+        else
+            echo "safe apt install failed: $1, exit code: $CMD_STATUS, retry number: $TIMES"
+            echo "will sleep $[ $TIMES*10 ] seconds before next attempt"
+            sleep $[ $TIMES*10 ]
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+        fi
+    done
+    if [ $CMD_STATUS -eq 0 ] && [ $TIMES -ne 1 ]; then
+        echo "safe apt install succeed. retry number: $TIMES."
+    fi
+}
+safe_apt_install "sudo apt-get -y update" 5
+sleep 0.5
+safe_apt_install "sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/libnvidia-container-tools_1.19.1-1_arm64.deb" 5
+sleep 5
+sudo rm -f /opt/nvidia/deb_repos/libnvidia-container-tools_1.19.1-1_arm64.deb
+**********************20:35:28.877 - Info: *begin sudo apt-get -y update, 5
+20:35:28.877 - Info: 
+20:35:29.177 - Info: 
+20:35:29.260 - Info: 0% [Working]
+20:35:29.260 - Info:             
+20:35:29.260 - Info: Hit:1 https://download.docker.com/linux/ubuntu noble InRelease
+20:35:29.260 - Info: 
+20:35:29.260 - Info: 
+20:35:29.287 - Info: 0% [Waiting for headers] [Connecting to ports.ubuntu.com (91.189.91.104)]
+20:35:29.287 - Info:                                                                          
+20:35:29.287 - Info: Hit:2 https://repo.download.nvidia.com/jetson/common r39.2 InRelease
+20:35:29.287 - Info: 
+20:35:29.287 - Info: 
+20:35:29.348 - Info: 0% [Connecting to repo.download.nvidia.com (23.205.151.187)] [Connecting to ports.ubuntu.com (91.189.91.104)]
+20:35:29.348 - Info:                                                                                                              
+20:35:29.348 - Info: Hit:3 https://repo.download.nvidia.com/jetson/som r39.2 InRelease
+20:35:29.348 - Info: 
+20:35:29.348 - Info: 
+20:35:29.404 - Info: 0% [Connecting to repo.download.nvidia.com (23.205.151.187)] [Connecting to ports.ubuntu.com (91.189.91.104)]
+20:35:29.404 - Info:                                                                                                              
+20:35:29.442 - Info: 0% [Waiting for headers] [Connecting to ports.ubuntu.com (91.189.91.104)]
+20:35:29.442 - Info:                                                                          
+20:35:29.442 - Info: Hit:4 https://repo.download.nvidia.com/jetson/ffmpeg r39.2 InRelease
+20:35:29.442 - Info: 
+20:35:29.442 - Info: 
+20:35:29.442 - Info:                                                                          
+20:35:29.601 - Info: 0% [Waiting for headers]
+20:35:29.649 - Info:                         
+20:35:29.649 - Info: Hit:5 http://ports.ubuntu.com/ubuntu-ports noble InRelease
+20:35:29.649 - Info: 
+20:35:29.649 - Info: 
+20:35:29.649 - Info:                         
+20:35:29.761 - Info: 0% [Working]
+20:35:29.881 - Info: 0% [Waiting for headers]
+20:35:29.881 - Info:                         
+20:35:29.881 - Info: Hit:6 http://ports.ubuntu.com/ubuntu-ports noble-updates InRelease
+20:35:29.881 - Info: 
+20:35:29.881 - Info: 
+20:35:29.933 - Info: 0% [Waiting for headers]
+20:35:30.111 - Info:                         
+20:35:30.111 - Info: Hit:7 http://ports.ubuntu.com/ubuntu-ports noble-backports InRelease
+20:35:30.111 - Info: 
+20:35:30.111 - Info: 
+20:35:30.111 - Info:                         
+20:35:30.176 - Info: 0% [Working]
+20:35:30.299 - Info: 0% [Waiting for headers]
+20:35:30.342 - Info:                         
+20:35:30.342 - Info: Hit:8 http://ports.ubuntu.com/ubuntu-ports noble-security InRelease
+20:35:30.342 - Info: 
+20:35:30.342 - Info: 
+20:35:30.342 - Info:                         
+20:35:30.457 - Info: 0% [Working]
+20:35:30.457 - Info: 20% [Working]
+20:35:30.457 - Info:              
+20:35:31.086 - Info: 
+20:35:31.086 - Info: Reading package lists... 0%
+20:35:31.104 - Info: 
+20:35:31.104 - Info: Reading package lists... 0%
+20:35:31.108 - Info: 
+20:35:31.108 - Info: Reading package lists... 0%
+20:35:31.108 - Info: 
+20:35:31.108 - Info: Reading package lists... 0%
+20:35:31.112 - Info: 
+20:35:31.112 - Info: Reading package lists... 0%
+20:35:31.112 - Info: 
+20:35:31.112 - Info: Reading package lists... 0%
+20:35:31.113 - Info: 
+20:35:31.113 - Info: Reading package lists... 0%
+20:35:31.113 - Info: 
+20:35:31.113 - Info: Reading package lists... 0%
+20:35:31.115 - Info: 
+20:35:31.115 - Info: Reading package lists... 0%
+20:35:31.115 - Info: 
+20:35:31.115 - Info: Reading package lists... 0%
+20:35:31.120 - Info: 
+20:35:31.120 - Info: Reading package lists... 0%
+20:35:31.196 - Info: 
+20:35:31.196 - Info: Reading package lists... 3%
+20:35:31.196 - Info: 
+20:35:31.196 - Info: Reading package lists... 3%
+20:35:31.211 - Info: 
+20:35:31.211 - Info: Reading package lists... 5%
+20:35:31.211 - Info: 
+20:35:31.211 - Info: Reading package lists... 5%
+20:35:31.870 - Info: 
+20:35:31.870 - Info: Reading package lists... 27%
+20:35:32.331 - Info: 
+20:35:32.331 - Info: Reading package lists... 41%
+20:35:32.331 - Info: 
+20:35:32.331 - Info: Reading package lists... 41%
+20:35:32.497 - Info: 
+20:35:32.497 - Info: Reading package lists... 57%
+20:35:32.497 - Info: 
+20:35:32.498 - Info: Reading package lists... 57%
+20:35:32.504 - Info: 
+20:35:32.504 - Info: Reading package lists... 58%
+20:35:32.504 - Info: 
+20:35:32.504 - Info: Reading package lists... 58%
+20:35:32.505 - Info: 
+20:35:32.505 - Info: Reading package lists... 58%
+20:35:32.505 - Info: 
+20:35:32.505 - Info: Reading package lists... 58%
+20:35:32.525 - Info: 
+20:35:32.525 - Info: Reading package lists... 58%
+20:35:32.525 - Info: 
+20:35:32.525 - Info: Reading package lists... 58%
+20:35:32.528 - Info: 
+20:35:32.528 - Info: Reading package lists... 59%
+20:35:32.528 - Info: 
+20:35:32.528 - Info: Reading package lists... 59%
+20:35:32.595 - Info: 
+20:35:32.595 - Info: Reading package lists... 61%
+20:35:32.623 - Info: 
+20:35:32.623 - Info: Reading package lists... 62%
+20:35:32.623 - Info: 
+20:35:32.623 - Info: Reading package lists... 62%
+20:35:32.642 - Info: 
+20:35:32.642 - Info: Reading package lists... 64%
+20:35:32.642 - Info: 
+20:35:32.642 - Info: Reading package lists... 64%
+20:35:32.786 - Info: 
+20:35:32.786 - Info: Reading package lists... 69%
+20:35:32.786 - Info: 
+20:35:32.786 - Info: Reading package lists... 69%
+20:35:32.809 - Info: 
+20:35:32.809 - Info: Reading package lists... 71%
+20:35:32.809 - Info: 
+20:35:32.809 - Info: Reading package lists... 71%
+20:35:32.938 - Info: 
+20:35:32.938 - Info: Reading package lists... 77%
+20:35:32.938 - Info: 
+20:35:32.938 - Info: Reading package lists... 77%
+20:35:32.972 - Info: 
+20:35:32.972 - Info: Reading package lists... 80%
+20:35:32.972 - Info: 
+20:35:32.972 - Info: Reading package lists... 80%
+20:35:32.977 - Info: 
+20:35:32.977 - Info: Reading package lists... 80%
+20:35:32.977 - Info: 
+20:35:32.977 - Info: Reading package lists... 80%
+20:35:32.979 - Info: 
+20:35:32.979 - Info: Reading package lists... 80%
+20:35:32.979 - Info: 
+20:35:32.979 - Info: Reading package lists... 80%
+20:35:32.984 - Info: 
+20:35:32.984 - Info: Reading package lists... 80%
+20:35:32.984 - Info: 
+20:35:32.984 - Info: Reading package lists... 80%
+20:35:32.984 - Info: 
+20:35:32.984 - Info: Reading package lists... 80%
+20:35:32.984 - Info: 
+20:35:32.984 - Info: Reading package lists... 80%
+20:35:32.988 - Info: 
+20:35:32.988 - Info: Reading package lists... 80%
+20:35:32.988 - Info: 
+20:35:32.988 - Info: Reading package lists... 80%
+20:35:32.988 - Info: 
+20:35:32.988 - Info: Reading package lists... 80%
+20:35:32.988 - Info: 
+20:35:32.988 - Info: Reading package lists... 80%
+20:35:32.989 - Info: 
+20:35:32.989 - Info: Reading package lists... 80%
+20:35:32.989 - Info: 
+20:35:32.989 - Info: Reading package lists... 80%
+20:35:32.990 - Info: 
+20:35:32.990 - Info: Reading package lists... 80%
+20:35:32.990 - Info: 
+20:35:32.990 - Info: Reading package lists... 80%
+20:35:33.021 - Info: 
+20:35:33.021 - Info: Reading package lists... 83%
+20:35:33.021 - Info: 
+20:35:33.021 - Info: Reading package lists... 83%
+20:35:33.035 - Info: 
+20:35:33.035 - Info: Reading package lists... 84%
+20:35:33.035 - Info: 
+20:35:33.035 - Info: Reading package lists... 84%
+20:35:33.077 - Info: 
+20:35:33.077 - Info: Reading package lists... 88%
+20:35:33.077 - Info: 
+20:35:33.077 - Info: Reading package lists... 88%
+20:35:33.093 - Info: 
+20:35:33.093 - Info: Reading package lists... 90%
+20:35:33.093 - Info: 
+20:35:33.093 - Info: Reading package lists... 90%
+20:35:33.153 - Info: 
+20:35:33.153 - Info: Reading package lists... 95%
+20:35:33.153 - Info: 
+20:35:33.153 - Info: Reading package lists... 95%
+20:35:33.186 - Info: 
+20:35:33.186 - Info: Reading package lists... 98%
+20:35:33.186 - Info: 
+20:35:33.186 - Info: Reading package lists... 98%
+20:35:33.189 - Info: 
+20:35:33.189 - Info: Reading package lists... 98%
+20:35:33.189 - Info: 
+20:35:33.189 - Info: Reading package lists... 98%
+20:35:33.270 - Info: 
+20:35:33.270 - Info: Reading package lists... 98%
+20:35:33.270 - Info: 
+20:35:33.270 - Info: Reading package lists... 98%
+20:35:33.389 - Info: 
+20:35:33.389 - Info: Reading package lists... Done
+20:35:33.389 - Info: 
+20:35:33.389 - Info: 
+20:35:33.955 - Info: *begin sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/libnvidia-container-tools_1.19.1-1_arm64.deb, 5
+20:35:33.955 - Info: 
+20:35:34.124 - Info: 
+20:35:34.124 - Info: Reading package lists... 0%
+20:35:34.211 - Info: 
+20:35:34.212 - Info: Reading package lists... 0%
+20:35:34.223 - Info: 
+20:35:34.223 - Info: Reading package lists... Done
+20:35:34.223 - Info: 
+20:35:34.223 - Info: 
+20:35:34.247 - Info: 
+20:35:34.247 - Info: Building dependency tree... 0%
+20:35:34.247 - Info: 
+20:35:34.247 - Info: Building dependency tree... 0%
+20:35:34.249 - Info: 
+20:35:34.249 - Info: Building dependency tree... 0%
+20:35:34.470 - Info: 
+20:35:34.470 - Info: Building dependency tree... 50%
+20:35:34.470 - Info: 
+20:35:34.470 - Info: Building dependency tree... 50%
+20:35:34.956 - Info: 
+20:35:34.956 - Info: Building dependency tree... 84%
+20:35:35.166 - Info: 
+20:35:35.166 - Info: Building dependency tree... Done
+20:35:35.166 - Info: 
+20:35:35.166 - Info: 
+20:35:35.166 - Info: 
+20:35:35.166 - Info: Reading state information... 0% 
+20:35:35.166 - Info: 
+20:35:35.166 - Info: Reading state information... 0%
+20:35:35.171 - Info: 
+20:35:35.172 - Info: Reading state information... Done
+20:35:35.172 - Info: 
+20:35:35.172 - Info: 
+20:35:35.308 - Info: Note, selecting 'libnvidia-container-tools' instead of '/opt/nvidia/deb_repos/libnvidia-container-tools_1.19.1-1_arm64.deb'
+20:35:35.308 - Info: 
+20:35:36.869 - Info: The following NEW packages will be installed:
+20:35:36.869 - Info: 
+20:35:36.874 - Info:   libnvidia-container-tools
+20:35:36.874 - Info: 
+20:35:36.944 - Info: 0 upgraded, 1 newly installed, 0 to remove and 285 not upgraded.
+20:35:36.945 - Info: 
+20:35:36.950 - Info: Need to get 20.2 kB of archives.
+20:35:36.950 - Info: 
+20:35:36.950 - Info: After this operation, 68.6 kB of additional disk space will be used.
+20:35:36.950 - Info: 
+20:35:36.963 - Info: 
+20:35:37.067 - Info: 0% [Working]
+20:35:37.067 - Info:             
+20:35:37.067 - Info: Get:1 https://repo.download.nvidia.com/jetson/common r39.2/main arm64 libnvidia-container-tools arm64 1.19.1-1 [20.2 kB]
+20:35:37.067 - Info: 
+20:35:37.067 - Info: 
+20:35:37.068 - Info: 62% [1 libnvidia-container-tools 15.7 kB/20.2 kB 78%]
+20:35:37.068 - Info:                                                      
+20:35:37.068 - Info: 100% [Working]
+20:35:37.068 - Info:               
+20:35:37.068 - Info: Fetched 20.2 kB in 0s (174 kB/s)
+20:35:37.068 - Info: 
+20:35:38.536 - Info: Selecting previously unselected package libnvidia-container-tools.
+20:35:38.536 - Info: 
+20:35:38.536 - Info: (Reading database ... 
+20:35:38.553 - Info: (Reading database ... 5%
+20:35:38.553 - Info: (Reading database ... 10%
+20:35:38.553 - Info: (Reading database ... 15%
+20:35:38.553 - Info: (Reading database ... 20%
+20:35:38.553 - Info: (Reading database ... 25%
+20:35:38.553 - Info: (Reading database ... 30%
+20:35:38.553 - Info: (Reading database ... 35%
+20:35:38.553 - Info: (Reading database ... 40%
+20:35:38.553 - Info: (Reading database ... 45%
+20:35:38.553 - Info: (Reading database ... 50%
+20:35:38.558 - Info: (Reading database ... 55%
+20:35:38.568 - Info: (Reading database ... 60%
+20:35:38.581 - Info: (Reading database ... 65%
+20:35:38.598 - Info: (Reading database ... 70%
+20:35:38.634 - Info: (Reading database ... 75%
+20:35:38.646 - Info: (Reading database ... 80%
+20:35:38.663 - Info: (Reading database ... 85%
+20:35:38.678 - Info: (Reading database ... 90%
+20:35:38.687 - Info: (Reading database ... 95%
+20:35:38.733 - Info: (Reading database ... 100%
+20:35:38.733 - Info: (Reading database ... 183233 files and directories currently installed.)
+20:35:38.733 - Info: 
+20:35:38.750 - Info: Preparing to unpack .../libnvidia-container-tools_1.19.1-1_arm64.deb ...
+20:35:38.750 - Info: 
+20:35:38.759 - Info: Unpacking libnvidia-container-tools (1.19.1-1) ...
+20:35:38.759 - Info: 
+20:35:38.967 - Info: Setting up libnvidia-container-tools (1.19.1-1) ...
+20:35:38.967 - Info: 
+20:35:49.827 - Info: change working directory to /tmp20:35:49.827 - Info: exec_command: ssh jetson@192.168.55.1 "dpkg-query -W -f='\${db:Status-abbrev} \${Version}' libnvidia-container-tools"20:35:50.277 - Info: [ Package Install Finished Successfully ]20:35:50.277 - Info: [ Package Install Started ]20:35:50.277 - Info: target deb installer start to install20:35:50.278 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+sudo mkdir -p /opt/nvidia/deb_repos
+sudo chmod 777 /opt/nvidia/deb_repos
+sudo rm -f /opt/nvidia/deb_repos/nvidia-container-toolkit-base_1.19.1-1_arm64.deb
+**********************20:35:52.058 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+
+exec 3>&1
+exec 1>&2
+exec 2>&3
+function safe_apt_install {
+    export DEBIAN_FRONTEND=noninteractive
+    echo "*begin $1, $2"
+    tmp_log=/tmp/sdkm_apt_install_log.ckw.txt
+    sudo rm -f $tmp_log
+    set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+    MAX_RETRY=3
+    TIMES=1
+    while [ ${CMD_STATUS} -ne 0 ]; do
+        cat $tmp_log > /dev/stderr
+        if [ $TIMES -gt $MAX_RETRY ]; then
+            echo "Unhandled error when running $1: `tr '\n' '; ' <$tmp_log`" 1>&2; exit 1
+        fi
+        if grep -q -e "is locked by another process" -e "E: Could not get lock /var/" -e "Could not open lock" $tmp_log; then
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting $2 seconds for apt to be available"; sleep ${2}
+        elif grep -q -e "apt --fix-broken install" $tmp_log; then
+            echo "safe apt install failed, need to run apt --fix-broken install"
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; sudo apt-get -f -y --allow-downgrades install 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting 5 seconds for apt"; sleep 5
+        else
+            echo "safe apt install failed: $1, exit code: $CMD_STATUS, retry number: $TIMES"
+            echo "will sleep $[ $TIMES*10 ] seconds before next attempt"
+            sleep $[ $TIMES*10 ]
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+        fi
+    done
+    if [ $CMD_STATUS -eq 0 ] && [ $TIMES -ne 1 ]; then
+        echo "safe apt install succeed. retry number: $TIMES."
+    fi
+}
+safe_apt_install "sudo apt-get -y update" 5
+sleep 0.5
+safe_apt_install "sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/nvidia-container-toolkit-base_1.19.1-1_arm64.deb" 5
+sleep 5
+sudo rm -f /opt/nvidia/deb_repos/nvidia-container-toolkit-base_1.19.1-1_arm64.deb
+**********************20:35:52.800 - Info: *begin sudo apt-get -y update, 5
+20:35:52.800 - Info: 
+20:35:53.067 - Info: 
+20:35:53.133 - Info: 0% [Working]
+20:35:53.133 - Info:             
+20:35:53.133 - Info: Hit:1 https://download.docker.com/linux/ubuntu noble InRelease
+20:35:53.133 - Info: 
+20:35:53.133 - Info: 
+20:35:53.172 - Info: 0% [Connected to repo.download.nvidia.com (23.205.151.187)] [Connecting to ports.ubuntu.com (91.189.92.21)]
+20:35:53.173 - Info:                                                                                                            
+20:35:53.173 - Info: Hit:2 https://repo.download.nvidia.com/jetson/common r39.2 InRelease
+20:35:53.173 - Info: 
+20:35:53.173 - Info: 
+20:35:53.233 - Info: 0% [Connecting to repo.download.nvidia.com (23.205.151.187)] [Connecting to ports.ubuntu.com (91.189.92.21)]
+20:35:53.233 - Info:                                                                                                             
+20:35:53.233 - Info: Hit:3 https://repo.download.nvidia.com/jetson/som r39.2 InRelease
+20:35:53.233 - Info: 
+20:35:53.233 - Info: 
+20:35:53.260 - Info: 0% [Connecting to repo.download.nvidia.com (23.205.151.187)] [Connecting to ports.ubuntu.com (91.189.92.21)]
+20:35:53.260 - Info:                                                                                                             
+20:35:53.288 - Info: 0% [Connected to repo.download.nvidia.com (23.205.151.187)] [Connecting to ports.ubuntu.com (91.189.92.21)]
+20:35:53.288 - Info:                                                                                                            
+20:35:53.288 - Info: Hit:4 https://repo.download.nvidia.com/jetson/ffmpeg r39.2 InRelease
+20:35:53.288 - Info: 
+20:35:53.288 - Info: 
+20:35:53.288 - Info:                                                                                                            
+20:35:53.446 - Info: 0% [Connecting to ports.ubuntu.com (91.189.92.21)]
+20:35:53.446 - Info:                                                   
+20:35:53.522 - Info: 0% [Waiting for headers]
+20:35:53.522 - Info:                         
+20:35:53.522 - Info: Hit:5 http://ports.ubuntu.com/ubuntu-ports noble InRelease
+20:35:53.522 - Info: 
+20:35:53.522 - Info: 
+20:35:53.522 - Info:                         
+20:35:53.614 - Info: 0% [Working]
+20:35:53.745 - Info: 0% [Waiting for headers]
+20:35:53.745 - Info:                         
+20:35:53.745 - Info: Hit:6 http://ports.ubuntu.com/ubuntu-ports noble-updates InRelease
+20:35:53.745 - Info: 
+20:35:53.745 - Info: 
+20:35:53.745 - Info:                         
+20:35:53.790 - Info: 0% [Working]
+20:35:53.915 - Info: 0% [Waiting for headers]
+20:35:53.969 - Info:                         
+20:35:53.969 - Info: Hit:7 http://ports.ubuntu.com/ubuntu-ports noble-backports InRelease
+20:35:53.969 - Info: 
+20:35:53.969 - Info: 
+20:35:53.969 - Info:                         
+20:35:54.038 - Info: 0% [Working]
+20:35:54.152 - Info: 0% [Waiting for headers]
+20:35:54.192 - Info:                         
+20:35:54.192 - Info: Hit:8 http://ports.ubuntu.com/ubuntu-ports noble-security InRelease
+20:35:54.192 - Info: 
+20:35:54.192 - Info: 
+20:35:54.192 - Info:                         
+20:35:54.313 - Info: 0% [Working]
+20:35:54.313 - Info: 20% [Working]
+20:35:54.313 - Info:              
+20:35:54.537 - Info: 
+20:35:54.537 - Info: Reading package lists... 0%
+20:35:54.555 - Info: 
+20:35:54.555 - Info: Reading package lists... 0%
+20:35:54.559 - Info: 
+20:35:54.559 - Info: Reading package lists... 0%
+20:35:54.559 - Info: 
+20:35:54.559 - Info: Reading package lists... 0%
+20:35:54.563 - Info: 
+20:35:54.563 - Info: Reading package lists... 0%
+20:35:54.563 - Info: 
+20:35:54.563 - Info: Reading package lists... 0%
+20:35:54.563 - Info: 
+20:35:54.563 - Info: Reading package lists... 0%
+20:35:54.564 - Info: 
+20:35:54.564 - Info: Reading package lists... 0%
+20:35:54.566 - Info: 
+20:35:54.566 - Info: Reading package lists... 0%
+20:35:54.566 - Info: 
+20:35:54.566 - Info: Reading package lists... 0%
+20:35:54.571 - Info: 
+20:35:54.571 - Info: Reading package lists... 0%
+20:35:54.642 - Info: 
+20:35:54.642 - Info: Reading package lists... 3%
+20:35:54.642 - Info: 
+20:35:54.642 - Info: Reading package lists... 3%
+20:35:54.653 - Info: 
+20:35:54.653 - Info: Reading package lists... 5%
+20:35:54.653 - Info: 
+20:35:54.653 - Info: Reading package lists... 5%
+20:35:55.286 - Info: 
+20:35:55.286 - Info: Reading package lists... 26%
+20:35:55.845 - Info: 
+20:35:55.845 - Info: Reading package lists... 41%
+20:35:55.845 - Info: 
+20:35:55.845 - Info: Reading package lists... 41%
+20:35:55.996 - Info: 
+20:35:55.996 - Info: Reading package lists... 55%
+20:35:56.019 - Info: 
+20:35:56.019 - Info: Reading package lists... 57%
+20:35:56.019 - Info: 
+20:35:56.019 - Info: Reading package lists... 57%
+20:35:56.026 - Info: 
+20:35:56.026 - Info: Reading package lists... 58%
+20:35:56.026 - Info: 
+20:35:56.026 - Info: Reading package lists... 58%
+20:35:56.027 - Info: 
+20:35:56.027 - Info: Reading package lists... 58%
+20:35:56.027 - Info: 
+20:35:56.027 - Info: Reading package lists... 58%
+20:35:56.047 - Info: 
+20:35:56.047 - Info: Reading package lists... 58%
+20:35:56.047 - Info: 
+20:35:56.047 - Info: Reading package lists... 58%
+20:35:56.051 - Info: 
+20:35:56.051 - Info: Reading package lists... 59%
+20:35:56.051 - Info: 
+20:35:56.051 - Info: Reading package lists... 59%
+20:35:56.148 - Info: 
+20:35:56.148 - Info: Reading package lists... 62%
+20:35:56.148 - Info: 
+20:35:56.148 - Info: Reading package lists... 62%
+20:35:56.168 - Info: 
+20:35:56.168 - Info: Reading package lists... 64%
+20:35:56.168 - Info: 
+20:35:56.168 - Info: Reading package lists... 64%
+20:35:56.311 - Info: 
+20:35:56.311 - Info: Reading package lists... 69%
+20:35:56.311 - Info: 
+20:35:56.311 - Info: Reading package lists... 69%
+20:35:56.334 - Info: 
+20:35:56.334 - Info: Reading package lists... 71%
+20:35:56.334 - Info: 
+20:35:56.334 - Info: Reading package lists... 71%
+20:35:56.463 - Info: 
+20:35:56.463 - Info: Reading package lists... 77%
+20:35:56.463 - Info: 
+20:35:56.463 - Info: Reading package lists... 77%
+20:35:56.499 - Info: 
+20:35:56.499 - Info: Reading package lists... 80%
+20:35:56.499 - Info: 
+20:35:56.499 - Info: Reading package lists... 80%
+20:35:56.505 - Info: 
+20:35:56.505 - Info: Reading package lists... 80%
+20:35:56.505 - Info: 
+20:35:56.505 - Info: Reading package lists... 80%
+20:35:56.507 - Info: 
+20:35:56.507 - Info: Reading package lists... 80%
+20:35:56.507 - Info: 
+20:35:56.507 - Info: Reading package lists... 80%
+20:35:56.512 - Info: 
+20:35:56.513 - Info: Reading package lists... 80%
+20:35:56.513 - Info: 
+20:35:56.513 - Info: Reading package lists... 80%
+20:35:56.513 - Info: 
+20:35:56.514 - Info: Reading package lists... 80%
+20:35:56.514 - Info: 
+20:35:56.514 - Info: Reading package lists... 80%
+20:35:56.517 - Info: 
+20:35:56.517 - Info: Reading package lists... 80%
+20:35:56.517 - Info: 
+20:35:56.517 - Info: Reading package lists... 80%
+20:35:56.517 - Info: 
+20:35:56.517 - Info: Reading package lists... 80%
+20:35:56.517 - Info: 
+20:35:56.517 - Info: Reading package lists... 80%
+20:35:56.517 - Info: 
+20:35:56.517 - Info: Reading package lists... 80%
+20:35:56.517 - Info: 
+20:35:56.517 - Info: Reading package lists... 80%
+20:35:56.518 - Info: 
+20:35:56.518 - Info: Reading package lists... 80%
+20:35:56.518 - Info: 
+20:35:56.518 - Info: Reading package lists... 80%
+20:35:56.549 - Info: 
+20:35:56.549 - Info: Reading package lists... 83%
+20:35:56.549 - Info: 
+20:35:56.549 - Info: Reading package lists... 83%
+20:35:56.565 - Info: 
+20:35:56.565 - Info: Reading package lists... 84%
+20:35:56.565 - Info: 
+20:35:56.565 - Info: Reading package lists... 84%
+20:35:56.609 - Info: 
+20:35:56.609 - Info: Reading package lists... 88%
+20:35:56.609 - Info: 
+20:35:56.609 - Info: Reading package lists... 88%
+20:35:56.625 - Info: 
+20:35:56.625 - Info: Reading package lists... 90%
+20:35:56.625 - Info: 
+20:35:56.625 - Info: Reading package lists... 90%
+20:35:56.688 - Info: 
+20:35:56.688 - Info: Reading package lists... 95%
+20:35:56.688 - Info: 
+20:35:56.688 - Info: Reading package lists... 95%
+20:35:56.707 - Info: 
+20:35:56.707 - Info: Reading package lists... 97%
+20:35:56.721 - Info: 
+20:35:56.721 - Info: Reading package lists... 98%
+20:35:56.721 - Info: 
+20:35:56.721 - Info: Reading package lists... 98%
+20:35:56.724 - Info: 
+20:35:56.724 - Info: Reading package lists... 98%
+20:35:56.724 - Info: 
+20:35:56.724 - Info: Reading package lists... 98%
+20:35:56.805 - Info: 
+20:35:56.805 - Info: Reading package lists... 98%
+20:35:56.805 - Info: 
+20:35:56.805 - Info: Reading package lists... 98%
+20:35:56.925 - Info: 
+20:35:56.925 - Info: Reading package lists... Done
+20:35:56.925 - Info: 
+20:35:56.925 - Info: 
+20:35:57.492 - Info: *begin sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/nvidia-container-toolkit-base_1.19.1-1_arm64.deb, 5
+20:35:57.492 - Info: 
+20:35:57.653 - Info: 
+20:35:57.653 - Info: Reading package lists... 0%
+20:35:57.744 - Info: 
+20:35:57.744 - Info: Reading package lists... 0%
+20:35:57.755 - Info: 
+20:35:57.755 - Info: Reading package lists... Done
+20:35:57.755 - Info: 
+20:35:57.755 - Info: 
+20:35:57.778 - Info: 
+20:35:57.778 - Info: Building dependency tree... 0%
+20:35:57.778 - Info: 
+20:35:57.778 - Info: Building dependency tree... 0%
+20:35:57.780 - Info: 
+20:35:57.780 - Info: Building dependency tree... 0%
+20:35:58.001 - Info: 
+20:35:58.001 - Info: Building dependency tree... 50%
+20:35:58.001 - Info: 
+20:35:58.001 - Info: Building dependency tree... 50%
+20:35:58.491 - Info: 
+20:35:58.491 - Info: Building dependency tree... 86%
+20:35:58.666 - Info: 
+20:35:58.666 - Info: Building dependency tree... Done
+20:35:58.666 - Info: 
+20:35:58.666 - Info: 
+20:35:58.666 - Info: 
+20:35:58.666 - Info: Reading state information... 0% 
+20:35:58.666 - Info: 
+20:35:58.666 - Info: Reading state information... 0%
+20:35:58.671 - Info: 
+20:35:58.671 - Info: Reading state information... Done
+20:35:58.671 - Info: 
+20:35:58.671 - Info: 
+20:35:58.807 - Info: Note, selecting 'nvidia-container-toolkit-base' instead of '/opt/nvidia/deb_repos/nvidia-container-toolkit-base_1.19.1-1_arm64.deb'
+20:35:58.807 - Info: 
+20:36:00.468 - Info: The following NEW packages will be installed:
+20:36:00.468 - Info: 
+20:36:00.469 - Info:   nvidia-container-toolkit-base
+20:36:00.469 - Info: 
+20:36:00.541 - Info: 0 upgraded, 1 newly installed, 0 to remove and 285 not upgraded.
+20:36:00.541 - Info: 
+20:36:00.546 - Info: Need to get 4,842 kB of archives.
+20:36:00.546 - Info: 
+20:36:00.546 - Info: After this operation, 24.9 MB of additional disk space will be used.
+20:36:00.546 - Info: 
+20:36:00.558 - Info: 
+20:36:00.633 - Info: 0% [Working]
+20:36:00.633 - Info:             
+20:36:00.633 - Info: Get:1 https://repo.download.nvidia.com/jetson/common r39.2/main arm64 nvidia-container-toolkit-base arm64 1.19.1-1 [4,842 kB]
+20:36:00.633 - Info: 
+20:36:00.633 - Info: 
+20:36:00.746 - Info: 0% [1 nvidia-container-toolkit-base 16.4 kB/4,842 kB 0%]
+20:36:00.746 - Info:                                                         
+20:36:00.746 - Info: 100% [Working]
+20:36:00.746 - Info:               
+20:36:00.746 - Info: Fetched 4,842 kB in 0s (24.2 MB/s)
+20:36:00.746 - Info: 
+20:36:02.187 - Info: Selecting previously unselected package nvidia-container-toolkit-base.
+20:36:02.187 - Info: 
+20:36:02.187 - Info: (Reading database ... 
+20:36:02.214 - Info: (Reading database ... 5%
+20:36:02.214 - Info: (Reading database ... 10%
+20:36:02.214 - Info: (Reading database ... 15%
+20:36:02.214 - Info: (Reading database ... 20%
+20:36:02.214 - Info: (Reading database ... 25%
+20:36:02.214 - Info: (Reading database ... 30%
+20:36:02.214 - Info: (Reading database ... 35%
+20:36:02.214 - Info: (Reading database ... 40%
+20:36:02.214 - Info: (Reading database ... 45%
+20:36:02.214 - Info: (Reading database ... 50%
+20:36:02.221 - Info: (Reading database ... 55%
+20:36:02.232 - Info: (Reading database ... 60%
+20:36:02.243 - Info: (Reading database ... 65%
+20:36:02.260 - Info: (Reading database ... 70%
+20:36:02.296 - Info: (Reading database ... 75%
+20:36:02.308 - Info: (Reading database ... 80%
+20:36:02.325 - Info: (Reading database ... 85%
+20:36:02.341 - Info: (Reading database ... 90%
+20:36:02.351 - Info: (Reading database ... 95%
+20:36:02.397 - Info: (Reading database ... 100%
+20:36:02.397 - Info: (Reading database ... 183238 files and directories currently installed.)
+20:36:02.397 - Info: 
+20:36:02.414 - Info: Preparing to unpack .../nvidia-container-toolkit-base_1.19.1-1_arm64.deb ...
+20:36:02.415 - Info: 
+20:36:02.423 - Info: Unpacking nvidia-container-toolkit-base (1.19.1-1) ...
+20:36:02.423 - Info: 
+20:36:03.342 - Info: Setting up nvidia-container-toolkit-base (1.19.1-1) ...
+20:36:03.342 - Info: 
+20:36:04.091 - Info: Created symlink /etc/systemd/system/multi-user.target.wants/nvidia-cdi-refresh.path → /etc/systemd/system/nvidia-cdi-refresh.path.
+20:36:04.091 - Info: 
+20:36:04.091 - Info: 
+20:36:04.797 - Info: Created symlink /etc/systemd/system/multi-user.target.wants/nvidia-cdi-refresh.service → /etc/systemd/system/nvidia-cdi-refresh.service.
+20:36:04.797 - Info: 
+20:36:04.797 - Info: 
+20:36:05.778 - Info: Regenerating NVIDIA CDI specification...
+20:36:05.778 - Info: 
+20:36:16.948 - Info: change working directory to /tmp20:36:16.948 - Info: exec_command: ssh jetson@192.168.55.1 "dpkg-query -W -f='\${db:Status-abbrev} \${Version}' nvidia-container-toolkit-base"20:36:17.369 - Info: [ Package Install Finished Successfully ]20:36:17.370 - Info: [ Package Install Started ]20:36:17.370 - Info: target deb installer start to install20:36:17.370 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+sudo mkdir -p /opt/nvidia/deb_repos
+sudo chmod 777 /opt/nvidia/deb_repos
+sudo rm -f /opt/nvidia/deb_repos/nvidia-container-toolkit_1.19.1-1_arm64.deb
+**********************20:36:18.892 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+
+exec 3>&1
+exec 1>&2
+exec 2>&3
+function safe_apt_install {
+    export DEBIAN_FRONTEND=noninteractive
+    echo "*begin $1, $2"
+    tmp_log=/tmp/sdkm_apt_install_log.ckw.txt
+    sudo rm -f $tmp_log
+    set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+    MAX_RETRY=3
+    TIMES=1
+    while [ ${CMD_STATUS} -ne 0 ]; do
+        cat $tmp_log > /dev/stderr
+        if [ $TIMES -gt $MAX_RETRY ]; then
+            echo "Unhandled error when running $1: `tr '\n' '; ' <$tmp_log`" 1>&2; exit 1
+        fi
+        if grep -q -e "is locked by another process" -e "E: Could not get lock /var/" -e "Could not open lock" $tmp_log; then
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting $2 seconds for apt to be available"; sleep ${2}
+        elif grep -q -e "apt --fix-broken install" $tmp_log; then
+            echo "safe apt install failed, need to run apt --fix-broken install"
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; sudo apt-get -f -y --allow-downgrades install 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting 5 seconds for apt"; sleep 5
+        else
+            echo "safe apt install failed: $1, exit code: $CMD_STATUS, retry number: $TIMES"
+            echo "will sleep $[ $TIMES*10 ] seconds before next attempt"
+            sleep $[ $TIMES*10 ]
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+        fi
+    done
+    if [ $CMD_STATUS -eq 0 ] && [ $TIMES -ne 1 ]; then
+        echo "safe apt install succeed. retry number: $TIMES."
+    fi
+}
+safe_apt_install "sudo apt-get -y update" 5
+sleep 0.5
+safe_apt_install "sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/nvidia-container-toolkit_1.19.1-1_arm64.deb" 5
+sleep 5
+sudo rm -f /opt/nvidia/deb_repos/nvidia-container-toolkit_1.19.1-1_arm64.deb
+**********************20:36:19.666 - Info: *begin sudo apt-get -y update, 5
+20:36:19.667 - Info: 
+20:36:19.947 - Info: 
+20:36:20.012 - Info: 0% [Working]
+20:36:20.012 - Info:             
+20:36:20.012 - Info: Hit:1 https://download.docker.com/linux/ubuntu noble InRelease
+20:36:20.012 - Info: 
+20:36:20.012 - Info: 
+20:36:20.021 - Info: 0% [Connected to repo.download.nvidia.com (23.205.151.188)] [Connecting to ports.ubuntu.com]
+20:36:20.021 - Info:                                                                                             
+20:36:20.025 - Info: Hit:2 https://repo.download.nvidia.com/jetson/common r39.2 InRelease
+20:36:20.025 - Info: 
+20:36:20.025 - Info: 
+20:36:20.082 - Info: 0% [Connecting to repo.download.nvidia.com (23.205.151.188)] [Connecting to ports.ubuntu.com]
+20:36:20.082 - Info:                                                                                              
+20:36:20.082 - Info: Hit:3 https://repo.download.nvidia.com/jetson/som r39.2 InRelease
+20:36:20.082 - Info: 
+20:36:20.082 - Info: 
+20:36:20.082 - Info:                                                                                              
+20:36:20.140 - Info: 0% [Connecting to ports.ubuntu.com]
+20:36:20.141 - Info: 0% [Waiting for headers] [Connecting to ports.ubuntu.com]
+20:36:20.141 - Info:                                                          
+20:36:20.141 - Info: Hit:4 https://repo.download.nvidia.com/jetson/ffmpeg r39.2 InRelease
+20:36:20.141 - Info: 
+20:36:20.141 - Info: 
+20:36:20.141 - Info:                                                          
+20:36:20.334 - Info: 0% [Connecting to ports.ubuntu.com]
+20:36:20.493 - Info: 0% [Connecting to ports.ubuntu.com (91.189.92.20)]
+20:36:20.493 - Info:                                                   
+20:36:20.669 - Info: 0% [Waiting for headers]
+20:36:20.678 - Info:                         
+20:36:20.678 - Info: Hit:5 http://ports.ubuntu.com/ubuntu-ports noble InRelease
+20:36:20.678 - Info: 
+20:36:20.678 - Info: 
+20:36:20.678 - Info:                         
+20:36:20.812 - Info: 0% [Working]
+20:36:20.888 - Info: 0% [Waiting for headers]
+20:36:20.888 - Info:                         
+20:36:20.888 - Info: Hit:6 http://ports.ubuntu.com/ubuntu-ports noble-updates InRelease
+20:36:20.888 - Info: 
+20:36:20.888 - Info: 
+20:36:20.888 - Info:                         
+20:36:21.011 - Info: 0% [Working]
+20:36:21.097 - Info: 0% [Waiting for headers]
+20:36:21.097 - Info:                         
+20:36:21.097 - Info: Hit:7 http://ports.ubuntu.com/ubuntu-ports noble-backports InRelease
+20:36:21.097 - Info: 
+20:36:21.097 - Info: 
+20:36:21.097 - Info:                         
+20:36:21.212 - Info: 0% [Working]
+20:36:21.306 - Info: 0% [Waiting for headers]
+20:36:21.306 - Info:                         
+20:36:21.306 - Info: Hit:8 http://ports.ubuntu.com/ubuntu-ports noble-security InRelease
+20:36:21.306 - Info: 
+20:36:21.306 - Info: 
+20:36:21.306 - Info:                         
+20:36:21.432 - Info: 0% [Working]
+20:36:21.432 - Info: 20% [Working]
+20:36:21.432 - Info:              
+20:36:21.648 - Info: 
+20:36:21.648 - Info: Reading package lists... 0%
+20:36:21.665 - Info: 
+20:36:21.665 - Info: Reading package lists... 0%
+20:36:21.669 - Info: 
+20:36:21.669 - Info: Reading package lists... 0%
+20:36:21.669 - Info: 
+20:36:21.669 - Info: Reading package lists... 0%
+20:36:21.672 - Info: 
+20:36:21.672 - Info: Reading package lists... 0%
+20:36:21.672 - Info: 
+20:36:21.672 - Info: Reading package lists... 0%
+20:36:21.674 - Info: 
+20:36:21.674 - Info: Reading package lists... 0%
+20:36:21.674 - Info: 
+20:36:21.674 - Info: Reading package lists... 0%
+20:36:21.675 - Info: 
+20:36:21.675 - Info: Reading package lists... 0%
+20:36:21.675 - Info: 
+20:36:21.675 - Info: Reading package lists... 0%
+20:36:21.682 - Info: 
+20:36:21.682 - Info: Reading package lists... 0%
+20:36:21.752 - Info: 
+20:36:21.752 - Info: Reading package lists... 3%
+20:36:21.752 - Info: 
+20:36:21.752 - Info: Reading package lists... 3%
+20:36:21.764 - Info: 
+20:36:21.764 - Info: Reading package lists... 5%
+20:36:21.764 - Info: 
+20:36:21.764 - Info: Reading package lists... 5%
+20:36:22.391 - Info: 
+20:36:22.391 - Info: Reading package lists... 26%
+20:36:22.909 - Info: 
+20:36:22.909 - Info: Reading package lists... 41%
+20:36:22.909 - Info: 
+20:36:22.909 - Info: Reading package lists... 41%
+20:36:23.077 - Info: 
+20:36:23.077 - Info: Reading package lists... 57%
+20:36:23.077 - Info: 
+20:36:23.077 - Info: Reading package lists... 57%
+20:36:23.083 - Info: 
+20:36:23.083 - Info: Reading package lists... 58%
+20:36:23.084 - Info: 
+20:36:23.084 - Info: Reading package lists... 58%
+20:36:23.085 - Info: 
+20:36:23.085 - Info: Reading package lists... 58%
+20:36:23.085 - Info: 
+20:36:23.085 - Info: Reading package lists... 58%
+20:36:23.091 - Info: 
+20:36:23.091 - Info: Reading package lists... 58%
+20:36:23.104 - Info: 
+20:36:23.104 - Info: Reading package lists... 58%
+20:36:23.104 - Info: 
+20:36:23.104 - Info: Reading package lists... 58%
+20:36:23.108 - Info: 
+20:36:23.108 - Info: Reading package lists... 59%
+20:36:23.108 - Info: 
+20:36:23.108 - Info: Reading package lists... 59%
+20:36:23.203 - Info: 
+20:36:23.203 - Info: Reading package lists... 62%
+20:36:23.203 - Info: 
+20:36:23.203 - Info: Reading package lists... 62%
+20:36:23.222 - Info: 
+20:36:23.222 - Info: Reading package lists... 64%
+20:36:23.222 - Info: 
+20:36:23.222 - Info: Reading package lists... 64%
+20:36:23.367 - Info: 
+20:36:23.367 - Info: Reading package lists... 69%
+20:36:23.367 - Info: 
+20:36:23.367 - Info: Reading package lists... 69%
+20:36:23.391 - Info: 
+20:36:23.391 - Info: Reading package lists... 71%
+20:36:23.391 - Info: 
+20:36:23.391 - Info: Reading package lists... 71%
+20:36:23.529 - Info: 
+20:36:23.529 - Info: Reading package lists... 77%
+20:36:23.529 - Info: 
+20:36:23.529 - Info: Reading package lists... 77%
+20:36:23.565 - Info: 
+20:36:23.565 - Info: Reading package lists... 80%
+20:36:23.565 - Info: 
+20:36:23.565 - Info: Reading package lists... 80%
+20:36:23.571 - Info: 
+20:36:23.571 - Info: Reading package lists... 80%
+20:36:23.571 - Info: 
+20:36:23.571 - Info: Reading package lists... 80%
+20:36:23.573 - Info: 
+20:36:23.573 - Info: Reading package lists... 80%
+20:36:23.573 - Info: 
+20:36:23.573 - Info: Reading package lists... 80%
+20:36:23.578 - Info: 
+20:36:23.578 - Info: Reading package lists... 80%
+20:36:23.578 - Info: 
+20:36:23.578 - Info: Reading package lists... 80%
+20:36:23.578 - Info: 
+20:36:23.578 - Info: Reading package lists... 80%
+20:36:23.578 - Info: 
+20:36:23.578 - Info: Reading package lists... 80%
+20:36:23.584 - Info: 
+20:36:23.584 - Info: Reading package lists... 80%
+20:36:23.584 - Info: 
+20:36:23.584 - Info: Reading package lists... 80%
+20:36:23.584 - Info: 
+20:36:23.584 - Info: Reading package lists... 80%
+20:36:23.584 - Info: 
+20:36:23.584 - Info: Reading package lists... 80%
+20:36:23.584 - Info: 
+20:36:23.584 - Info: Reading package lists... 80%
+20:36:23.584 - Info: 
+20:36:23.584 - Info: Reading package lists... 80%
+20:36:23.585 - Info: 
+20:36:23.585 - Info: Reading package lists... 80%
+20:36:23.585 - Info: 
+20:36:23.585 - Info: Reading package lists... 80%
+20:36:23.617 - Info: 
+20:36:23.617 - Info: Reading package lists... 83%
+20:36:23.617 - Info: 
+20:36:23.617 - Info: Reading package lists... 83%
+20:36:23.632 - Info: 
+20:36:23.632 - Info: Reading package lists... 84%
+20:36:23.632 - Info: 
+20:36:23.632 - Info: Reading package lists... 84%
+20:36:23.675 - Info: 
+20:36:23.675 - Info: Reading package lists... 88%
+20:36:23.675 - Info: 
+20:36:23.675 - Info: Reading package lists... 88%
+20:36:23.693 - Info: 
+20:36:23.693 - Info: Reading package lists... 90%
+20:36:23.693 - Info: 
+20:36:23.693 - Info: Reading package lists... 90%
+20:36:23.755 - Info: 
+20:36:23.755 - Info: Reading package lists... 95%
+20:36:23.755 - Info: 
+20:36:23.755 - Info: Reading package lists... 95%
+20:36:23.789 - Info: 
+20:36:23.789 - Info: Reading package lists... 98%
+20:36:23.789 - Info: 
+20:36:23.789 - Info: Reading package lists... 98%
+20:36:23.791 - Info: 
+20:36:23.791 - Info: Reading package lists... 98%
+20:36:23.792 - Info: 
+20:36:23.792 - Info: Reading package lists... 98%
+20:36:23.874 - Info: 
+20:36:23.874 - Info: Reading package lists... 98%
+20:36:23.874 - Info: 
+20:36:23.874 - Info: Reading package lists... 98%
+20:36:23.884 - Info: 
+20:36:23.884 - Info: Reading package lists... 99%
+20:36:23.994 - Info: 
+20:36:23.994 - Info: Reading package lists... Done
+20:36:23.994 - Info: 
+20:36:23.994 - Info: 
+20:36:24.562 - Info: *begin sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/nvidia-container-toolkit_1.19.1-1_arm64.deb, 5
+20:36:24.562 - Info: 
+20:36:25.188 - Info: 
+20:36:25.188 - Info: Reading package lists... 0%
+20:36:25.604 - Info: 
+20:36:25.604 - Info: Reading package lists... 0%
+20:36:25.620 - Info: 
+20:36:25.620 - Info: Reading package lists... Done
+20:36:25.620 - Info: 
+20:36:25.620 - Info: 
+20:36:25.655 - Info: 
+20:36:25.655 - Info: Building dependency tree... 0%
+20:36:25.655 - Info: 
+20:36:25.655 - Info: Building dependency tree... 0%
+20:36:25.659 - Info: 
+20:36:25.659 - Info: Building dependency tree... 0%
+20:36:25.877 - Info: 
+20:36:25.877 - Info: Building dependency tree... 50%
+20:36:25.877 - Info: 
+20:36:25.877 - Info: Building dependency tree... 50%
+20:36:26.365 - Info: 
+20:36:26.365 - Info: Building dependency tree... 86%
+20:36:26.539 - Info: 
+20:36:26.539 - Info: Building dependency tree... Done
+20:36:26.539 - Info: 
+20:36:26.539 - Info: 
+20:36:26.539 - Info: 
+20:36:26.539 - Info: Reading state information... 0% 
+20:36:26.539 - Info: 
+20:36:26.539 - Info: Reading state information... 0%
+20:36:26.544 - Info: 
+20:36:26.544 - Info: Reading state information... Done
+20:36:26.544 - Info: 
+20:36:26.544 - Info: 
+20:36:26.679 - Info: Note, selecting 'nvidia-container-toolkit' instead of '/opt/nvidia/deb_repos/nvidia-container-toolkit_1.19.1-1_arm64.deb'
+20:36:26.679 - Info: 
+20:36:28.255 - Info: The following NEW packages will be installed:
+20:36:28.255 - Info: 
+20:36:28.256 - Info:   nvidia-container-toolkit
+20:36:28.256 - Info: 
+20:36:28.328 - Info: 0 upgraded, 1 newly installed, 0 to remove and 285 not upgraded.
+20:36:28.328 - Info: 
+20:36:28.334 - Info: Need to get 1,143 kB of archives.
+20:36:28.334 - Info: 
+20:36:28.334 - Info: After this operation, 4,437 kB of additional disk space will be used.
+20:36:28.334 - Info: 
+20:36:28.347 - Info: 
+20:36:28.428 - Info: 0% [Working]
+20:36:28.428 - Info:             
+20:36:28.428 - Info: Get:1 https://repo.download.nvidia.com/jetson/common r39.2/main arm64 nvidia-container-toolkit arm64 1.19.1-1 [1,143 kB]
+20:36:28.428 - Info: 
+20:36:28.428 - Info: 
+20:36:28.930 - Info: 1% [1 nvidia-container-toolkit 16.4 kB/1,143 kB 1%]
+20:36:29.430 - Info: 80% [1 nvidia-container-toolkit 1,143 kB/1,143 kB 100%]
+20:36:29.500 - Info:                                                        
+20:36:29.500 - Info: 100% [Working]
+20:36:29.500 - Info:               
+20:36:29.500 - Info: Fetched 1,143 kB in 1s (980 kB/s)
+20:36:29.500 - Info: 
+20:36:35.075 - Info: Selecting previously unselected package nvidia-container-toolkit.
+20:36:35.075 - Info: 
+20:36:35.075 - Info: (Reading database ... 
+20:36:35.107 - Info: (Reading database ... 5%
+20:36:35.107 - Info: (Reading database ... 10%
+20:36:35.107 - Info: (Reading database ... 15%
+20:36:35.107 - Info: (Reading database ... 20%
+20:36:35.107 - Info: (Reading database ... 25%
+20:36:35.108 - Info: (Reading database ... 30%
+20:36:35.108 - Info: (Reading database ... 35%
+20:36:35.108 - Info: (Reading database ... 40%
+20:36:35.108 - Info: (Reading database ... 45%
+20:36:35.108 - Info: (Reading database ... 50%
+20:36:35.117 - Info: (Reading database ... 55%
+20:36:35.139 - Info: (Reading database ... 60%
+20:36:35.152 - Info: (Reading database ... 65%
+20:36:35.171 - Info: (Reading database ... 70%
+20:36:35.208 - Info: (Reading database ... 75%
+20:36:35.221 - Info: (Reading database ... 80%
+20:36:35.238 - Info: (Reading database ... 85%
+20:36:35.255 - Info: (Reading database ... 90%
+20:36:35.265 - Info: (Reading database ... 95%
+20:36:35.311 - Info: (Reading database ... 100%
+20:36:35.311 - Info: (Reading database ... 183248 files and directories currently installed.)
+20:36:35.311 - Info: 
+20:36:35.329 - Info: Preparing to unpack .../nvidia-container-toolkit_1.19.1-1_arm64.deb ...
+20:36:35.329 - Info: 
+20:36:35.335 - Info: Unpacking nvidia-container-toolkit (1.19.1-1) ...
+20:36:35.335 - Info: 
+20:36:35.752 - Info: Setting up nvidia-container-toolkit (1.19.1-1) ...
+20:36:35.752 - Info: 
+20:36:46.656 - Info: change working directory to /tmp20:36:46.656 - Info: exec_command: ssh jetson@192.168.55.1 "dpkg-query -W -f='\${db:Status-abbrev} \${Version}' nvidia-container-toolkit"20:36:47.081 - Info: [ Package Install Finished Successfully ]20:36:47.081 - Info: [ Package PostInstall Started ]20:36:47.081 - Info: current working directory is /tmp20:36:47.081 - Info: exec_command [target]:
+**********************
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+
+sudo nvidia-ctk runtime configure --runtime=docker
+sudo systemctl restart docker
+**********************20:36:47.081 - Info: exec_command: scp  /home/ckw/.nvsdkm/replays/scripts/JetPack_7.2_Linux/NV_L4T_DOCKER_SBSA_TARGET_POST_INSTALL_COMP.sh jetson@[192.168.55.1]:~; ssh -t  jetson@192.168.55.1 "set -o pipefail; ~/NV_L4T_DOCKER_SBSA_TARGET_POST_INSTALL_COMP.sh | sed 's/^/SDKM_INSTALL_ERROR /' && rm -f ~/NV_L4T_DOCKER_SBSA_TARGET_POST_INSTALL_COMP.sh"20:36:47.911 - Info: SDKM_INSTALL_ERROR time="2026-07-27T20:36:47+08:00" level=info msg="Config file does not exist; using empty config"
+20:36:47.911 - Info: SDKM_INSTALL_ERROR time="2026-07-27T20:36:47+08:00" level=info msg="Wrote updated config to /etc/docker/daemon.json"
+20:36:47.911 - Info: SDKM_INSTALL_ERROR time="2026-07-27T20:36:47+08:00" level=info msg="It is recommended that docker daemon be restarted."
+20:36:50.120 - Info: [ Package PostInstall Finished Successfully ]20:36:50.120 - Info: exec_command: ssh   jetson@192.168.55.1 "df -B1 / | tail -1 | awk '{ printf \$4 }'"20:36:50.500 - Info: [target] [ 464.06 MB used. Disk Avail: 205.40 GB ]20:36:50.500 - Info: [ NV_L4T_DOCKER_SBSA_TARGET_POST_INSTALL_COMP Install took 3m24s ]

@@ -1,0 +1,833 @@
+------ 2026-07-27 20:33:22 ------
+------ SDK: JetPack_7.2_Linux ------
+20:33:22.027 - Info: exec_command: ssh   jetson@192.168.55.1 "df -B1 / | tail -1 | awk '{ printf \$4 }'"20:33:22.460 - Info: NV_L4T_SIPL_SBSA_TARGET_POST_INSTALL_COMP include 1 package20:33:22.460 - Info: [ Package PreInstall Started ]20:33:22.460 - Info: current working directory is /home/ckw/nvidia/nvidia_sdk/JetPack_7.2_Linux_JETSON_ORIN_NANO_TARGETS20:33:22.460 - Info: exec_command [host]:
+**********************
+scp -F /dev/null -o PubkeyAuthentication=no -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o ConnectTimeout=5 /home/ckw/Downloads/nvidia/sdkm_downloads/Jetson_SIPL_API_R39.2.0_aarch64.tbz2 jetson@192.168.55.1:/home/jetson/
+**********************20:33:22.460 - Info: exec_command: /home/ckw/.nvsdkm/replays/scripts/JetPack_7.2_Linux/NV_L4T_SIPL_SBSA_TARGET_POST_INSTALL_COMP.sh20:33:22.586 - Info: Warning: Permanently added '192.168.55.1' (ED25519) to the list of known hosts.
+20:33:22.587 - Info: 
+20:33:22.959 - Info: [ Package PreInstall Finished Successfully ]20:33:22.959 - Info: [ Package Install Started ]20:33:22.959 - Info: current working directory is /home/ckw/nvidia/nvidia_sdk/JetPack_7.2_Linux_JETSON_ORIN_NANO_TARGETS20:33:22.959 - Info: exec_command [target]:
+**********************
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+
+cd /home/jetson/
+sudo tar -C / -xvf Jetson_SIPL_API_R39.2.0_aarch64.tbz2
+sudo rm -r Jetson_SIPL_API_R39.2.0_aarch64.tbz2
+**********************20:33:22.959 - Info: exec_command: scp  /home/ckw/.nvsdkm/replays/scripts/JetPack_7.2_Linux/NV_L4T_SIPL_SBSA_TARGET_POST_INSTALL_COMP.sh jetson@[192.168.55.1]:~; ssh -t  jetson@192.168.55.1 "set -o pipefail; ~/NV_L4T_SIPL_SBSA_TARGET_POST_INSTALL_COMP.sh | sed 's/^/SDKM_INSTALL_ERROR /' && rm -f ~/NV_L4T_SIPL_SBSA_TARGET_POST_INSTALL_COMP.sh"20:33:23.824 - Info: usr/
+20:33:23.824 - Info: 
+20:33:23.824 - Info: usr/src/
+20:33:23.824 - Info: 
+20:33:23.824 - Info: usr/src/jetson_sipl_api/
+20:33:23.824 - Info: 
+20:33:23.826 - Info: usr/src/jetson_sipl_api/sipl/
+20:33:23.826 - Info: 
+20:33:23.826 - Info: usr/src/jetson_sipl_api/sipl/CHANGELOG.md
+20:33:23.827 - Info: 
+20:33:23.827 - Info: usr/src/jetson_sipl_api/sipl/hsl/
+20:33:23.827 - Info: 
+20:33:23.827 - Info: usr/src/jetson_sipl_api/sipl/hsl/integrations/
+20:33:23.827 - Info: 
+20:33:23.827 - Info: usr/src/jetson_sipl_api/sipl/hsl/integrations/cmake/
+20:33:23.827 - Info: 
+20:33:23.827 - Info: usr/src/jetson_sipl_api/sipl/hsl/integrations/cmake/hsl_compile_rules.cmake
+20:33:23.827 - Info: 
+20:33:23.827 - Info: usr/src/jetson_sipl_api/sipl/hsl/pyhsl/
+20:33:23.827 - Info: 
+20:33:23.827 - Info: usr/src/jetson_sipl_api/sipl/hsl/pyhsl/hslctool.py
+20:33:23.827 - Info: 
+20:33:23.827 - Info: usr/src/jetson_sipl_api/sipl/hsl/pyhsl/crcutils.py
+20:33:23.827 - Info: 
+20:33:23.827 - Info: usr/src/jetson_sipl_api/sipl/hsl/pyhsl/hslcompile.py
+20:33:23.827 - Info: 
+20:33:23.827 - Info: usr/src/jetson_sipl_api/sipl/hsl/pyhsl/opalcallbacks.py
+20:33:23.827 - Info: 
+20:33:23.827 - Info: usr/src/jetson_sipl_api/sipl/hsl/pyhsl/pyhsl.py
+20:33:23.827 - Info: 
+20:33:23.829 - Info: usr/src/jetson_sipl_api/sipl/hsl/pyhsl/hslcpackager.py
+20:33:23.829 - Info: 
+20:33:23.830 - Info: usr/src/jetson_sipl_api/sipl/hsl/pyhsl/opalEncoderBridge.py
+20:33:23.830 - Info: 
+20:33:23.830 - Info: usr/src/jetson_sipl_api/sipl/hsl/pyhsl/pyhslcore.py
+20:33:23.830 - Info: 
+20:33:23.830 - Info: usr/src/jetson_sipl_api/sipl/hsl/pyhsl/hsldecoder.py
+20:33:23.830 - Info: 
+20:33:23.831 - Info: usr/src/jetson_sipl_api/sipl/hsl/pyhsl/drvhsl.py
+20:33:23.831 - Info: 
+20:33:23.832 - Info: usr/src/jetson_sipl_api/sipl/hsl/pyhsl/hslencoder.py
+20:33:23.832 - Info: 
+20:33:23.833 - Info: usr/src/jetson_sipl_api/sipl/hsl/pyhsl/opal.py
+20:33:23.833 - Info: 
+20:33:23.834 - Info: usr/src/jetson_sipl_api/sipl/hsl/include/
+20:33:23.834 - Info: 
+20:33:23.834 - Info: usr/src/jetson_sipl_api/sipl/hsl/include/hsl/
+20:33:23.834 - Info: 
+20:33:23.834 - Info: usr/src/jetson_sipl_api/sipl/hsl/include/hsl/bytecode/
+20:33:23.834 - Info: 
+20:33:23.834 - Info: usr/src/jetson_sipl_api/sipl/hsl/include/hsl/bytecode/IHslDecoder.h
+20:33:23.834 - Info: 
+20:33:23.835 - Info: usr/src/jetson_sipl_api/sipl/hsl/include/hsl/bytecode/IHslEncoder.h
+20:33:23.835 - Info: 
+20:33:23.835 - Info: usr/src/jetson_sipl_api/sipl/hsl/include/hsl/bytecode/hsldef.h
+20:33:23.835 - Info: 
+20:33:23.835 - Info: usr/src/jetson_sipl_api/sipl/hsl/include/hsl/bytecode/chsldef.h
+20:33:23.835 - Info: 
+20:33:23.836 - Info: usr/src/jetson_sipl_api/sipl/samples/
+20:33:23.836 - Info: 
+20:33:23.836 - Info: usr/src/jetson_sipl_api/sipl/samples/query/
+20:33:23.836 - Info: 
+20:33:23.836 - Info: usr/src/jetson_sipl_api/sipl/samples/query/main.cpp
+20:33:23.836 - Info: 
+20:33:23.838 - Info: usr/src/jetson_sipl_api/sipl/samples/query/README.md
+20:33:23.838 - Info: 
+20:33:23.838 - Info: usr/src/jetson_sipl_api/sipl/samples/query/CMakeLists.txt
+20:33:23.838 - Info: 
+20:33:23.838 - Info: usr/src/jetson_sipl_api/sipl/samples/camera/
+20:33:23.838 - Info: 
+20:33:23.839 - Info: usr/src/jetson_sipl_api/sipl/samples/camera/CUtils.hpp
+20:33:23.839 - Info: 
+20:33:23.839 - Info: usr/src/jetson_sipl_api/sipl/samples/camera/CComposite.hpp
+20:33:23.839 - Info: 
+20:33:23.840 - Info: usr/src/jetson_sipl_api/sipl/samples/camera/CFileReader.hpp
+20:33:23.840 - Info: 
+20:33:23.840 - Info: usr/src/jetson_sipl_api/sipl/samples/camera/main.cpp
+20:33:23.840 - Info: 
+20:33:23.847 - Info: usr/src/jetson_sipl_api/sipl/samples/camera/HsbTransportMetadata.hpp
+20:33:23.847 - Info: 
+20:33:23.847 - Info: usr/src/jetson_sipl_api/sipl/samples/camera/CQueryAdapter.cpp
+20:33:23.847 - Info: 
+20:33:23.847 - Info: usr/src/jetson_sipl_api/sipl/samples/camera/CNvWfd.hpp
+20:33:23.847 - Info: 
+20:33:23.847 - Info: usr/src/jetson_sipl_api/sipl/samples/camera/NvNvSciBufHelper.h
+20:33:23.847 - Info: 
+20:33:23.847 - Info: usr/src/jetson_sipl_api/sipl/samples/camera/CFrameFeeder.hpp
+20:33:23.847 - Info: 
+20:33:23.847 - Info: usr/src/jetson_sipl_api/sipl/samples/camera/CCamFsyncUtils.hpp
+20:33:23.847 - Info: 
+20:33:23.848 - Info: usr/src/jetson_sipl_api/sipl/samples/camera/CFileWriter.hpp
+20:33:23.848 - Info: 
+20:33:23.848 - Info: usr/src/jetson_sipl_api/sipl/samples/camera/CAutoRecovery.hpp
+20:33:23.848 - Info: 
+20:33:23.849 - Info: usr/src/jetson_sipl_api/sipl/samples/camera/CNvSIPLMaster.hpp
+20:33:23.849 - Info: 
+20:33:23.852 - Info: usr/src/jetson_sipl_api/sipl/samples/camera/CProfiler.hpp
+20:33:23.852 - Info: 
+20:33:23.852 - Info: usr/src/jetson_sipl_api/sipl/samples/camera/CComposite.cpp
+20:33:23.852 - Info: 
+20:33:23.852 - Info: usr/src/jetson_sipl_api/sipl/samples/camera/CNvWfd.cpp
+20:33:23.852 - Info: 
+20:33:23.853 - Info: usr/src/jetson_sipl_api/sipl/samples/camera/CCmdLineParser.hpp
+20:33:23.853 - Info: 
+20:33:23.854 - Info: usr/src/jetson_sipl_api/sipl/samples/camera/CUtils.cpp
+20:33:23.854 - Info: 
+20:33:23.873 - Info: usr/src/jetson_sipl_api/sipl/samples/camera/HsbTransportMetadata.cpp
+20:33:23.874 - Info: 
+20:33:23.874 - Info: usr/src/jetson_sipl_api/sipl/samples/camera/CCompositeHelper.hpp
+20:33:23.874 - Info: 
+20:33:23.875 - Info: usr/src/jetson_sipl_api/sipl/samples/camera/CQueryAdapter.hpp
+20:33:23.875 - Info: 
+20:33:23.875 - Info: usr/src/jetson_sipl_api/sipl/samples/camera/CSensorGroupSyncMonitor.hpp
+20:33:23.875 - Info: 
+20:33:23.876 - Info: usr/src/jetson_sipl_api/sipl/samples/camera/CCamFsyncUtils.cpp
+20:33:23.876 - Info: 
+20:33:23.876 - Info: usr/src/jetson_sipl_api/sipl/samples/camera/CMakeLists.txt
+20:33:23.876 - Info: 
+20:33:23.876 - Info: usr/src/jetson_sipl_api/sipl/samples/camera/NvNvSciBufHelper.cpp
+20:33:23.876 - Info: 
+20:33:23.877 - Info: usr/src/jetson_sipl_api/sipl/samples/camera/common/
+20:33:23.877 - Info: 
+20:33:23.877 - Info: usr/src/jetson_sipl_api/sipl/samples/camera/common/NvLogging.cpp
+20:33:23.877 - Info: 
+20:33:23.877 - Info: usr/src/jetson_sipl_api/sipl/samples/camera/common/NvEglRenderer.cpp
+20:33:23.877 - Info: 
+20:33:23.877 - Info: usr/src/jetson_sipl_api/sipl/samples/camera/common/NvEglRenderer.h
+20:33:23.877 - Info: 
+20:33:23.878 - Info: usr/src/jetson_sipl_api/sipl/samples/camera/common/NvElementProfiler.h
+20:33:23.878 - Info: 
+20:33:23.878 - Info: usr/src/jetson_sipl_api/sipl/samples/camera/common/NvLogging.h
+20:33:23.878 - Info: 
+20:33:23.878 - Info: usr/src/jetson_sipl_api/sipl/samples/camera/common/NvElementProfiler.cpp
+20:33:23.878 - Info: 
+20:33:23.878 - Info: usr/src/jetson_sipl_api/sipl/samples/camera/common/NvElement.cpp
+20:33:23.878 - Info: 
+20:33:23.878 - Info: usr/src/jetson_sipl_api/sipl/samples/camera/common/NvElement.h
+20:33:23.878 - Info: 
+20:33:23.879 - Info: usr/src/jetson_sipl_api/sipl/samples/camera/CNvSIPLConsumer.hpp
+20:33:23.879 - Info: 
+20:33:23.880 - Info: usr/src/jetson_sipl_api/sipl/hololink/
+20:33:23.880 - Info: 
+20:33:23.880 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/
+20:33:23.880 - Info: 
+20:33:23.880 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/
+20:33:23.880 - Info: 
+20:33:23.880 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/core/
+20:33:23.880 - Info: 
+20:33:23.880 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/core/jesd.cpp
+20:33:23.880 - Info: 
+20:33:23.881 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/core/smart_object_pool.hpp
+20:33:23.881 - Info: 
+20:33:23.881 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/core/networking.hpp
+20:33:23.881 - Info: 
+20:33:23.881 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/core/logging_internal.hpp
+20:33:23.881 - Info: 
+20:33:23.881 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/core/packetizer_program.cpp
+20:33:23.881 - Info: 
+20:33:23.882 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/core/csi_controller.hpp
+20:33:23.882 - Info: 
+20:33:23.882 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/core/arp_wrapper.hpp
+20:33:23.882 - Info: 
+20:33:23.882 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/core/nullable_pointer.hpp
+20:33:23.882 - Info: 
+20:33:23.882 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/core/data_channel.hpp
+20:33:23.882 - Info: 
+20:33:23.883 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/core/hololink.cpp
+20:33:23.883 - Info: 
+20:33:23.889 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/core/networking.cpp
+20:33:23.889 - Info: 
+20:33:23.889 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/core/deserializer.hpp
+20:33:23.889 - Info: 
+20:33:23.889 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/core/serializer.hpp
+20:33:23.889 - Info: 
+20:33:23.889 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/core/named_lock.hpp
+20:33:23.889 - Info: 
+20:33:23.889 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/core/arp_wrapper.cpp
+20:33:23.889 - Info: 
+20:33:23.889 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/core/hololink.hpp
+20:33:23.889 - Info: 
+20:33:23.889 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/core/jesd.hpp
+20:33:23.889 - Info: 
+20:33:23.889 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/core/timeout.hpp
+20:33:23.889 - Info: 
+20:33:23.889 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/core/nvtx_trace.hpp
+20:33:23.890 - Info: 
+20:33:23.890 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/core/reactor.hpp
+20:33:23.890 - Info: 
+20:33:23.890 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/core/reactor.cpp
+20:33:23.890 - Info: 
+20:33:23.891 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/core/logging.cpp
+20:33:23.892 - Info: 
+20:33:23.892 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/core/packetizer_program.hpp
+20:33:23.892 - Info: 
+20:33:23.892 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/core/data_channel.cpp
+20:33:23.892 - Info: 
+20:33:23.892 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/core/csi_formats.hpp
+20:33:23.892 - Info: 
+20:33:23.892 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/core/enumerator.hpp
+20:33:23.892 - Info: 
+20:33:23.892 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/core/logging.hpp
+20:33:23.892 - Info: 
+20:33:23.892 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/core/CMakeLists.txt
+20:33:23.892 - Info: 
+20:33:23.893 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/core/metadata.cpp
+20:33:23.893 - Info: 
+20:33:23.893 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/core/metadata.hpp
+20:33:23.893 - Info: 
+20:33:23.893 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/core/timeout.cpp
+20:33:23.893 - Info: 
+20:33:23.893 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/core/enumerator.cpp
+20:33:23.893 - Info: 
+20:33:23.894 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/common/
+20:33:23.894 - Info: 
+20:33:23.894 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/common/holoargs.cpp
+20:33:23.894 - Info: 
+20:33:23.894 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/common/gui_renderer.cpp
+20:33:23.894 - Info: 
+20:33:23.894 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/common/tools.cpp
+20:33:23.894 - Info: 
+20:33:23.894 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/common/cuda_helper.cpp
+20:33:23.894 - Info: 
+20:33:23.894 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/common/cuda_error.hpp
+20:33:23.894 - Info: 
+20:33:23.894 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/common/cuda_helper.hpp
+20:33:23.894 - Info: 
+20:33:23.895 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/common/tools.hpp
+20:33:23.895 - Info: 
+20:33:23.895 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/common/gui_renderer.hpp
+20:33:23.895 - Info: 
+20:33:23.895 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/common/CMakeLists.txt
+20:33:23.895 - Info: 
+20:33:23.895 - Info: usr/src/jetson_sipl_api/sipl/hololink/src/hololink/common/holoargs.hpp
+20:33:23.895 - Info: 
+20:33:23.895 - Info: usr/src/jetson_sipl_api/sipl/README.md
+20:33:23.895 - Info: 
+20:33:23.895 - Info: usr/src/jetson_sipl_api/sipl/capture/
+20:33:23.895 - Info: 
+20:33:23.896 - Info: usr/src/jetson_sipl_api/sipl/capture/include/
+20:33:23.896 - Info: 
+20:33:23.896 - Info: usr/src/jetson_sipl_api/sipl/capture/include/NvFusaCaptureExternalEnums.hpp
+20:33:23.896 - Info: 
+20:33:23.896 - Info: usr/src/jetson_sipl_api/sipl/capture/include/NvFusaCaptureExternal.hpp
+20:33:23.896 - Info: 
+20:33:23.896 - Info: usr/src/jetson_sipl_api/sipl/capture/include/NvFusaCaptureExternalStructs.hpp
+20:33:23.896 - Info: 
+20:33:23.896 - Info: usr/src/jetson_sipl_api/sipl/uddf/
+20:33:23.896 - Info: 
+20:33:23.896 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/
+20:33:23.896 - Info: 
+20:33:23.896 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/sensors/
+20:33:23.896 - Info: 
+20:33:23.896 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/sensors/IMX728/
+20:33:23.896 - Info: 
+20:33:23.896 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/sensors/IMX728/IMX728.cpp
+20:33:23.896 - Info: 
+20:33:23.898 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/sensors/IMX728/IMX728.hpp
+20:33:23.898 - Info: 
+20:33:23.898 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/sensors/IMX728/IMX728Hsl.py
+20:33:23.898 - Info: 
+20:33:23.915 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/sensors/IMX728/IMX728Defs.hpp
+20:33:23.915 - Info: 
+20:33:23.916 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/sensors/IMX728/CMakeLists.txt
+20:33:23.916 - Info: 
+20:33:23.916 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/sensors/IMX623/
+20:33:23.916 - Info: 
+20:33:23.916 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/sensors/IMX623/IMX623.cpp
+20:33:23.916 - Info: 
+20:33:23.916 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/sensors/IMX623/IMX623Defs.hpp
+20:33:23.916 - Info: 
+20:33:23.916 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/sensors/IMX623/IMX623Hsl.py
+20:33:23.916 - Info: 
+20:33:23.919 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/sensors/IMX623/IMX623.hpp
+20:33:23.919 - Info: 
+20:33:23.919 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/sensors/IMX623/CMakeLists.txt
+20:33:23.919 - Info: 
+20:33:23.919 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/sensors/AR0234/
+20:33:23.919 - Info: 
+20:33:23.919 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/sensors/AR0234/AR0234Hsl.py
+20:33:23.919 - Info: 
+20:33:23.919 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/sensors/AR0234/AR0234.cpp
+20:33:23.919 - Info: 
+20:33:23.920 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/sensors/AR0234/AR0234.hpp
+20:33:23.920 - Info: 
+20:33:23.921 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/sensors/AR0234/CMakeLists.txt
+20:33:23.921 - Info: 
+20:33:23.921 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/eeproms/
+20:33:23.921 - Info: 
+20:33:23.921 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/eeproms/BR24H128/
+20:33:23.921 - Info: 
+20:33:23.921 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/eeproms/BR24H128/BR24H128Hsl.py
+20:33:23.921 - Info: 
+20:33:23.921 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/eeproms/BR24H128/BR24H128.cpp
+20:33:23.921 - Info: 
+20:33:23.921 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/eeproms/BR24H128/BR24H128.hpp
+20:33:23.921 - Info: 
+20:33:23.922 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/eeproms/BR24H128/CMakeLists.txt
+20:33:23.923 - Info: 
+20:33:23.923 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/eeproms/GT24C64D/
+20:33:23.923 - Info: 
+20:33:23.923 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/eeproms/GT24C64D/GT24C64DHsl.py
+20:33:23.923 - Info: 
+20:33:23.923 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/eeproms/GT24C64D/GT24C64D.cpp
+20:33:23.923 - Info: 
+20:33:23.923 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/eeproms/GT24C64D/CMakeLists.txt
+20:33:23.923 - Info: 
+20:33:23.923 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/eeproms/GT24C64D/GT24C64D.hpp
+20:33:23.923 - Info: 
+20:33:23.923 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/powerControllers/
+20:33:23.923 - Info: 
+20:33:23.923 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/powerControllers/MAX20087/
+20:33:23.923 - Info: 
+20:33:23.923 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/powerControllers/MAX20087/MAX20087.cpp
+20:33:23.923 - Info: 
+20:33:23.923 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/powerControllers/MAX20087/MAX20087.hpp
+20:33:23.923 - Info: 
+20:33:23.923 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/powerControllers/MAX20087/MAX20087Hsl.py
+20:33:23.923 - Info: 
+20:33:23.923 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/powerControllers/MAX20087/CMakeLists.txt
+20:33:23.923 - Info: 
+20:33:23.923 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/deserializers/
+20:33:23.923 - Info: 
+20:33:23.923 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/deserializers/MAX96724/
+20:33:23.923 - Info: 
+20:33:23.923 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/deserializers/MAX96724/MAX96724.hpp
+20:33:23.923 - Info: 
+20:33:23.923 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/deserializers/MAX96724/MAX96724Hsl.py
+20:33:23.923 - Info: 
+20:33:23.923 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/deserializers/MAX96724/MAX96724.cpp
+20:33:23.923 - Info: 
+20:33:23.923 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/deserializers/MAX96724/CMakeLists.txt
+20:33:23.923 - Info: 
+20:33:23.923 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/deserializers/MAX96712/
+20:33:23.923 - Info: 
+20:33:23.923 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/deserializers/MAX96712/MAX96712.hpp
+20:33:23.923 - Info: 
+20:33:23.924 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/deserializers/MAX96712/MAX96712.cpp
+20:33:23.924 - Info: 
+20:33:23.924 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/deserializers/MAX96712/CMakeLists.txt
+20:33:23.924 - Info: 
+20:33:23.924 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/deserializers/MAX96712/MAX96712Hsl.py
+20:33:23.924 - Info: 
+20:33:23.924 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/deserializers/MAX967XX/
+20:33:23.924 - Info: 
+20:33:23.924 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/deserializers/MAX967XX/MAX967XX.hpp
+20:33:23.924 - Info: 
+20:33:23.924 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/deserializers/MAX967XX/MAX967XXHsl.py
+20:33:23.924 - Info: 
+20:33:23.924 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/deserializers/MAX967XX/MAX967XX.cpp
+20:33:23.924 - Info: 
+20:33:23.926 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/vb1940/
+20:33:23.926 - Info: 
+20:33:23.926 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/vb1940/VB1940.hpp
+20:33:23.927 - Info: 
+20:33:23.927 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/vb1940/VB1940Module.hpp
+20:33:23.927 - Info: 
+20:33:23.927 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/vb1940/VB1940Hsl.py
+20:33:23.927 - Info: 
+20:33:23.927 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/vb1940/VB1940.cpp
+20:33:23.927 - Info: 
+20:33:23.927 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/vb1940/vb1940_data.py
+20:33:23.927 - Info: 
+20:33:23.945 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/vb1940/VB1940Module.cpp
+20:33:23.945 - Info: 
+20:33:23.945 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/vb1940/upscale.hpp
+20:33:23.945 - Info: 
+20:33:23.946 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/vb1940/CMakeLists.txt
+20:33:23.946 - Info: 
+20:33:23.946 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/serializers/
+20:33:23.946 - Info: 
+20:33:23.946 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/serializers/MAX9295/
+20:33:23.946 - Info: 
+20:33:23.946 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/serializers/MAX9295/MAX9295.cpp
+20:33:23.946 - Info: 
+20:33:23.946 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/serializers/MAX9295/MAX9295.hpp
+20:33:23.946 - Info: 
+20:33:23.946 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/serializers/MAX9295/MAX9295Hsl.py
+20:33:23.946 - Info: 
+20:33:23.946 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/serializers/MAX9295/CMakeLists.txt
+20:33:23.946 - Info: 
+20:33:23.946 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/serializers/MAX96717/
+20:33:23.946 - Info: 
+20:33:23.946 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/serializers/MAX96717/MAX96717Hsl.py
+20:33:23.946 - Info: 
+20:33:23.946 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/serializers/MAX96717/MAX96717.cpp
+20:33:23.946 - Info: 
+20:33:23.946 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/serializers/MAX96717/MAX96717.hpp
+20:33:23.946 - Info: 
+20:33:23.947 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/serializers/MAX96717/CMakeLists.txt
+20:33:23.947 - Info: 
+20:33:23.947 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/hsb/
+20:33:23.947 - Info: 
+20:33:23.947 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/hsb/HsbExtendedInterface.hpp
+20:33:23.947 - Info: 
+20:33:23.947 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/hsb/HsbTransportDriver.hpp
+20:33:23.947 - Info: 
+20:33:23.947 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/hsb/HsbTransportDriver.cpp
+20:33:23.947 - Info: 
+20:33:23.948 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/hsb/CMakeLists.txt
+20:33:23.948 - Info: 
+20:33:23.948 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/CMakeLists.txt
+20:33:23.948 - Info: 
+20:33:23.948 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/tegra-deser-power/
+20:33:23.948 - Info: 
+20:33:23.948 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/tegra-deser-power/ScopedFd.hpp
+20:33:23.948 - Info: 
+20:33:23.948 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/tegra-deser-power/native-gpio/
+20:33:23.948 - Info: 
+20:33:23.948 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/tegra-deser-power/native-gpio/TegraDeserPowerDriver_NativeGpio.cpp
+20:33:23.948 - Info: 
+20:33:23.949 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/tegra-deser-power/native-gpio/TegraDeserPowerDriver_NativeGpio.hpp
+20:33:23.949 - Info: 
+20:33:23.949 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/tegra-deser-power/native-gpio/CMakeLists.txt
+20:33:23.949 - Info: 
+20:33:23.949 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/tegra-deser-power/DeserPowerCommon.hpp
+20:33:23.949 - Info: 
+20:33:23.949 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/tegra-deser-power/CMakeLists.txt
+20:33:23.949 - Info: 
+20:33:23.949 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/common/
+20:33:23.949 - Info: 
+20:33:23.949 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/common/SensorUbb.hpp
+20:33:23.949 - Info: 
+20:33:23.950 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/common/EepromUbb.hpp
+20:33:23.950 - Info: 
+20:33:23.951 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/common/SerializerUbb.hpp
+20:33:23.951 - Info: 
+20:33:23.951 - Info: usr/src/jetson_sipl_api/sipl/uddf/drivers/common/DeviceUbb.hpp
+20:33:23.951 - Info: 
+20:33:23.952 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/
+20:33:23.952 - Info: 
+20:33:23.952 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/drivers/
+20:33:23.952 - Info: 
+20:33:23.952 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/drivers/coe/
+20:33:23.952 - Info: 
+20:33:23.952 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/drivers/coe/SampleHsbDriver.hpp
+20:33:23.952 - Info: 
+20:33:23.952 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/drivers/coe/Sequence_Lifecycle.py
+20:33:23.952 - Info: 
+20:33:23.952 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/drivers/coe/SampleHsbDriver.cpp
+20:33:23.952 - Info: 
+20:33:23.952 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/drivers/coe/SampleCoEDriver.hpp
+20:33:23.952 - Info: 
+20:33:23.952 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/drivers/coe/SampleCoEDriver.cpp
+20:33:23.952 - Info: 
+20:33:23.953 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/drivers/coe/CMakeLists.txt
+20:33:23.953 - Info: 
+20:33:23.953 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/drivers/gmsl/
+20:33:23.953 - Info: 
+20:33:23.953 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/drivers/gmsl/SampleSerializerSequences.py
+20:33:23.953 - Info: 
+20:33:23.953 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/drivers/gmsl/SampleEepromUbb.hpp
+20:33:23.953 - Info: 
+20:33:23.953 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/drivers/gmsl/SampleSensorRegisters.py
+20:33:23.953 - Info: 
+20:33:23.953 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/drivers/gmsl/SampleDeserDriver.cpp
+20:33:23.953 - Info: 
+20:33:23.953 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/drivers/gmsl/SampleDeserializerSequences.py
+20:33:23.953 - Info: 
+20:33:23.953 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/drivers/gmsl/SampleSerializerUbb.hpp
+20:33:23.953 - Info: 
+20:33:23.953 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/drivers/gmsl/SampleSerializerUbb.cpp
+20:33:23.953 - Info: 
+20:33:23.953 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/drivers/gmsl/SampleSensorUbb.cpp
+20:33:23.953 - Info: 
+20:33:23.953 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/drivers/gmsl/SampleSensorUbb.hpp
+20:33:23.953 - Info: 
+20:33:23.953 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/drivers/gmsl/SampleModuleDriver.hpp
+20:33:23.953 - Info: 
+20:33:23.953 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/drivers/gmsl/SampleDeserDriver.hpp
+20:33:23.953 - Info: 
+20:33:23.953 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/drivers/gmsl/SampleModuleDriver.cpp
+20:33:23.953 - Info: 
+20:33:23.953 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/drivers/gmsl/SampleEepromUbb.cpp
+20:33:23.953 - Info: 
+20:33:23.953 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/drivers/gmsl/CMakeLists.txt
+20:33:23.953 - Info: 
+20:33:23.953 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/drivers/gmsl/SampleSensorSequences.py
+20:33:23.953 - Info: 
+20:33:23.953 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/drivers/eagle/
+20:33:23.954 - Info: 
+20:33:23.954 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/drivers/eagle/EagleSensorDriver.hpp
+20:33:23.954 - Info: 
+20:33:23.954 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/drivers/eagle/EagleMode.hpp
+20:33:23.954 - Info: 
+20:33:23.954 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/drivers/eagle/EagleSensorDriver.cpp
+20:33:23.954 - Info: 
+20:33:23.954 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/drivers/eagle/EagleModuleDriver.cpp
+20:33:23.954 - Info: 
+20:33:23.954 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/drivers/eagle/EagleModuleDriver.hpp
+20:33:23.954 - Info: 
+20:33:23.954 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/drivers/eagle/CMakeLists.txt
+20:33:23.955 - Info: 
+20:33:23.955 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/drivers/eagle/EagleMode.cpp
+20:33:23.955 - Info: 
+20:33:23.962 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/drivers/gmslpower/
+20:33:23.962 - Info: 
+20:33:23.962 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/drivers/gmslpower/SampleDeserializerPowerDriver.cpp
+20:33:23.962 - Info: 
+20:33:23.962 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/drivers/gmslpower/SampleModulePowerDriver.cpp
+20:33:23.962 - Info: 
+20:33:23.962 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/drivers/gmslpower/CMakeLists.txt
+20:33:23.962 - Info: 
+20:33:23.962 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/drivers/gmslpower/SampleDeserializerPowerDriver.hpp
+20:33:23.962 - Info: 
+20:33:23.962 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/drivers/gmslpower/SampleModulePowerDriver.hpp
+20:33:23.962 - Info: 
+20:33:23.962 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/drivers/CMakeLists.txt
+20:33:23.962 - Info: 
+20:33:23.962 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/libraries/
+20:33:23.962 - Info: 
+20:33:23.962 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/libraries/coe/
+20:33:23.962 - Info: 
+20:33:23.962 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/libraries/coe/SampleCoELibrary.cpp
+20:33:23.962 - Info: 
+20:33:23.962 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/libraries/coe/CMakeLists.txt
+20:33:23.962 - Info: 
+20:33:23.962 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/libraries/gmsl/
+20:33:23.962 - Info: 
+20:33:23.962 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/libraries/gmsl/SampleGmslLibrary.cpp
+20:33:23.962 - Info: 
+20:33:23.962 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/libraries/gmsl/CMakeLists.txt
+20:33:23.962 - Info: 
+20:33:23.962 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/libraries/CMakeLists.txt
+20:33:23.962 - Info: 
+20:33:23.962 - Info: usr/src/jetson_sipl_api/sipl/uddf/samples/CMakeLists.txt
+20:33:23.962 - Info: 
+20:33:23.962 - Info: usr/src/jetson_sipl_api/sipl/uddf/libraries/
+20:33:23.962 - Info: 
+20:33:23.962 - Info: usr/src/jetson_sipl_api/sipl/uddf/libraries/moduleR0SIM623/
+20:33:23.962 - Info: 
+20:33:23.962 - Info: usr/src/jetson_sipl_api/sipl/uddf/libraries/moduleR0SIM623/R0SIM623Library.cpp
+20:33:23.962 - Info: 
+20:33:23.962 - Info: usr/src/jetson_sipl_api/sipl/uddf/libraries/moduleR0SIM623/CMakeLists.txt
+20:33:23.962 - Info: 
+20:33:23.962 - Info: usr/src/jetson_sipl_api/sipl/uddf/libraries/deserMAX96712/
+20:33:23.962 - Info: 
+20:33:23.962 - Info: usr/src/jetson_sipl_api/sipl/uddf/libraries/deserMAX96712/MAX96712Library.cpp
+20:33:23.962 - Info: 
+20:33:23.962 - Info: usr/src/jetson_sipl_api/sipl/uddf/libraries/deserMAX96712/CMakeLists.txt
+20:33:23.962 - Info: 
+20:33:23.962 - Info: usr/src/jetson_sipl_api/sipl/uddf/libraries/moduleR0SIM728/
+20:33:23.962 - Info: 
+20:33:23.962 - Info: usr/src/jetson_sipl_api/sipl/uddf/libraries/moduleR0SIM728/R0SIM728Library.cpp
+20:33:23.962 - Info: 
+20:33:23.962 - Info: usr/src/jetson_sipl_api/sipl/uddf/libraries/moduleR0SIM728/CMakeLists.txt
+20:33:23.962 - Info: 
+20:33:23.962 - Info: usr/src/jetson_sipl_api/sipl/uddf/libraries/deserMAX96724/
+20:33:23.962 - Info: 
+20:33:23.962 - Info: usr/src/jetson_sipl_api/sipl/uddf/libraries/deserMAX96724/MAX96724Library.cpp
+20:33:23.962 - Info: 
+20:33:23.962 - Info: usr/src/jetson_sipl_api/sipl/uddf/libraries/deserMAX96724/CMakeLists.txt
+20:33:23.962 - Info: 
+20:33:23.962 - Info: usr/src/jetson_sipl_api/sipl/uddf/libraries/moduleEagle/
+20:33:23.962 - Info: 
+20:33:23.962 - Info: usr/src/jetson_sipl_api/sipl/uddf/libraries/moduleEagle/EagleLibrary.cpp
+20:33:23.962 - Info: 
+20:33:23.962 - Info: usr/src/jetson_sipl_api/sipl/uddf/libraries/moduleEagle/CMakeLists.txt
+20:33:23.962 - Info: 
+20:33:23.962 - Info: usr/src/jetson_sipl_api/sipl/uddf/libraries/moduleAR0234HAWK/
+20:33:23.962 - Info: 
+20:33:23.962 - Info: usr/src/jetson_sipl_api/sipl/uddf/libraries/moduleAR0234HAWK/AR0234HAWKLibrary.cpp
+20:33:23.962 - Info: 
+20:33:23.962 - Info: usr/src/jetson_sipl_api/sipl/uddf/libraries/moduleAR0234HAWK/CMakeLists.txt
+20:33:23.962 - Info: 
+20:33:23.962 - Info: usr/src/jetson_sipl_api/sipl/uddf/libraries/powerControlMAX20087/
+20:33:23.962 - Info: 
+20:33:23.963 - Info: usr/src/jetson_sipl_api/sipl/uddf/libraries/powerControlMAX20087/MAX20087Library.cpp
+20:33:23.963 - Info: 
+20:33:23.963 - Info: usr/src/jetson_sipl_api/sipl/uddf/libraries/powerControlMAX20087/CMakeLists.txt
+20:33:23.963 - Info: 
+20:33:23.963 - Info: usr/src/jetson_sipl_api/sipl/uddf/libraries/CMakeLists.txt
+20:33:23.963 - Info: 
+20:33:23.963 - Info: usr/src/jetson_sipl_api/sipl/uddf/libraries/tegra-deser-power/
+20:33:23.963 - Info: 
+20:33:23.963 - Info: usr/src/jetson_sipl_api/sipl/uddf/libraries/tegra-deser-power/TegraDeserPowerLibrary.cpp
+20:33:23.963 - Info: 
+20:33:23.963 - Info: usr/src/jetson_sipl_api/sipl/uddf/libraries/tegra-deser-power/README.md
+20:33:23.963 - Info: 
+20:33:23.963 - Info: usr/src/jetson_sipl_api/sipl/uddf/libraries/tegra-deser-power/CMakeLists.txt
+20:33:23.963 - Info: 
+20:33:23.963 - Info: usr/src/jetson_sipl_api/sipl/uddf/coSerDes/
+20:33:23.963 - Info: 
+20:33:23.963 - Info: usr/src/jetson_sipl_api/sipl/uddf/coSerDes/modules/
+20:33:23.963 - Info: 
+20:33:23.963 - Info: usr/src/jetson_sipl_api/sipl/uddf/coSerDes/modules/R0SIM728/
+20:33:23.963 - Info: 
+20:33:23.963 - Info: usr/src/jetson_sipl_api/sipl/uddf/coSerDes/modules/R0SIM728/R0SIM728Module.cpp
+20:33:23.963 - Info: 
+20:33:23.963 - Info: usr/src/jetson_sipl_api/sipl/uddf/coSerDes/modules/R0SIM728/R0SIM728Module.hpp
+20:33:23.963 - Info: 
+20:33:23.963 - Info: usr/src/jetson_sipl_api/sipl/uddf/coSerDes/modules/R0SIM728/CMakeLists.txt
+20:33:23.964 - Info: 
+20:33:23.964 - Info: usr/src/jetson_sipl_api/sipl/uddf/coSerDes/modules/AR0234HAWK/
+20:33:23.964 - Info: 
+20:33:23.964 - Info: usr/src/jetson_sipl_api/sipl/uddf/coSerDes/modules/AR0234HAWK/AR0234HAWKModule.cpp
+20:33:23.964 - Info: 
+20:33:23.964 - Info: usr/src/jetson_sipl_api/sipl/uddf/coSerDes/modules/AR0234HAWK/AR0234HAWKModule.hpp
+20:33:23.964 - Info: 
+20:33:23.964 - Info: usr/src/jetson_sipl_api/sipl/uddf/coSerDes/modules/AR0234HAWK/CMakeLists.txt
+20:33:23.964 - Info: 
+20:33:23.964 - Info: usr/src/jetson_sipl_api/sipl/uddf/coSerDes/modules/R0SIM623/
+20:33:23.964 - Info: 
+20:33:23.964 - Info: usr/src/jetson_sipl_api/sipl/uddf/coSerDes/modules/R0SIM623/R0SIM623Module.hpp
+20:33:23.964 - Info: 
+20:33:23.964 - Info: usr/src/jetson_sipl_api/sipl/uddf/coSerDes/modules/R0SIM623/R0SIM623Module.cpp
+20:33:23.964 - Info: 
+20:33:23.964 - Info: usr/src/jetson_sipl_api/sipl/uddf/coSerDes/modules/R0SIM623/CMakeLists.txt
+20:33:23.964 - Info: 
+20:33:23.964 - Info: usr/src/jetson_sipl_api/sipl/uddf/coSerDes/common/
+20:33:23.964 - Info: 
+20:33:23.964 - Info: usr/src/jetson_sipl_api/sipl/uddf/coSerDes/common/ModuleUbb.hpp
+20:33:23.964 - Info: 
+20:33:23.964 - Info: usr/src/jetson_sipl_api/sipl/uddf/README.md
+20:33:23.964 - Info: 
+20:33:23.964 - Info: usr/src/jetson_sipl_api/sipl/uddf/CMakeLists.txt
+20:33:23.964 - Info: 
+20:33:23.964 - Info: usr/src/jetson_sipl_api/sipl/uddf/common/
+20:33:23.964 - Info: 
+20:33:23.964 - Info: usr/src/jetson_sipl_api/sipl/uddf/common/utils/
+20:33:23.964 - Info: 
+20:33:23.966 - Info: usr/src/jetson_sipl_api/sipl/uddf/common/utils/UddfUtils.hpp
+20:33:23.966 - Info: 
+20:33:23.966 - Info: usr/src/jetson_sipl_api/sipl/uddf/common/utils/CrcUtils.hpp
+20:33:23.966 - Info: 
+20:33:23.966 - Info: usr/src/jetson_sipl_api/sipl/uddf/common/utils/FilteringConfigObject.hpp
+20:33:23.966 - Info: 
+20:33:23.966 - Info: usr/src/jetson_sipl_api/sipl/uddf/common/helpers/
+20:33:23.966 - Info: 
+20:33:23.966 - Info: usr/src/jetson_sipl_api/sipl/uddf/common/helpers/HsbTransportDriverBase.hpp
+20:33:23.966 - Info: 
+20:33:23.966 - Info: usr/src/jetson_sipl_api/sipl/uddf/common/helpers/CoEModuleDriverBase.hpp
+20:33:23.966 - Info: 
+20:33:23.983 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/
+20:33:23.983 - Info: 
+20:33:23.983 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/
+20:33:23.983 - Info: 
+20:33:23.983 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/cdi/
+20:33:23.983 - Info: 
+20:33:23.983 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/cdi/IDriverServices.hpp
+20:33:23.983 - Info: 
+20:33:23.984 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/cdi/LogFormatter.hpp
+20:33:23.984 - Info: 
+20:33:23.984 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/cdi/MemoryBlockDescriptor.hpp
+20:33:23.984 - Info: 
+20:33:23.984 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/cdi/HSLResult.hpp
+20:33:23.984 - Info: 
+20:33:23.984 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/cdi/ByteView.hpp
+20:33:23.984 - Info: 
+20:33:23.984 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/cdi/CDITypes.hpp
+20:33:23.984 - Info: 
+20:33:23.984 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/cdi/IHardwareAccess.hpp
+20:33:23.984 - Info: 
+20:33:23.985 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/cdi/hal/
+20:33:23.985 - Info: 
+20:33:23.985 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/cdi/hal/HSLStaticSequence.hpp
+20:33:23.985 - Info: 
+20:33:23.985 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/cdi/hal/IHSLDynamicSequence.hpp
+20:33:23.985 - Info: 
+20:33:23.985 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/cdi/hal/II2CBuilder.hpp
+20:33:23.985 - Info: 
+20:33:23.985 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/cdi/hal/IGPIOBuilder.hpp
+20:33:23.985 - Info: 
+20:33:23.986 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/ddi/
+20:33:23.986 - Info: 
+20:33:23.986 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/ddi/uuid.hpp
+20:33:23.986 - Info: 
+20:33:23.988 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/ddi/interfaces/
+20:33:23.988 - Info: 
+20:33:23.988 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/ddi/interfaces/IGmslModulePowerControl.hpp
+20:33:23.988 - Info: 
+20:33:23.988 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/ddi/interfaces/IGmslSerializer.hpp
+20:33:23.988 - Info: 
+20:33:23.988 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/ddi/interfaces/IReadWriteI2C.hpp
+20:33:23.988 - Info: 
+20:33:23.988 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/ddi/interfaces/ICoEModuleControl.hpp
+20:33:23.988 - Info: 
+20:33:23.988 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/ddi/interfaces/ICameraSensorInfo.hpp
+20:33:23.988 - Info: 
+20:33:23.988 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/ddi/interfaces/ISensorCharMode.hpp
+20:33:23.988 - Info: 
+20:33:23.988 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/ddi/interfaces/SensorControlTypes.hpp
+20:33:23.988 - Info: 
+20:33:23.989 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/ddi/interfaces/IGmslDeserializer.hpp
+20:33:23.989 - Info: 
+20:33:23.990 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/ddi/interfaces/IDiagnosticValues.hpp
+20:33:23.990 - Info: 
+20:33:23.990 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/ddi/interfaces/ICoEBridgeControl.hpp
+20:33:23.990 - Info: 
+20:33:23.992 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/ddi/interfaces/ICameraSensorControl.hpp
+20:33:23.992 - Info: 
+20:33:23.992 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/ddi/interfaces/IModuleComponentAccess.hpp
+20:33:23.992 - Info: 
+20:33:23.992 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/ddi/interfaces/IGmslDeserializerPowerControl.hpp
+20:33:23.992 - Info: 
+20:33:23.992 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/ddi/interfaces/IConfigurationObject.hpp
+20:33:23.992 - Info: 
+20:33:23.992 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/ddi/interfaces/config/
+20:33:23.992 - Info: 
+20:33:23.992 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/ddi/interfaces/config/ITunnelingMode.hpp
+20:33:23.992 - Info: 
+20:33:23.992 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/ddi/interfaces/IReadWriteGpio.hpp
+20:33:23.992 - Info: 
+20:33:23.992 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/ddi/interfaces/IGmslModuleControl.hpp
+20:33:23.992 - Info: 
+20:33:23.992 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/ddi/interfaces/IEEPromAccess.hpp
+20:33:23.992 - Info: 
+20:33:23.992 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/ddi/interfaces/ICameraModule.hpp
+20:33:23.992 - Info: 
+20:33:23.993 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/ddi/discovery.hpp
+20:33:23.993 - Info: 
+20:33:23.993 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/ddi/IInterface.hpp
+20:33:23.993 - Info: 
+20:33:23.993 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/ddi/DDITypes.hpp
+20:33:23.993 - Info: 
+20:33:23.993 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/ddi/IDriver.hpp
+20:33:23.993 - Info: 
+20:33:23.994 - Info: usr/src/jetson_sipl_api/sipl/uddf/include/uddf/ddi/ModuleComponentTypes.hpp
+20:33:23.994 - Info: 
+20:33:23.994 - Info: usr/src/jetson_sipl_api/sipl/CMakeLists.txt
+20:33:23.994 - Info: 
+20:33:23.996 - Info: usr/src/jetson_sipl_api/sipl/include/
+20:33:23.996 - Info: 
+20:33:23.996 - Info: usr/src/jetson_sipl_api/sipl/include/nvmedia/
+20:33:23.996 - Info: 
+20:33:23.996 - Info: usr/src/jetson_sipl_api/sipl/include/nvmedia/nvmedia_2d_sci.h
+20:33:23.996 - Info: 
+20:33:23.998 - Info: usr/src/jetson_sipl_api/sipl/include/nvmedia/nvmedia_2d.h
+20:33:23.998 - Info: 
+20:33:24.003 - Info: usr/src/jetson_sipl_api/sipl/include/nvmedia/nvmedia_core.h
+20:33:24.003 - Info: 
+20:33:24.003 - Info: usr/src/jetson_sipl_api/sipl/include/NvSIPLInterrupts.hpp
+20:33:24.003 - Info: 
+20:33:24.003 - Info: usr/src/jetson_sipl_api/sipl/include/WF/
+20:33:24.003 - Info: 
+20:33:24.004 - Info: usr/src/jetson_sipl_api/sipl/include/WF/wfdplatform.h
+20:33:24.004 - Info: 
+20:33:24.004 - Info: usr/src/jetson_sipl_api/sipl/include/WF/wfdext.h
+20:33:24.004 - Info: 
+20:33:24.004 - Info: usr/src/jetson_sipl_api/sipl/include/WF/wfd.h
+20:33:24.004 - Info: 
+20:33:24.004 - Info: usr/src/jetson_sipl_api/sipl/include/NvSIPLTrace.hpp
+20:33:24.004 - Info: 
+20:33:24.005 - Info: usr/src/jetson_sipl_api/sipl/include/NvSIPLCDICommon.h
+20:33:24.005 - Info: 
+20:33:24.005 - Info: usr/src/jetson_sipl_api/sipl/include/NvSIPLCapStructs.h
+20:33:24.005 - Info: 
+20:33:24.006 - Info: usr/src/jetson_sipl_api/sipl/include/NvSIPLCamera.hpp
+20:33:24.006 - Info: 
+20:33:24.009 - Info: usr/src/jetson_sipl_api/sipl/include/nvsci/
+20:33:24.009 - Info: 
+20:33:24.009 - Info: usr/src/jetson_sipl_api/sipl/include/nvsci/nvsciipc.h
+20:33:24.009 - Info: 
+20:33:24.013 - Info: usr/src/jetson_sipl_api/sipl/include/nvsci/nvscisync.h
+20:33:24.013 - Info: 
+20:33:24.018 - Info: usr/src/jetson_sipl_api/sipl/include/nvsci/nvscistream.h
+20:33:24.018 - Info: 
+20:33:24.018 - Info: usr/src/jetson_sipl_api/sipl/include/nvsci/nvscierror.h
+20:33:24.018 - Info: 
+20:33:24.018 - Info: usr/src/jetson_sipl_api/sipl/include/nvsci/nvscibuf.h
+20:33:24.018 - Info: 
+20:33:24.042 - Info: usr/src/jetson_sipl_api/sipl/include/nvsci/nvscistream_api.h
+20:33:24.042 - Info: 
+20:33:24.046 - Info: usr/src/jetson_sipl_api/sipl/include/nvsci/nvscievent.h
+20:33:24.046 - Info: 
+20:33:24.048 - Info: usr/src/jetson_sipl_api/sipl/include/nvsci/nvscistream_types.h
+20:33:24.048 - Info: 
+20:33:24.048 - Info: usr/src/jetson_sipl_api/sipl/include/NvSIPLClient.hpp
+20:33:24.048 - Info: 
+20:33:24.048 - Info: usr/src/jetson_sipl_api/sipl/include/INvSIPLISPStatCustomInterface.hpp
+20:33:24.048 - Info: 
+20:33:24.049 - Info: usr/src/jetson_sipl_api/sipl/include/NvSIPLCameraTypes.hpp
+20:33:24.049 - Info: 
+20:33:24.050 - Info: usr/src/jetson_sipl_api/sipl/include/nvbufsurftransform.h
+20:33:24.050 - Info: 
+20:33:24.050 - Info: usr/src/jetson_sipl_api/sipl/include/query/
+20:33:24.050 - Info: 
+20:33:24.050 - Info: usr/src/jetson_sipl_api/sipl/include/query/include/
+20:33:24.050 - Info: 
+20:33:24.050 - Info: usr/src/jetson_sipl_api/sipl/include/query/include/NvSIPLQuery.hpp
+20:33:24.050 - Info: 
+20:33:24.051 - Info: usr/src/jetson_sipl_api/sipl/include/query/include/NvSIPLQueryTrace.hpp
+20:33:24.051 - Info: 
+20:33:24.051 - Info: usr/src/jetson_sipl_api/sipl/include/query/include/NvSIPLCameraQuery.hpp
+20:33:24.051 - Info: 
+20:33:24.051 - Info: usr/src/jetson_sipl_api/sipl/include/INvSiplControlAuto.hpp
+20:33:24.051 - Info: 
+20:33:24.053 - Info: usr/src/jetson_sipl_api/sipl/include/NvSIPLDeviceBlockInfo.hpp
+20:33:24.053 - Info: 
+20:33:24.053 - Info: usr/src/jetson_sipl_api/sipl/include/NvSIPLISPStat.hpp
+20:33:24.053 - Info: 
+20:33:24.054 - Info: usr/src/jetson_sipl_api/sipl/include/nvbufsurface.h
+20:33:24.054 - Info: 
+20:33:24.054 - Info: usr/src/jetson_sipl_api/sipl/include/nvbufsurface_nvscibuf.h
+20:33:24.054 - Info: 
+20:33:24.054 - Info: usr/src/jetson_sipl_api/sipl/include/NvSIPLVersion.hpp
+20:33:24.054 - Info: 
+20:33:24.057 - Info: usr/src/jetson_sipl_api/sipl/include/NvSIPLCommon.hpp
+20:33:24.057 - Info: 
+20:33:24.057 - Info: usr/src/jetson_sipl_api/sipl/include/NvSIPLPipelineMgr.hpp
+20:33:24.057 - Info: 
+20:33:24.057 - Info: usr/src/jetson_sipl_api/sipl/include/NvSIPLISPStructs.hpp
+20:33:24.057 - Info: 
+20:33:24.057 - Info: usr/src/jetson_sipl_api/sipl/include/NvCamFsync.h
+20:33:24.057 - Info: 
+20:33:24.057 - Info: usr/src/jetson_sipl_api/sipl/include/NvSiplControlAutoDef.hpp
+20:33:24.057 - Info: 
+20:33:24.057 - Info: usr/src/jetson_sipl_api/sipl/include/NvSIPLPlatformCfg.hpp
+20:33:24.057 - Info: 
+20:33:24.057 - Info: usr/src/jetson_sipl_api/sipl/include/INvSIPLDeviceInterfaceProvider.hpp
+20:33:24.057 - Info: 
+20:33:24.057 - Info: usr/share/
+20:33:24.057 - Info: 
+20:33:24.057 - Info: usr/share/doc/
+20:33:24.057 - Info: 
+20:33:24.057 - Info: usr/share/doc/jetson_sipl_api/
+20:33:24.057 - Info: 
+20:33:24.057 - Info: usr/share/doc/jetson_sipl_api/Tegra_Software_License_Agreement-Tegra-Linux.txt
+20:33:24.057 - Info: 
+20:33:24.195 - Info: [ Package Install Finished Successfully ]20:33:24.195 - Info: exec_command: ssh   jetson@192.168.55.1 "df -B1 / | tail -1 | awk '{ printf \$4 }'"20:33:24.621 - Info: [target] [ 5.39 MB used. Disk Avail: 205.86 GB ]20:33:24.621 - Info: [ NV_L4T_SIPL_SBSA_TARGET_POST_INSTALL_COMP Install took 3s ]

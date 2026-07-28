@@ -1,0 +1,830 @@
+------ 2026-07-27 21:04:55 ------
+------ SDK: JetPack_7.2_Linux ------
+21:04:55.966 - Info: exec_command: ssh   jetson@192.168.55.1 "df -B1 / | tail -1 | awk '{ printf \$4 }'"21:04:56.366 - Info: NV_L4T_CUDNN_RUNTIME_SBSA_TARGET_POST_INSTALL_COMP include 1 package21:04:56.366 - Info: [ Package Install Started ]21:04:56.366 - Info: target deb installer start to install21:04:56.385 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+sudo mkdir -p /opt/nvidia/deb_repos
+sudo chmod 777 /opt/nvidia/deb_repos
+sudo rm -f /opt/nvidia/deb_repos/cudnn-local-repo-ubuntu2404-9.20.0_1.0-1_arm64.deb
+**********************21:06:45.516 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+
+exec 3>&1
+exec 1>&2
+exec 2>&3
+function safe_apt_install {
+    export DEBIAN_FRONTEND=noninteractive
+    echo "*begin $1, $2"
+    tmp_log=/tmp/sdkm_apt_install_log.ckw.txt
+    sudo rm -f $tmp_log
+    set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+    MAX_RETRY=3
+    TIMES=1
+    while [ ${CMD_STATUS} -ne 0 ]; do
+        cat $tmp_log > /dev/stderr
+        if [ $TIMES -gt $MAX_RETRY ]; then
+            echo "Unhandled error when running $1: `tr '\n' '; ' <$tmp_log`" 1>&2; exit 1
+        fi
+        if grep -q -e "is locked by another process" -e "E: Could not get lock /var/" -e "Could not open lock" $tmp_log; then
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting $2 seconds for apt to be available"; sleep ${2}
+        elif grep -q -e "apt --fix-broken install" $tmp_log; then
+            echo "safe apt install failed, need to run apt --fix-broken install"
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; sudo apt-get -f -y --allow-downgrades install 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting 5 seconds for apt"; sleep 5
+        else
+            echo "safe apt install failed: $1, exit code: $CMD_STATUS, retry number: $TIMES"
+            echo "will sleep $[ $TIMES*10 ] seconds before next attempt"
+            sleep $[ $TIMES*10 ]
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+        fi
+    done
+    if [ $CMD_STATUS -eq 0 ] && [ $TIMES -ne 1 ]; then
+        echo "safe apt install succeed. retry number: $TIMES."
+    fi
+}
+safe_apt_install "sudo apt-get -y update" 5
+sleep 0.5
+safe_apt_install "sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/cudnn-local-repo-ubuntu2404-9.20.0_1.0-1_arm64.deb" 5
+sleep 5
+# ensure package version from local repository has a higher priority
+sudo mkdir -p /etc/apt/preferences.d/
+sudo rm -f /etc/apt/preferences.d/sdkm
+sudo touch /etc/apt/preferences.d/sdkm
+echo 'Package: *' | sudo tee -a /etc/apt/preferences.d/sdkm
+echo 'Pin: origin ""' | sudo tee -a /etc/apt/preferences.d/sdkm
+echo 'Pin-Priority: 999' | sudo tee -a /etc/apt/preferences.d/sdkm
+
+packageName=$(dpkg -f /opt/nvidia/deb_repos/cudnn-local-repo-ubuntu2404-9.20.0_1.0-1_arm64.deb Package)
+keyringFilePath=$(dpkg -L $packageName | grep 'keyring\.gpg$' | head -n 1 | tr -d "\n")
+if [ -n "$keyringFilePath" ]
+then
+	if [ -f "$keyringFilePath" ]
+	then
+		sudo cp $keyringFilePath /usr/share/keyrings/
+	else
+		echo 'Warning: deb repo keyring file not found' >&2
+	fi
+else
+	pubKeyFilePath=$(dpkg -L $packageName | grep '\.pub$' | head -n 1 | tr -d "\n")
+	echo $pubKeyFilePath
+	if [ -n "$pubKeyFilePath" ]
+	then
+		safe_apt_install "sudo apt-key add $pubKeyFilePath" 5
+	else
+		echo 'Warning: deb repo pub key file not found' >&2
+	fi
+fi
+sleep 2
+safe_apt_install "sudo apt-get -y update" 5
+
+safe_apt_install "sudo -E apt-get -y  install libcudnn9-cuda-13 " 5
+targetDebRepoPackageName=$(dpkg -f /opt/nvidia/deb_repos/cudnn-local-repo-ubuntu2404-9.20.0_1.0-1_arm64.deb Package | tr -d '\n')
+echo targetDebRepoPackageName $targetDebRepoPackageName
+if [ -n "targetDebRepoPackageName" ]
+then
+    safe_apt_install "sudo apt-get purge -y $targetDebRepoPackageName" 5
+else
+    echo 'Warning: target deb repo package name not found' >&2
+fi
+sudo rm -f /etc/apt/preferences.d/sdkm
+
+sudo rm -f /opt/nvidia/deb_repos/cudnn-local-repo-ubuntu2404-9.20.0_1.0-1_arm64.deb
+**********************21:06:46.327 - Info: *begin sudo apt-get -y update, 5
+21:06:46.327 - Info: 
+21:06:46.645 - Info: 
+21:06:46.731 - Info: 0% [Working]
+21:06:46.731 - Info:             
+21:06:46.731 - Info: Hit:1 https://download.docker.com/linux/ubuntu noble InRelease
+21:06:46.731 - Info: 
+21:06:46.731 - Info: 
+21:06:46.731 - Info: 0% [Waiting for headers] [Connecting to ports.ubuntu.com]
+21:06:46.731 - Info:                                                          
+21:06:46.731 - Info: Hit:2 https://repo.download.nvidia.com/jetson/common r39.2 InRelease
+21:06:46.731 - Info: 
+21:06:46.731 - Info: 
+21:06:46.778 - Info: 0% [Connected to repo.download.nvidia.com (23.205.151.187)] [Connecting to ports.ubuntu.com]
+21:06:46.778 - Info:                                                                                             
+21:06:46.778 - Info: Hit:3 https://repo.download.nvidia.com/jetson/som r39.2 InRelease
+21:06:46.778 - Info: 
+21:06:46.778 - Info: 
+21:06:46.778 - Info:                                                                                             
+21:06:46.855 - Info: 0% [Connecting to ports.ubuntu.com]
+21:06:46.855 - Info:                                    
+21:06:46.855 - Info: Hit:4 https://repo.download.nvidia.com/jetson/ffmpeg r39.2 InRelease
+21:06:46.855 - Info: 
+21:06:46.855 - Info: 
+21:06:46.860 - Info: 0% [Connecting to ports.ubuntu.com]
+21:06:47.236 - Info: 0% [Connecting to ports.ubuntu.com (91.189.91.102)]
+21:06:47.236 - Info:                                                    
+21:06:47.404 - Info: 0% [Waiting for headers]
+21:06:47.409 - Info:                         
+21:06:47.409 - Info: Hit:5 http://ports.ubuntu.com/ubuntu-ports noble InRelease
+21:06:47.409 - Info: 
+21:06:47.409 - Info: 
+21:06:47.409 - Info:                         
+21:06:47.535 - Info: 0% [Working]
+21:06:47.641 - Info: 0% [Waiting for headers]
+21:06:47.641 - Info:                         
+21:06:47.641 - Info: Hit:6 http://ports.ubuntu.com/ubuntu-ports noble-updates InRelease
+21:06:47.641 - Info: 
+21:06:47.641 - Info: 
+21:06:47.641 - Info:                         
+21:06:47.766 - Info: 0% [Working]
+21:06:47.872 - Info: 0% [Waiting for headers]
+21:06:47.872 - Info:                         
+21:06:47.872 - Info: Hit:7 http://ports.ubuntu.com/ubuntu-ports noble-backports InRelease
+21:06:47.872 - Info: 
+21:06:47.872 - Info: 
+21:06:47.990 - Info: 0% [Waiting for headers]
+21:06:48.750 - Info:                         
+21:06:48.750 - Info: Hit:8 http://ports.ubuntu.com/ubuntu-ports noble-security InRelease
+21:06:48.750 - Info: 
+21:06:48.750 - Info: 
+21:06:48.750 - Info:                         
+21:06:48.887 - Info: 0% [Working]
+21:06:48.887 - Info: 20% [Working]
+21:06:48.887 - Info:              
+21:06:49.347 - Info: 
+21:06:49.347 - Info: Reading package lists... 0%
+21:06:49.363 - Info: 
+21:06:49.363 - Info: Reading package lists... 0%
+21:06:49.368 - Info: 
+21:06:49.368 - Info: Reading package lists... 0%
+21:06:49.368 - Info: 
+21:06:49.368 - Info: Reading package lists... 0%
+21:06:49.372 - Info: 
+21:06:49.372 - Info: Reading package lists... 0%
+21:06:49.372 - Info: 
+21:06:49.372 - Info: Reading package lists... 0%
+21:06:49.372 - Info: 
+21:06:49.372 - Info: Reading package lists... 0%
+21:06:49.372 - Info: 
+21:06:49.372 - Info: Reading package lists... 0%
+21:06:49.374 - Info: 
+21:06:49.374 - Info: Reading package lists... 0%
+21:06:49.374 - Info: 
+21:06:49.374 - Info: Reading package lists... 0%
+21:06:49.379 - Info: 
+21:06:49.379 - Info: Reading package lists... 0%
+21:06:49.449 - Info: 
+21:06:49.449 - Info: Reading package lists... 3%
+21:06:49.449 - Info: 
+21:06:49.449 - Info: Reading package lists... 3%
+21:06:49.461 - Info: 
+21:06:49.461 - Info: Reading package lists... 5%
+21:06:49.461 - Info: 
+21:06:49.461 - Info: Reading package lists... 5%
+21:06:50.138 - Info: 
+21:06:50.138 - Info: Reading package lists... 27%
+21:06:50.646 - Info: 
+21:06:50.646 - Info: Reading package lists... 41%
+21:06:50.646 - Info: 
+21:06:50.646 - Info: Reading package lists... 41%
+21:06:50.830 - Info: 
+21:06:50.830 - Info: Reading package lists... 57%
+21:06:50.830 - Info: 
+21:06:50.830 - Info: Reading package lists... 57%
+21:06:50.837 - Info: 
+21:06:50.837 - Info: Reading package lists... 58%
+21:06:50.837 - Info: 
+21:06:50.837 - Info: Reading package lists... 58%
+21:06:50.838 - Info: 
+21:06:50.838 - Info: Reading package lists... 58%
+21:06:50.838 - Info: 
+21:06:50.838 - Info: Reading package lists... 58%
+21:06:50.847 - Info: 
+21:06:50.847 - Info: Reading package lists... 58%
+21:06:50.858 - Info: 
+21:06:50.858 - Info: Reading package lists... 58%
+21:06:50.858 - Info: 
+21:06:50.858 - Info: Reading package lists... 58%
+21:06:50.862 - Info: 
+21:06:50.862 - Info: Reading package lists... 59%
+21:06:50.862 - Info: 
+21:06:50.862 - Info: Reading package lists... 59%
+21:06:50.966 - Info: 
+21:06:50.966 - Info: Reading package lists... 62%
+21:06:50.966 - Info: 
+21:06:50.966 - Info: Reading package lists... 62%
+21:06:50.985 - Info: 
+21:06:50.985 - Info: Reading package lists... 64%
+21:06:50.985 - Info: 
+21:06:50.985 - Info: Reading package lists... 64%
+21:06:51.154 - Info: 
+21:06:51.154 - Info: Reading package lists... 69%
+21:06:51.154 - Info: 
+21:06:51.154 - Info: Reading package lists... 69%
+21:06:51.179 - Info: 
+21:06:51.179 - Info: Reading package lists... 71%
+21:06:51.179 - Info: 
+21:06:51.179 - Info: Reading package lists... 71%
+21:06:51.323 - Info: 
+21:06:51.323 - Info: Reading package lists... 77%
+21:06:51.323 - Info: 
+21:06:51.323 - Info: Reading package lists... 77%
+21:06:51.361 - Info: 
+21:06:51.361 - Info: Reading package lists... 80%
+21:06:51.361 - Info: 
+21:06:51.361 - Info: Reading package lists... 80%
+21:06:51.366 - Info: 
+21:06:51.367 - Info: Reading package lists... 80%
+21:06:51.367 - Info: 
+21:06:51.367 - Info: Reading package lists... 80%
+21:06:51.369 - Info: 
+21:06:51.369 - Info: Reading package lists... 80%
+21:06:51.369 - Info: 
+21:06:51.369 - Info: Reading package lists... 80%
+21:06:51.374 - Info: 
+21:06:51.374 - Info: Reading package lists... 80%
+21:06:51.374 - Info: 
+21:06:51.374 - Info: Reading package lists... 80%
+21:06:51.375 - Info: 
+21:06:51.375 - Info: Reading package lists... 80%
+21:06:51.375 - Info: 
+21:06:51.375 - Info: Reading package lists... 80%
+21:06:51.379 - Info: 
+21:06:51.379 - Info: Reading package lists... 80%
+21:06:51.379 - Info: 
+21:06:51.379 - Info: Reading package lists... 80%
+21:06:51.380 - Info: 
+21:06:51.380 - Info: Reading package lists... 80%
+21:06:51.380 - Info: 
+21:06:51.380 - Info: Reading package lists... 80%
+21:06:51.380 - Info: 
+21:06:51.380 - Info: Reading package lists... 80%
+21:06:51.380 - Info: 
+21:06:51.380 - Info: Reading package lists... 80%
+21:06:51.382 - Info: 
+21:06:51.382 - Info: Reading package lists... 80%
+21:06:51.382 - Info: 
+21:06:51.383 - Info: Reading package lists... 80%
+21:06:51.451 - Info: 
+21:06:51.451 - Info: Reading package lists... 83%
+21:06:51.451 - Info: 
+21:06:51.451 - Info: Reading package lists... 83%
+21:06:51.468 - Info: 
+21:06:51.468 - Info: Reading package lists... 84%
+21:06:51.468 - Info: 
+21:06:51.468 - Info: Reading package lists... 84%
+21:06:51.520 - Info: 
+21:06:51.520 - Info: Reading package lists... 88%
+21:06:51.521 - Info: 
+21:06:51.521 - Info: Reading package lists... 88%
+21:06:51.539 - Info: 
+21:06:51.539 - Info: Reading package lists... 90%
+21:06:51.539 - Info: 
+21:06:51.539 - Info: Reading package lists... 90%
+21:06:51.556 - Info: 
+21:06:51.556 - Info: Reading package lists... 91%
+21:06:51.606 - Info: 
+21:06:51.606 - Info: Reading package lists... 95%
+21:06:51.606 - Info: 
+21:06:51.606 - Info: Reading package lists... 95%
+21:06:51.642 - Info: 
+21:06:51.642 - Info: Reading package lists... 98%
+21:06:51.642 - Info: 
+21:06:51.642 - Info: Reading package lists... 98%
+21:06:51.644 - Info: 
+21:06:51.644 - Info: Reading package lists... 98%
+21:06:51.644 - Info: 
+21:06:51.644 - Info: Reading package lists... 98%
+21:06:51.735 - Info: 
+21:06:51.735 - Info: Reading package lists... 98%
+21:06:51.735 - Info: 
+21:06:51.735 - Info: Reading package lists... 98%
+21:06:51.872 - Info: 
+21:06:51.872 - Info: Reading package lists... Done
+21:06:51.872 - Info: 
+21:06:51.872 - Info: 
+21:06:52.463 - Info: *begin sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/cudnn-local-repo-ubuntu2404-9.20.0_1.0-1_arm64.deb, 5
+21:06:52.463 - Info: 
+21:06:52.621 - Info: 
+21:06:52.621 - Info: Reading package lists... 0%
+21:06:52.742 - Info: 
+21:06:52.742 - Info: Reading package lists... 0%
+21:06:52.760 - Info: 
+21:06:52.760 - Info: Reading package lists... Done
+21:06:52.760 - Info: 
+21:06:52.760 - Info: 
+21:06:52.795 - Info: 
+21:06:52.795 - Info: Building dependency tree... 0%
+21:06:52.795 - Info: 
+21:06:52.795 - Info: Building dependency tree... 0%
+21:06:52.797 - Info: 
+21:06:52.797 - Info: Building dependency tree... 0%
+21:06:53.028 - Info: 
+21:06:53.029 - Info: Building dependency tree... 50%
+21:06:53.029 - Info: 
+21:06:53.029 - Info: Building dependency tree... 50%
+21:06:53.499 - Info: 
+21:06:53.499 - Info: Building dependency tree... 83%
+21:06:53.720 - Info: 
+21:06:53.720 - Info: Building dependency tree... Done
+21:06:53.720 - Info: 
+21:06:53.720 - Info: 
+21:06:53.720 - Info: 
+21:06:53.720 - Info: Reading state information... 0% 
+21:06:53.720 - Info: 
+21:06:53.720 - Info: Reading state information... 0%
+21:06:53.725 - Info: 
+21:06:53.725 - Info: Reading state information... Done
+21:06:53.725 - Info: 
+21:06:53.725 - Info: 
+21:06:53.867 - Info: Note, selecting 'cudnn-local-repo-ubuntu2404-9.20.0' instead of '/opt/nvidia/deb_repos/cudnn-local-repo-ubuntu2404-9.20.0_1.0-1_arm64.deb'
+21:06:53.867 - Info: 
+21:06:55.517 - Info: The following NEW packages will be installed:
+21:06:55.518 - Info: 
+21:06:55.526 - Info:   cudnn-local-repo-ubuntu2404-9.20.0
+21:06:55.526 - Info: 
+21:06:55.600 - Info: 0 upgraded, 1 newly installed, 0 to remove and 285 not upgraded.
+21:06:55.600 - Info: 
+21:06:55.614 - Info: Need to get 0 B/1,740 MB of archives.
+21:06:55.614 - Info: 
+21:06:55.614 - Info: After this operation, 1,740 MB of additional disk space will be used.
+21:06:55.614 - Info: 
+21:06:55.626 - Info: 
+21:06:56.127 - Info: 0% [Working]
+21:07:15.752 - Info:             
+21:07:15.752 - Info: Get:1 /opt/nvidia/deb_repos/cudnn-local-repo-ubuntu2404-9.20.0_1.0-1_arm64.deb cudnn-local-repo-ubuntu2404-9.20.0 arm64 1.0-1 [1,740 MB]
+21:07:15.752 - Info: 
+21:07:15.752 - Info: 
+21:07:15.752 - Info: 0% [1 cudnn-local-repo-ubuntu2404-9.20.0 0 B/1,740 MB 0%]
+21:07:15.752 - Info:                                                          
+21:07:15.752 - Info: 100% [Working]
+21:07:15.752 - Info:               
+21:07:17.267 - Info: Selecting previously unselected package cudnn-local-repo-ubuntu2404-9.20.0.
+21:07:17.267 - Info: 
+21:07:17.267 - Info: (Reading database ... 
+21:07:17.288 - Info: (Reading database ... 5%
+21:07:17.288 - Info: (Reading database ... 10%
+21:07:17.288 - Info: (Reading database ... 15%
+21:07:17.288 - Info: (Reading database ... 20%
+21:07:17.288 - Info: (Reading database ... 25%
+21:07:17.288 - Info: (Reading database ... 30%
+21:07:17.288 - Info: (Reading database ... 35%
+21:07:17.288 - Info: (Reading database ... 40%
+21:07:17.288 - Info: (Reading database ... 45%
+21:07:17.288 - Info: (Reading database ... 50%
+21:07:17.295 - Info: (Reading database ... 55%
+21:07:17.306 - Info: (Reading database ... 60%
+21:07:17.318 - Info: (Reading database ... 65%
+21:07:17.331 - Info: (Reading database ... 70%
+21:07:17.372 - Info: (Reading database ... 75%
+21:07:17.385 - Info: (Reading database ... 80%
+21:07:17.402 - Info: (Reading database ... 85%
+21:07:17.419 - Info: (Reading database ... 90%
+21:07:17.430 - Info: (Reading database ... 95%
+21:07:17.506 - Info: (Reading database ... 100%
+21:07:17.506 - Info: (Reading database ... 201720 files and directories currently installed.)
+21:07:17.506 - Info: 
+21:07:17.525 - Info: Preparing to unpack .../cudnn-local-repo-ubuntu2404-9.20.0_1.0-1_arm64.deb ...
+21:07:17.525 - Info: 
+21:07:17.534 - Info: Unpacking cudnn-local-repo-ubuntu2404-9.20.0 (1.0-1) ...
+21:07:17.534 - Info: 
+21:08:00.270 - Info: Setting up cudnn-local-repo-ubuntu2404-9.20.0 (1.0-1) ...
+21:08:00.270 - Info: 
+21:08:00.323 - Info: 
+21:08:00.323 - Info: 
+21:08:00.323 - Info: The public cudnn-local-repo-ubuntu2404-9.20.0 GPG key does not appear to be installed.
+21:08:00.323 - Info: 
+21:08:00.323 - Info: To install the key, run this command:
+21:08:00.323 - Info: 
+21:08:00.323 - Info: sudo cp /var/cudnn-local-repo-ubuntu2404-9.20.0/cudnn-local-D5B19692-keyring.gpg /usr/share/keyrings/
+21:08:00.323 - Info: 
+21:08:00.323 - Info: 
+21:08:00.323 - Info: 
+21:08:14.478 - Info: Package: *
+21:08:14.478 - Info: 
+21:08:14.478 - Info: 
+21:08:14.564 - Info: Pin: origin ""
+21:08:14.564 - Info: 
+21:08:14.564 - Info: 
+21:08:14.653 - Info: Pin-Priority: 999
+21:08:14.653 - Info: 
+21:08:14.653 - Info: 
+21:08:16.852 - Info: *begin sudo apt-get -y update, 5
+21:08:16.852 - Info: 
+21:08:17.180 - Info: 
+21:08:17.180 - Info: 0% [Working]
+21:08:17.180 - Info:             
+21:08:17.180 - Info: Get:1 file:/var/cudnn-local-repo-ubuntu2404-9.20.0  InRelease [1,572 B]
+21:08:17.180 - Info: 
+21:08:17.202 - Info: 
+21:08:17.202 - Info: 0% [Working]
+21:08:17.202 - Info:             
+21:08:17.202 - Info: Get:1 file:/var/cudnn-local-repo-ubuntu2404-9.20.0  InRelease [1,572 B]
+21:08:17.202 - Info: 
+21:08:17.202 - Info: 
+21:08:17.225 - Info: 0% [1 InRelease 0 B/1,572 B 0%] [Connected to download.docker.com (18.65.14.45)] [Connected to repo.download.nvidia.com (23.205.151.162)] [Connecting to ports.ubuntu.com]
+21:08:17.225 - Info:                                                                                                                                                                           
+21:08:17.240 - Info: 0% [Connected to download.docker.com (18.65.14.45)] [Connected to repo.download.nvidia.com (23.205.151.162)] [Connecting to ports.ubuntu.com]
+21:08:17.240 - Info:                                                                                                                                              
+21:08:17.240 - Info: Hit:2 https://download.docker.com/linux/ubuntu noble InRelease
+21:08:17.240 - Info: 
+21:08:17.240 - Info: 
+21:08:17.240 - Info:                                                                                                                                              
+21:08:17.261 - Info: 0% [Waiting for headers] [Connecting to ports.ubuntu.com]
+21:08:17.261 - Info:                                                          
+21:08:17.261 - Info: Hit:3 https://repo.download.nvidia.com/jetson/common r39.2 InRelease
+21:08:17.261 - Info: 
+21:08:17.261 - Info: 
+21:08:17.261 - Info:                                                          
+21:08:17.324 - Info: 0% [Connecting to ports.ubuntu.com]
+21:08:17.325 - Info:                                    
+21:08:17.325 - Info: Hit:4 https://repo.download.nvidia.com/jetson/som r39.2 InRelease
+21:08:17.325 - Info: 
+21:08:17.325 - Info: 
+21:08:17.352 - Info: 0% [Connecting to ports.ubuntu.com]
+21:08:17.354 - Info: 0% [Connected to repo.download.nvidia.com (23.205.151.162)] [Connecting to ports.ubuntu.com]
+21:08:17.355 - Info:                                                                                             
+21:08:17.355 - Info: Get:5 file:/var/cudnn-local-repo-ubuntu2404-9.20.0  Packages [5,605 B]
+21:08:17.355 - Info: 
+21:08:17.355 - Info: 
+21:08:17.370 - Info: 0% [5 Packages 0 B/5,605 B 0%] [Connected to repo.download.nvidia.com (23.205.151.162)] [Connecting to ports.ubuntu.com]
+21:08:17.370 - Info:                                                                                                                         
+21:08:17.371 - Info: 0% [Connected to repo.download.nvidia.com (23.205.151.162)] [Connecting to ports.ubuntu.com]
+21:08:17.371 - Info:                                                                                             
+21:08:17.373 - Info: 0% [5 Packages store 0 B] [Waiting for headers] [Connecting to ports.ubuntu.com]
+21:08:17.373 - Info:                                                                                 
+21:08:17.385 - Info: 0% [Waiting for headers] [Connecting to ports.ubuntu.com]
+21:08:17.385 - Info:                                                          
+21:08:17.385 - Info: Hit:6 https://repo.download.nvidia.com/jetson/ffmpeg r39.2 InRelease
+21:08:17.385 - Info: 
+21:08:17.385 - Info: 
+21:08:17.385 - Info:                                                          
+21:08:17.472 - Info: 0% [Connecting to ports.ubuntu.com]
+21:08:17.830 - Info: 0% [Connecting to ports.ubuntu.com (91.189.92.19)]
+21:08:17.830 - Info:                                                   
+21:08:17.914 - Info: 0% [Waiting for headers]
+21:08:17.914 - Info:                         
+21:08:17.914 - Info: Hit:7 http://ports.ubuntu.com/ubuntu-ports noble InRelease
+21:08:17.914 - Info: 
+21:08:17.914 - Info: 
+21:08:17.914 - Info:                         
+21:08:18.006 - Info: 0% [Working]
+21:08:18.120 - Info: 0% [Waiting for headers]
+21:08:18.120 - Info:                         
+21:08:18.120 - Info: Hit:8 http://ports.ubuntu.com/ubuntu-ports noble-updates InRelease
+21:08:18.120 - Info: 
+21:08:18.120 - Info: 
+21:08:18.120 - Info:                         
+21:08:18.138 - Info: 0% [Working]
+21:08:18.258 - Info: 0% [Waiting for headers]
+21:08:18.327 - Info:                         
+21:08:18.327 - Info: Hit:9 http://ports.ubuntu.com/ubuntu-ports noble-backports InRelease
+21:08:18.327 - Info: 
+21:08:18.327 - Info: 
+21:08:18.327 - Info:                         
+21:08:18.453 - Info: 0% [Working]
+21:08:18.535 - Info: 0% [Waiting for headers]
+21:08:18.535 - Info:                         
+21:08:18.535 - Info: Hit:10 http://ports.ubuntu.com/ubuntu-ports noble-security InRelease
+21:08:18.535 - Info: 
+21:08:18.535 - Info: 
+21:08:18.535 - Info:                         
+21:08:18.657 - Info: 0% [Working]
+21:08:18.657 - Info: 100% [Working]
+21:08:18.657 - Info:               
+21:08:18.905 - Info: 
+21:08:18.905 - Info: Reading package lists... 0%
+21:08:18.922 - Info: 
+21:08:18.922 - Info: Reading package lists... 0%
+21:08:18.923 - Info: 
+21:08:18.923 - Info: Reading package lists... 0%
+21:08:18.923 - Info: 
+21:08:18.923 - Info: Reading package lists... 0%
+21:08:18.927 - Info: 
+21:08:18.927 - Info: Reading package lists... 0%
+21:08:18.927 - Info: 
+21:08:18.927 - Info: Reading package lists... 0%
+21:08:18.932 - Info: 
+21:08:18.932 - Info: Reading package lists... 0%
+21:08:18.932 - Info: 
+21:08:18.932 - Info: Reading package lists... 0%
+21:08:18.932 - Info: 
+21:08:18.932 - Info: Reading package lists... 0%
+21:08:18.932 - Info: 
+21:08:18.932 - Info: Reading package lists... 0%
+21:08:18.935 - Info: 
+21:08:18.935 - Info: Reading package lists... 0%
+21:08:18.935 - Info: 
+21:08:18.935 - Info: Reading package lists... 0%
+21:08:18.941 - Info: 
+21:08:18.941 - Info: Reading package lists... 0%
+21:08:19.015 - Info: 
+21:08:19.015 - Info: Reading package lists... 3%
+21:08:19.015 - Info: 
+21:08:19.015 - Info: Reading package lists... 3%
+21:08:19.028 - Info: 
+21:08:19.028 - Info: Reading package lists... 5%
+21:08:19.028 - Info: 
+21:08:19.028 - Info: Reading package lists... 5%
+21:08:19.661 - Info: 
+21:08:19.661 - Info: Reading package lists... 26%
+21:08:20.218 - Info: 
+21:08:20.218 - Info: Reading package lists... 41%
+21:08:20.218 - Info: 
+21:08:20.218 - Info: Reading package lists... 41%
+21:08:20.368 - Info: 
+21:08:20.368 - Info: Reading package lists... 55%
+21:08:20.392 - Info: 
+21:08:20.392 - Info: Reading package lists... 57%
+21:08:20.392 - Info: 
+21:08:20.392 - Info: Reading package lists... 57%
+21:08:20.398 - Info: 
+21:08:20.398 - Info: Reading package lists... 58%
+21:08:20.398 - Info: 
+21:08:20.398 - Info: Reading package lists... 58%
+21:08:20.399 - Info: 
+21:08:20.399 - Info: Reading package lists... 58%
+21:08:20.399 - Info: 
+21:08:20.399 - Info: Reading package lists... 58%
+21:08:20.418 - Info: 
+21:08:20.418 - Info: Reading package lists... 58%
+21:08:20.418 - Info: 
+21:08:20.418 - Info: Reading package lists... 58%
+21:08:20.427 - Info: 
+21:08:20.427 - Info: Reading package lists... 59%
+21:08:20.427 - Info: 
+21:08:20.427 - Info: Reading package lists... 59%
+21:08:20.523 - Info: 
+21:08:20.523 - Info: Reading package lists... 62%
+21:08:20.523 - Info: 
+21:08:20.523 - Info: Reading package lists... 62%
+21:08:20.541 - Info: 
+21:08:20.541 - Info: Reading package lists... 64%
+21:08:20.541 - Info: 
+21:08:20.541 - Info: Reading package lists... 64%
+21:08:20.688 - Info: 
+21:08:20.688 - Info: Reading package lists... 69%
+21:08:20.688 - Info: 
+21:08:20.688 - Info: Reading package lists... 69%
+21:08:20.712 - Info: 
+21:08:20.712 - Info: Reading package lists... 71%
+21:08:20.712 - Info: 
+21:08:20.712 - Info: Reading package lists... 71%
+21:08:20.845 - Info: 
+21:08:20.845 - Info: Reading package lists... 77%
+21:08:20.845 - Info: 
+21:08:20.845 - Info: Reading package lists... 77%
+21:08:20.882 - Info: 
+21:08:20.882 - Info: Reading package lists... 80%
+21:08:20.882 - Info: 
+21:08:20.882 - Info: Reading package lists... 80%
+21:08:20.887 - Info: 
+21:08:20.887 - Info: Reading package lists... 80%
+21:08:20.887 - Info: 
+21:08:20.887 - Info: Reading package lists... 80%
+21:08:20.889 - Info: 
+21:08:20.889 - Info: Reading package lists... 80%
+21:08:20.889 - Info: 
+21:08:20.889 - Info: Reading package lists... 80%
+21:08:20.894 - Info: 
+21:08:20.894 - Info: Reading package lists... 80%
+21:08:20.894 - Info: 
+21:08:20.894 - Info: Reading package lists... 80%
+21:08:20.895 - Info: 
+21:08:20.895 - Info: Reading package lists... 80%
+21:08:20.895 - Info: 
+21:08:20.895 - Info: Reading package lists... 80%
+21:08:20.898 - Info: 
+21:08:20.898 - Info: Reading package lists... 80%
+21:08:20.898 - Info: 
+21:08:20.898 - Info: Reading package lists... 80%
+21:08:20.899 - Info: 
+21:08:20.899 - Info: Reading package lists... 80%
+21:08:20.899 - Info: 
+21:08:20.899 - Info: Reading package lists... 80%
+21:08:20.899 - Info: 
+21:08:20.899 - Info: Reading package lists... 80%
+21:08:20.899 - Info: 
+21:08:20.899 - Info: Reading package lists... 80%
+21:08:20.900 - Info: 
+21:08:20.900 - Info: Reading package lists... 80%
+21:08:20.900 - Info: 
+21:08:20.900 - Info: Reading package lists... 80%
+21:08:20.932 - Info: 
+21:08:20.932 - Info: Reading package lists... 83%
+21:08:20.932 - Info: 
+21:08:20.932 - Info: Reading package lists... 83%
+21:08:20.948 - Info: 
+21:08:20.948 - Info: Reading package lists... 84%
+21:08:20.948 - Info: 
+21:08:20.948 - Info: Reading package lists... 84%
+21:08:20.994 - Info: 
+21:08:20.994 - Info: Reading package lists... 88%
+21:08:20.994 - Info: 
+21:08:20.994 - Info: Reading package lists... 88%
+21:08:21.012 - Info: 
+21:08:21.013 - Info: Reading package lists... 90%
+21:08:21.013 - Info: 
+21:08:21.013 - Info: Reading package lists... 90%
+21:08:21.074 - Info: 
+21:08:21.074 - Info: Reading package lists... 95%
+21:08:21.077 - Info: 
+21:08:21.078 - Info: Reading package lists... 95%
+21:08:21.078 - Info: 
+21:08:21.078 - Info: Reading package lists... 95%
+21:08:21.113 - Info: 
+21:08:21.113 - Info: Reading package lists... 98%
+21:08:21.113 - Info: 
+21:08:21.113 - Info: Reading package lists... 98%
+21:08:21.116 - Info: 
+21:08:21.116 - Info: Reading package lists... 98%
+21:08:21.116 - Info: 
+21:08:21.116 - Info: Reading package lists... 98%
+21:08:21.197 - Info: 
+21:08:21.197 - Info: Reading package lists... 98%
+21:08:21.197 - Info: 
+21:08:21.197 - Info: Reading package lists... 98%
+21:08:21.328 - Info: 
+21:08:21.328 - Info: Reading package lists... Done
+21:08:21.328 - Info: 
+21:08:21.328 - Info: 
+21:08:21.396 - Info: *begin sudo -E apt-get -y  install libcudnn9-cuda-13 , 5
+21:08:21.396 - Info: 
+21:08:21.556 - Info: 
+21:08:21.557 - Info: Reading package lists... 0%
+21:08:21.587 - Info: 
+21:08:21.587 - Info: Reading package lists... 100%
+21:08:21.587 - Info: 
+21:08:21.587 - Info: Reading package lists... Done
+21:08:21.587 - Info: 
+21:08:21.587 - Info: 
+21:08:21.593 - Info: 
+21:08:21.593 - Info: Building dependency tree... 0%
+21:08:21.593 - Info: 
+21:08:21.593 - Info: Building dependency tree... 0%
+21:08:21.824 - Info: 
+21:08:21.824 - Info: Building dependency tree... 50%
+21:08:21.824 - Info: 
+21:08:21.824 - Info: Building dependency tree... 50%
+21:08:22.297 - Info: 
+21:08:22.297 - Info: Building dependency tree... 83%
+21:08:22.526 - Info: 
+21:08:22.526 - Info: Building dependency tree... Done
+21:08:22.526 - Info: 
+21:08:22.526 - Info: 
+21:08:22.526 - Info: 
+21:08:22.526 - Info: Reading state information... 0% 
+21:08:22.526 - Info: 
+21:08:22.526 - Info: Reading state information... 0%
+21:08:22.530 - Info: 
+21:08:22.530 - Info: Reading state information... Done
+21:08:22.530 - Info: 
+21:08:22.530 - Info: 
+21:08:24.297 - Info: The following NEW packages will be installed:
+21:08:24.297 - Info: 
+21:08:24.303 - Info:   libcudnn9-cuda-13
+21:08:24.303 - Info: 
+21:08:24.375 - Info: 0 upgraded, 1 newly installed, 0 to remove and 285 not upgraded.
+21:08:24.376 - Info: 
+21:08:24.379 - Info: Need to get 0 B/403 MB of archives.
+21:08:24.379 - Info: 
+21:08:24.379 - Info: After this operation, 591 MB of additional disk space will be used.
+21:08:24.379 - Info: 
+21:08:24.389 - Info: 
+21:08:24.889 - Info: 0% [Working]
+21:08:29.078 - Info:             
+21:08:29.078 - Info: Get:1 file:/var/cudnn-local-repo-ubuntu2404-9.20.0  libcudnn9-cuda-13 9.20.0.46-1 [403 MB]
+21:08:29.078 - Info: 
+21:08:29.078 - Info: 
+21:08:29.078 - Info: 0% [1 libcudnn9-cuda-13 0 B/403 MB 0%]
+21:08:29.078 - Info:                                       
+21:08:29.078 - Info: 100% [Working]
+21:08:29.078 - Info:               
+21:08:30.530 - Info: Selecting previously unselected package libcudnn9-cuda-13.
+21:08:30.530 - Info: 
+21:08:30.530 - Info: (Reading database ... 
+21:08:30.551 - Info: (Reading database ... 5%
+21:08:30.551 - Info: (Reading database ... 10%
+21:08:30.551 - Info: (Reading database ... 15%
+21:08:30.551 - Info: (Reading database ... 20%
+21:08:30.551 - Info: (Reading database ... 25%
+21:08:30.551 - Info: (Reading database ... 30%
+21:08:30.551 - Info: (Reading database ... 35%
+21:08:30.551 - Info: (Reading database ... 40%
+21:08:30.551 - Info: (Reading database ... 45%
+21:08:30.551 - Info: (Reading database ... 50%
+21:08:30.558 - Info: (Reading database ... 55%
+21:08:30.571 - Info: (Reading database ... 60%
+21:08:30.584 - Info: (Reading database ... 65%
+21:08:30.598 - Info: (Reading database ... 70%
+21:08:30.640 - Info: (Reading database ... 75%
+21:08:30.652 - Info: (Reading database ... 80%
+21:08:30.669 - Info: (Reading database ... 85%
+21:08:30.686 - Info: (Reading database ... 90%
+21:08:30.696 - Info: (Reading database ... 95%
+21:08:30.757 - Info: (Reading database ... 100%
+21:08:30.757 - Info: (Reading database ... 201758 files and directories currently installed.)
+21:08:30.757 - Info: 
+21:08:30.776 - Info: Preparing to unpack .../libcudnn9-cuda-13_9.20.0.46-1_arm64.deb ...
+21:08:30.776 - Info: 
+21:08:30.781 - Info: Unpacking libcudnn9-cuda-13 (9.20.0.46-1) ...
+21:08:30.781 - Info: 
+21:08:42.496 - Info: Setting up libcudnn9-cuda-13 (9.20.0.46-1) ...
+21:08:42.497 - Info: 
+21:08:48.288 - Info: targetDebRepoPackageName cudnn-local-repo-ubuntu2404-9.20.0
+21:08:48.289 - Info: 
+21:08:48.289 - Info: *begin sudo apt-get purge -y cudnn-local-repo-ubuntu2404-9.20.0, 5
+21:08:48.289 - Info: 
+21:08:48.459 - Info: 
+21:08:48.459 - Info: Reading package lists... 0%
+21:08:48.505 - Info: 
+21:08:48.505 - Info: Reading package lists... 100%
+21:08:48.505 - Info: 
+21:08:48.505 - Info: Reading package lists... Done
+21:08:48.505 - Info: 
+21:08:48.505 - Info: 
+21:08:48.511 - Info: 
+21:08:48.511 - Info: Building dependency tree... 0%
+21:08:48.511 - Info: 
+21:08:48.511 - Info: Building dependency tree... 0%
+21:08:48.742 - Info: 
+21:08:48.742 - Info: Building dependency tree... 50%
+21:08:48.742 - Info: 
+21:08:48.743 - Info: Building dependency tree... 50%
+21:08:49.215 - Info: 
+21:08:49.215 - Info: Building dependency tree... 83%
+21:08:49.439 - Info: 
+21:08:49.439 - Info: Building dependency tree... Done
+21:08:49.439 - Info: 
+21:08:49.439 - Info: 
+21:08:49.439 - Info: 
+21:08:49.439 - Info: Reading state information... 0% 
+21:08:49.439 - Info: 
+21:08:49.439 - Info: Reading state information... 0%
+21:08:49.444 - Info: 
+21:08:49.444 - Info: Reading state information... Done
+21:08:49.444 - Info: 
+21:08:49.444 - Info: 
+21:08:51.221 - Info: The following packages will be REMOVED:
+21:08:51.221 - Info: 
+21:08:51.228 - Info:   cudnn-local-repo-ubuntu2404-9.20.0*
+21:08:51.228 - Info: 
+21:08:51.309 - Info: 0 upgraded, 0 newly installed, 1 to remove and 285 not upgraded.
+21:08:51.309 - Info: 
+21:08:51.314 - Info: After this operation, 1,740 MB disk space will be freed.
+21:08:51.314 - Info: 
+21:08:54.313 - Info: (Reading database ... 
+21:08:54.326 - Info: (Reading database ... 5%
+21:08:54.326 - Info: (Reading database ... 10%
+21:08:54.326 - Info: (Reading database ... 15%
+21:08:54.327 - Info: (Reading database ... 20%
+21:08:54.327 - Info: (Reading database ... 25%
+21:08:54.327 - Info: (Reading database ... 30%
+21:08:54.327 - Info: (Reading database ... 35%
+21:08:54.327 - Info: (Reading database ... 40%
+21:08:54.327 - Info: (Reading database ... 45%
+21:08:54.327 - Info: (Reading database ... 50%
+21:08:54.335 - Info: (Reading database ... 55%
+21:08:54.349 - Info: (Reading database ... 60%
+21:08:54.361 - Info: (Reading database ... 65%
+21:08:54.375 - Info: (Reading database ... 70%
+21:08:54.417 - Info: (Reading database ... 75%
+21:08:54.429 - Info: (Reading database ... 80%
+21:08:54.446 - Info: (Reading database ... 85%
+21:08:54.464 - Info: (Reading database ... 90%
+21:08:54.474 - Info: (Reading database ... 95%
+21:08:54.534 - Info: (Reading database ... 100%
+21:08:54.534 - Info: (Reading database ... 201777 files and directories currently installed.)
+21:08:54.534 - Info: 
+21:08:54.553 - Info: Removing cudnn-local-repo-ubuntu2404-9.20.0 (1.0-1) ...
+21:08:54.553 - Info: 
+21:08:55.308 - Info: (Reading database ... 
+21:08:55.323 - Info: (Reading database ... 5%
+21:08:55.323 - Info: (Reading database ... 10%
+21:08:55.323 - Info: (Reading database ... 15%
+21:08:55.323 - Info: (Reading database ... 20%
+21:08:55.323 - Info: (Reading database ... 25%
+21:08:55.323 - Info: (Reading database ... 30%
+21:08:55.323 - Info: (Reading database ... 35%
+21:08:55.323 - Info: (Reading database ... 40%
+21:08:55.323 - Info: (Reading database ... 45%
+21:08:55.323 - Info: (Reading database ... 50%
+21:08:55.330 - Info: (Reading database ... 55%
+21:08:55.341 - Info: (Reading database ... 60%
+21:08:55.354 - Info: (Reading database ... 65%
+21:08:55.367 - Info: (Reading database ... 70%
+21:08:55.410 - Info: (Reading database ... 75%
+21:08:55.423 - Info: (Reading database ... 80%
+21:08:55.441 - Info: (Reading database ... 85%
+21:08:55.459 - Info: (Reading database ... 90%
+21:08:55.469 - Info: (Reading database ... 95%
+21:08:55.533 - Info: (Reading database ... 100%
+21:08:55.533 - Info: (Reading database ... 201740 files and directories currently installed.)
+21:08:55.533 - Info: 
+21:08:55.552 - Info: Purging configuration files for cudnn-local-repo-ubuntu2404-9.20.0 (1.0-1) ...
+21:08:55.552 - Info: 
+21:09:04.975 - Info: change working directory to /tmp21:09:04.976 - Info: exec_command: ssh jetson@192.168.55.1 "dpkg-query -W -f='\${db:Status-abbrev} \${Version}' libcudnn9-cuda-13"21:09:05.442 - Info: [ Package Install Finished Successfully ]21:09:05.442 - Info: exec_command: ssh   jetson@192.168.55.1 "df -B1 / | tail -1 | awk '{ printf \$4 }'"21:09:05.824 - Info: [target] [ 563.89 MB used. Disk Avail: 195.68 GB ]21:09:05.824 - Info: [ NV_L4T_CUDNN_RUNTIME_SBSA_TARGET_POST_INSTALL_COMP Install took 4m10s ]

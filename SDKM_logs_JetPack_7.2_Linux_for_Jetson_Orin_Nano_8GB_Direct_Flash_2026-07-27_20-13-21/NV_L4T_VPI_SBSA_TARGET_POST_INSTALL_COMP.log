@@ -1,0 +1,1703 @@
+------ 2026-07-27 20:48:44 ------
+------ SDK: JetPack_7.2_Linux ------
+20:48:44.508 - Info: exec_command: ssh   jetson@192.168.55.1 "df -B1 / | tail -1 | awk '{ printf \$4 }'"20:48:44.892 - Info: NV_L4T_VPI_SBSA_TARGET_POST_INSTALL_COMP include 3 package20:48:44.892 - Info: [ Package PreInstall Started ]20:48:44.892 - Info: current working directory is /home/ckw/nvidia/nvidia_sdk/JetPack_7.2_Linux_JETSON_ORIN_NANO_TARGETS20:48:44.894 - Info: exec_command [target]:
+**********************
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+
+safe_apt_install "sudo apt-get update" 5
+safe_apt_install "sudo apt-get install -y cmake g++" 5
+**********************20:48:44.894 - Info: exec_command: scp  /home/ckw/.nvsdkm/replays/scripts/JetPack_7.2_Linux/NV_L4T_VPI_SBSA_TARGET_POST_INSTALL_COMP.sh jetson@[192.168.55.1]:~; ssh -t  jetson@192.168.55.1 "set -o pipefail; ~/NV_L4T_VPI_SBSA_TARGET_POST_INSTALL_COMP.sh | sed 's/^/SDKM_INSTALL_ERROR /' && rm -f ~/NV_L4T_VPI_SBSA_TARGET_POST_INSTALL_COMP.sh"20:48:45.678 - Info: *begin sudo apt-get update, 5
+20:48:45.678 - Info: 
+20:48:45.984 - Info: 
+20:48:46.059 - Info: 0% [Working]
+20:48:46.060 - Info:             
+20:48:46.060 - Info: Hit:1 https://download.docker.com/linux/ubuntu noble InRelease
+20:48:46.060 - Info: 
+20:48:46.060 - Info: 
+20:48:46.060 - Info: 0% [Waiting for headers] [Connecting to ports.ubuntu.com]
+20:48:46.060 - Info:                                                          
+20:48:46.060 - Info: Hit:2 https://repo.download.nvidia.com/jetson/common r39.2 InRelease
+20:48:46.060 - Info: 
+20:48:46.060 - Info: 
+20:48:46.120 - Info: 0% [Connecting to repo.download.nvidia.com (23.205.151.187)] [Connecting to ports.ubuntu.com]
+20:48:46.120 - Info:                                                                                              
+20:48:46.120 - Info: Hit:3 https://repo.download.nvidia.com/jetson/som r39.2 InRelease
+20:48:46.120 - Info: 
+20:48:46.120 - Info: 
+20:48:46.182 - Info: 0% [Connecting to repo.download.nvidia.com (23.205.151.187)] [Connecting to ports.ubuntu.com]
+20:48:46.182 - Info:                                                                                              
+20:48:46.182 - Info: Hit:4 https://repo.download.nvidia.com/jetson/ffmpeg r39.2 InRelease
+20:48:46.182 - Info: 
+20:48:46.182 - Info: 
+20:48:46.182 - Info:                                                                                              
+20:48:46.198 - Info: 0% [Connecting to ports.ubuntu.com]
+20:48:46.555 - Info: 0% [Connecting to ports.ubuntu.com (91.189.92.21)]
+20:48:46.555 - Info:                                                   
+20:48:46.701 - Info: 0% [Waiting for headers]
+20:48:46.701 - Info:                         
+20:48:46.701 - Info: Hit:5 http://ports.ubuntu.com/ubuntu-ports noble InRelease
+20:48:46.701 - Info: 
+20:48:46.701 - Info: 
+20:48:46.701 - Info:                         
+20:48:46.723 - Info: 0% [Working]
+20:48:46.856 - Info: 0% [Waiting for headers]
+20:48:46.910 - Info:                         
+20:48:46.910 - Info: Hit:6 http://ports.ubuntu.com/ubuntu-ports noble-updates InRelease
+20:48:46.910 - Info: 
+20:48:46.910 - Info: 
+20:48:46.910 - Info:                         
+20:48:47.037 - Info: 0% [Working]
+20:48:47.117 - Info: 0% [Waiting for headers]
+20:48:47.117 - Info:                         
+20:48:47.117 - Info: Hit:7 http://ports.ubuntu.com/ubuntu-ports noble-backports InRelease
+20:48:47.117 - Info: 
+20:48:47.117 - Info: 
+20:48:47.117 - Info:                         
+20:48:47.245 - Info: 0% [Working]
+20:48:47.325 - Info: 0% [Waiting for headers]
+20:48:47.325 - Info:                         
+20:48:47.325 - Info: Hit:8 http://ports.ubuntu.com/ubuntu-ports noble-security InRelease
+20:48:47.325 - Info: 
+20:48:47.325 - Info: 
+20:48:47.325 - Info:                         
+20:48:47.446 - Info: 0% [Working]
+20:48:47.446 - Info: 20% [Working]
+20:48:47.446 - Info:              
+20:48:47.694 - Info: 
+20:48:47.694 - Info: Reading package lists... 0%
+20:48:47.710 - Info: 
+20:48:47.710 - Info: Reading package lists... 0%
+20:48:47.714 - Info: 
+20:48:47.714 - Info: Reading package lists... 0%
+20:48:47.714 - Info: 
+20:48:47.714 - Info: Reading package lists... 0%
+20:48:47.718 - Info: 
+20:48:47.718 - Info: Reading package lists... 0%
+20:48:47.718 - Info: 
+20:48:47.718 - Info: Reading package lists... 0%
+20:48:47.719 - Info: 
+20:48:47.719 - Info: Reading package lists... 0%
+20:48:47.719 - Info: 
+20:48:47.719 - Info: Reading package lists... 0%
+20:48:47.721 - Info: 
+20:48:47.721 - Info: Reading package lists... 0%
+20:48:47.721 - Info: 
+20:48:47.721 - Info: Reading package lists... 0%
+20:48:47.726 - Info: 
+20:48:47.726 - Info: Reading package lists... 0%
+20:48:47.800 - Info: 
+20:48:47.800 - Info: Reading package lists... 3%
+20:48:47.800 - Info: 
+20:48:47.800 - Info: Reading package lists... 3%
+20:48:47.812 - Info: 
+20:48:47.812 - Info: Reading package lists... 5%
+20:48:47.812 - Info: 
+20:48:47.812 - Info: Reading package lists... 5%
+20:48:48.434 - Info: 
+20:48:48.434 - Info: Reading package lists... 26%
+20:48:48.960 - Info: 
+20:48:48.960 - Info: Reading package lists... 41%
+20:48:48.960 - Info: 
+20:48:48.960 - Info: Reading package lists... 41%
+20:48:49.128 - Info: 
+20:48:49.128 - Info: Reading package lists... 57%
+20:48:49.128 - Info: 
+20:48:49.128 - Info: Reading package lists... 57%
+20:48:49.134 - Info: 
+20:48:49.134 - Info: Reading package lists... 58%
+20:48:49.134 - Info: 
+20:48:49.134 - Info: Reading package lists... 58%
+20:48:49.136 - Info: 
+20:48:49.136 - Info: Reading package lists... 58%
+20:48:49.136 - Info: 
+20:48:49.136 - Info: Reading package lists... 58%
+20:48:49.145 - Info: 
+20:48:49.145 - Info: Reading package lists... 58%
+20:48:49.156 - Info: 
+20:48:49.156 - Info: Reading package lists... 58%
+20:48:49.156 - Info: 
+20:48:49.156 - Info: Reading package lists... 58%
+20:48:49.160 - Info: 
+20:48:49.160 - Info: Reading package lists... 59%
+20:48:49.160 - Info: 
+20:48:49.160 - Info: Reading package lists... 59%
+20:48:49.255 - Info: 
+20:48:49.255 - Info: Reading package lists... 62%
+20:48:49.255 - Info: 
+20:48:49.255 - Info: Reading package lists... 62%
+20:48:49.273 - Info: 
+20:48:49.273 - Info: Reading package lists... 64%
+20:48:49.273 - Info: 
+20:48:49.273 - Info: Reading package lists... 64%
+20:48:49.418 - Info: 
+20:48:49.418 - Info: Reading package lists... 69%
+20:48:49.418 - Info: 
+20:48:49.418 - Info: Reading package lists... 69%
+20:48:49.441 - Info: 
+20:48:49.442 - Info: Reading package lists... 71%
+20:48:49.442 - Info: 
+20:48:49.442 - Info: Reading package lists... 71%
+20:48:49.571 - Info: 
+20:48:49.571 - Info: Reading package lists... 77%
+20:48:49.571 - Info: 
+20:48:49.571 - Info: Reading package lists... 77%
+20:48:49.606 - Info: 
+20:48:49.606 - Info: Reading package lists... 80%
+20:48:49.606 - Info: 
+20:48:49.606 - Info: Reading package lists... 80%
+20:48:49.611 - Info: 
+20:48:49.611 - Info: Reading package lists... 80%
+20:48:49.611 - Info: 
+20:48:49.611 - Info: Reading package lists... 80%
+20:48:49.613 - Info: 
+20:48:49.613 - Info: Reading package lists... 80%
+20:48:49.613 - Info: 
+20:48:49.613 - Info: Reading package lists... 80%
+20:48:49.618 - Info: 
+20:48:49.618 - Info: Reading package lists... 80%
+20:48:49.618 - Info: 
+20:48:49.618 - Info: Reading package lists... 80%
+20:48:49.619 - Info: 
+20:48:49.619 - Info: Reading package lists... 80%
+20:48:49.619 - Info: 
+20:48:49.619 - Info: Reading package lists... 80%
+20:48:49.623 - Info: 
+20:48:49.623 - Info: Reading package lists... 80%
+20:48:49.623 - Info: 
+20:48:49.623 - Info: Reading package lists... 80%
+20:48:49.624 - Info: 
+20:48:49.624 - Info: Reading package lists... 80%
+20:48:49.624 - Info: 
+20:48:49.624 - Info: Reading package lists... 80%
+20:48:49.624 - Info: 
+20:48:49.624 - Info: Reading package lists... 80%
+20:48:49.624 - Info: 
+20:48:49.624 - Info: Reading package lists... 80%
+20:48:49.625 - Info: 
+20:48:49.625 - Info: Reading package lists... 80%
+20:48:49.625 - Info: 
+20:48:49.625 - Info: Reading package lists... 80%
+20:48:49.656 - Info: 
+20:48:49.656 - Info: Reading package lists... 83%
+20:48:49.656 - Info: 
+20:48:49.656 - Info: Reading package lists... 83%
+20:48:49.671 - Info: 
+20:48:49.671 - Info: Reading package lists... 84%
+20:48:49.671 - Info: 
+20:48:49.671 - Info: Reading package lists... 84%
+20:48:49.714 - Info: 
+20:48:49.714 - Info: Reading package lists... 88%
+20:48:49.714 - Info: 
+20:48:49.714 - Info: Reading package lists... 88%
+20:48:49.730 - Info: 
+20:48:49.730 - Info: Reading package lists... 90%
+20:48:49.730 - Info: 
+20:48:49.730 - Info: Reading package lists... 90%
+20:48:49.792 - Info: 
+20:48:49.792 - Info: Reading package lists... 95%
+20:48:49.792 - Info: 
+20:48:49.792 - Info: Reading package lists... 95%
+20:48:49.824 - Info: 
+20:48:49.824 - Info: Reading package lists... 98%
+20:48:49.824 - Info: 
+20:48:49.824 - Info: Reading package lists... 98%
+20:48:49.827 - Info: 
+20:48:49.827 - Info: Reading package lists... 98%
+20:48:49.827 - Info: 
+20:48:49.827 - Info: Reading package lists... 98%
+20:48:49.911 - Info: 
+20:48:49.911 - Info: Reading package lists... 98%
+20:48:49.911 - Info: 
+20:48:49.911 - Info: Reading package lists... 98%
+20:48:49.922 - Info: 
+20:48:49.922 - Info: Reading package lists... 99%
+20:48:50.036 - Info: 
+20:48:50.036 - Info: Reading package lists... Done
+20:48:50.036 - Info: 
+20:48:50.036 - Info: 
+20:48:50.110 - Info: *begin sudo apt-get install -y cmake g++, 5
+20:48:50.110 - Info: 
+20:48:50.268 - Info: 
+20:48:50.268 - Info: Reading package lists... 0%
+20:48:50.316 - Info: 
+20:48:50.316 - Info: Reading package lists... 100%
+20:48:50.316 - Info: 
+20:48:50.316 - Info: Reading package lists... Done
+20:48:50.316 - Info: 
+20:48:50.316 - Info: 
+20:48:50.323 - Info: 
+20:48:50.323 - Info: Building dependency tree... 0%
+20:48:50.323 - Info: 
+20:48:50.323 - Info: Building dependency tree... 0%
+20:48:50.554 - Info: 
+20:48:50.554 - Info: Building dependency tree... 50%
+20:48:50.554 - Info: 
+20:48:50.554 - Info: Building dependency tree... 50%
+20:48:51.019 - Info: 
+20:48:51.019 - Info: Building dependency tree... 81%
+20:48:51.282 - Info: 
+20:48:51.283 - Info: Building dependency tree... Done
+20:48:51.283 - Info: 
+20:48:51.283 - Info: 
+20:48:51.283 - Info: 
+20:48:51.283 - Info: Reading state information... 0% 
+20:48:51.283 - Info: 
+20:48:51.283 - Info: Reading state information... 0%
+20:48:51.287 - Info: 
+20:48:51.288 - Info: Reading state information... Done
+20:48:51.288 - Info: 
+20:48:51.288 - Info: 
+20:48:53.000 - Info: The following additional packages will be installed:
+20:48:53.000 - Info: 
+20:48:53.008 - Info:   cmake-data g++-13 g++-13-aarch64-linux-gnu g++-aarch64-linux-gnu librhash0 libstdc++-13-dev
+20:48:53.008 - Info: 
+20:48:53.016 - Info: Suggested packages:
+20:48:53.016 - Info: 
+20:48:53.016 - Info:   cmake-doc cmake-format elpa-cmake-mode ninja-build gcc-13-doc libstdc++-13-doc
+20:48:53.016 - Info: 
+20:48:53.113 - Info: The following NEW packages will be installed:
+20:48:53.113 - Info: 
+20:48:53.121 - Info:   cmake cmake-data g++ g++-13 g++-13-aarch64-linux-gnu g++-aarch64-linux-gnu librhash0 libstdc++-13-dev
+20:48:53.121 - Info: 
+20:48:53.194 - Info: 0 upgraded, 8 newly installed, 0 to remove and 285 not upgraded.
+20:48:53.194 - Info: 
+20:48:53.199 - Info: Need to get 25.9 MB of archives.
+20:48:53.199 - Info: 
+20:48:53.199 - Info: After this operation, 97.4 MB of additional disk space will be used.
+20:48:53.199 - Info: 
+20:48:53.211 - Info: 
+20:48:53.693 - Info: 0% [Working]
+20:48:53.693 - Info:             
+20:48:53.693 - Info: Get:1 http://ports.ubuntu.com/ubuntu-ports noble/main arm64 librhash0 arm64 1.4.3-3build1 [126 kB]
+20:48:53.693 - Info: 
+20:48:53.693 - Info: 
+20:48:54.194 - Info: 0% [1 librhash0 14.2 kB/126 kB 11%]
+20:48:54.696 - Info: 0% [1 librhash0 51.8 kB/126 kB 41%]
+20:48:54.696 - Info:                                    
+20:48:54.792 - Info: 0% [1 librhash0 124 kB/126 kB 98%]
+20:48:54.792 - Info:                                   
+20:48:55.029 - Info: 3% [Working]
+20:48:55.029 - Info:             
+20:48:55.029 - Info: Get:2 http://ports.ubuntu.com/ubuntu-ports noble/main arm64 cmake-data all 3.28.3-1build7 [2,155 kB]
+20:48:55.029 - Info: 
+20:48:55.029 - Info: 
+20:48:55.530 - Info: 3% [2 cmake-data 2,602 B/2,155 kB 0%]
+20:48:56.031 - Info: 4% [2 cmake-data 217 kB/2,155 kB 10%]
+20:48:56.532 - Info: 4% [2 cmake-data 282 kB/2,155 kB 13%]
+20:48:56.712 - Info: 7% [2 cmake-data 1,374 kB/2,155 kB 64%]
+20:48:56.712 - Info:                                        
+20:48:56.712 - Info: 12% [Waiting for headers]
+20:48:56.712 - Info:                          
+20:48:56.712 - Info: Get:3 http://ports.ubuntu.com/ubuntu-ports noble/main arm64 cmake arm64 3.28.3-1build7 [10.3 MB]
+20:48:56.712 - Info: 
+20:48:56.712 - Info: 
+20:48:57.215 - Info: 12% [3 cmake 9,235 B/10.3 MB 0%]
+20:48:57.717 - Info: 18% [3 cmake 1,958 kB/10.3 MB 19%]
+20:48:58.219 - Info: 24% [3 cmake 3,990 kB/10.3 MB 39%]
+20:48:58.720 - Info: 35% [3 cmake 7,444 kB/10.3 MB 72%]
+20:48:58.980 - Info: 38% [3 cmake 8,272 kB/10.3 MB 80%]
+20:48:58.980 - Info:                                   
+20:48:58.980 - Info: 46% [Working]
+20:48:58.980 - Info:              
+20:48:58.980 - Info: Get:4 http://ports.ubuntu.com/ubuntu-ports noble-updates/main arm64 libstdc++-13-dev arm64 13.3.0-6ubuntu2~24.04.1 [2,397 kB]
+20:48:58.980 - Info: 
+20:48:58.980 - Info: 
+20:48:59.483 - Info: 47% [4 libstdc++-13-dev 51.7 kB/2,397 kB 2%]
+20:48:59.894 - Info: 52% [4 libstdc++-13-dev 1,951 kB/2,397 kB 81%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    2,315 kB/s 4s
+20:48:59.894 - Info: 56% [Waiting for headers]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         2,315 kB/s 4s
+20:48:59.894 - Info:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+20:48:59.894 - Info: Get:5 http://ports.ubuntu.com/ubuntu-ports noble-updates/main arm64 g++-13-aarch64-linux-gnu arm64 13.3.0-6ubuntu2~24.04.1 [10.9 MB]
+20:48:59.894 - Info: 
+20:48:59.894 - Info: 
+20:49:00.396 - Info: 57% [5 g++-13-aarch64-linux-gnu 78.2 kB/10.9 MB 1%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               2,315 kB/s 4s
+20:49:00.897 - Info: 70% [5 g++-13-aarch64-linux-gnu 4,431 kB/10.9 MB 41%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             2,315 kB/s 2s
+20:49:01.399 - Info: 81% [5 g++-13-aarch64-linux-gnu 7,838 kB/10.9 MB 72%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             2,315 kB/s 1s
+20:49:01.771 - Info: 89% [5 g++-13-aarch64-linux-gnu 10.4 MB/10.9 MB 96%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              2,315 kB/s 0s
+20:49:01.771 - Info: 92% [Working]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     2,315 kB/s 0s
+20:49:01.771 - Info:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+20:49:01.771 - Info: Get:6 http://ports.ubuntu.com/ubuntu-ports noble-updates/main arm64 g++-13 arm64 13.3.0-6ubuntu2~24.04.1 [16.0 kB]
+20:49:01.771 - Info: 
+20:49:01.771 - Info: 
+20:49:01.773 - Info: 92% [6 g++-13 16.0 kB/16.0 kB 100%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               2,315 kB/s 0s
+20:49:01.775 - Info: 95% [Working]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     2,315 kB/s 0s
+20:49:01.775 - Info:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+20:49:01.775 - Info: Get:7 http://ports.ubuntu.com/ubuntu-ports noble/main arm64 g++-aarch64-linux-gnu arm64 4:13.2.0-7ubuntu1 [962 B]
+20:49:01.775 - Info: 
+20:49:01.775 - Info: 
+20:49:01.775 - Info: 95% [7 g++-aarch64-linux-gnu 962 B/962 B 100%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    2,315 kB/s 0s
+20:49:01.775 - Info:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+20:49:01.775 - Info: Get:8 http://ports.ubuntu.com/ubuntu-ports noble/main arm64 g++ arm64 4:13.2.0-7ubuntu1 [1,082 B]
+20:49:01.775 - Info: 
+20:49:01.775 - Info: 
+20:49:01.775 - Info: 98% [8 g++ 1,082 B/1,082 B 100%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  2,315 kB/s 0s
+20:49:01.775 - Info: 100% [Working]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    2,315 kB/s 0s
+20:49:01.775 - Info:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+20:49:01.775 - Info: Fetched 25.9 MB in 9s (3,020 kB/s)
+20:49:01.775 - Info: 
+20:49:03.281 - Info: Selecting previously unselected package librhash0:arm64.
+20:49:03.281 - Info: 
+20:49:03.281 - Info: (Reading database ... 
+20:49:03.303 - Info: (Reading database ... 5%
+20:49:03.303 - Info: (Reading database ... 10%
+20:49:03.303 - Info: (Reading database ... 15%
+20:49:03.303 - Info: (Reading database ... 20%
+20:49:03.303 - Info: (Reading database ... 25%
+20:49:03.303 - Info: (Reading database ... 30%
+20:49:03.303 - Info: (Reading database ... 35%
+20:49:03.303 - Info: (Reading database ... 40%
+20:49:03.303 - Info: (Reading database ... 45%
+20:49:03.303 - Info: (Reading database ... 50%
+20:49:03.312 - Info: (Reading database ... 55%
+20:49:03.323 - Info: (Reading database ... 60%
+20:49:03.334 - Info: (Reading database ... 65%
+20:49:03.352 - Info: (Reading database ... 70%
+20:49:03.388 - Info: (Reading database ... 75%
+20:49:03.401 - Info: (Reading database ... 80%
+20:49:03.417 - Info: (Reading database ... 85%
+20:49:03.433 - Info: (Reading database ... 90%
+20:49:03.444 - Info: (Reading database ... 95%
+20:49:03.495 - Info: (Reading database ... 100%
+20:49:03.495 - Info: (Reading database ... 190458 files and directories currently installed.)
+20:49:03.495 - Info: 
+20:49:03.513 - Info: Preparing to unpack .../0-librhash0_1.4.3-3build1_arm64.deb ...
+20:49:03.513 - Info: 
+20:49:03.533 - Info: Unpacking librhash0:arm64 (1.4.3-3build1) ...
+20:49:03.533 - Info: 
+20:49:03.664 - Info: Selecting previously unselected package cmake-data.
+20:49:03.664 - Info: 
+20:49:03.727 - Info: Preparing to unpack .../1-cmake-data_3.28.3-1build7_all.deb ...
+20:49:03.727 - Info: 
+20:49:03.751 - Info: Unpacking cmake-data (3.28.3-1build7) ...
+20:49:03.751 - Info: 
+20:49:05.027 - Info: Selecting previously unselected package cmake.
+20:49:05.027 - Info: 
+20:49:05.102 - Info: Preparing to unpack .../2-cmake_3.28.3-1build7_arm64.deb ...
+20:49:05.102 - Info: 
+20:49:05.107 - Info: Unpacking cmake (3.28.3-1build7) ...
+20:49:05.107 - Info: 
+20:49:06.129 - Info: Selecting previously unselected package libstdc++-13-dev:arm64.
+20:49:06.129 - Info: 
+20:49:06.190 - Info: Preparing to unpack .../3-libstdc++-13-dev_13.3.0-6ubuntu2~24.04.1_arm64.deb ...
+20:49:06.190 - Info: 
+20:49:06.196 - Info: Unpacking libstdc++-13-dev:arm64 (13.3.0-6ubuntu2~24.04.1) ...
+20:49:06.196 - Info: 
+20:49:07.065 - Info: Selecting previously unselected package g++-13-aarch64-linux-gnu.
+20:49:07.065 - Info: 
+20:49:07.136 - Info: Preparing to unpack .../4-g++-13-aarch64-linux-gnu_13.3.0-6ubuntu2~24.04.1_arm64.deb ...
+20:49:07.136 - Info: 
+20:49:07.145 - Info: Unpacking g++-13-aarch64-linux-gnu (13.3.0-6ubuntu2~24.04.1) ...
+20:49:07.145 - Info: 
+20:49:08.104 - Info: Selecting previously unselected package g++-13.
+20:49:08.104 - Info: 
+20:49:08.168 - Info: Preparing to unpack .../5-g++-13_13.3.0-6ubuntu2~24.04.1_arm64.deb ...
+20:49:08.168 - Info: 
+20:49:08.173 - Info: Unpacking g++-13 (13.3.0-6ubuntu2~24.04.1) ...
+20:49:08.173 - Info: 
+20:49:08.246 - Info: Selecting previously unselected package g++-aarch64-linux-gnu.
+20:49:08.246 - Info: 
+20:49:08.300 - Info: Preparing to unpack .../6-g++-aarch64-linux-gnu_4%3a13.2.0-7ubuntu1_arm64.deb ...
+20:49:08.300 - Info: 
+20:49:08.305 - Info: Unpacking g++-aarch64-linux-gnu (4:13.2.0-7ubuntu1) ...
+20:49:08.305 - Info: 
+20:49:08.396 - Info: Selecting previously unselected package g++.
+20:49:08.396 - Info: 
+20:49:08.465 - Info: Preparing to unpack .../7-g++_4%3a13.2.0-7ubuntu1_arm64.deb ...
+20:49:08.465 - Info: 
+20:49:08.475 - Info: Unpacking g++ (4:13.2.0-7ubuntu1) ...
+20:49:08.475 - Info: 
+20:49:08.676 - Info: Setting up librhash0:arm64 (1.4.3-3build1) ...
+20:49:08.676 - Info: 
+20:49:08.694 - Info: Setting up cmake-data (3.28.3-1build7) ...
+20:49:08.694 - Info: 
+20:49:08.736 - Info: Setting up libstdc++-13-dev:arm64 (13.3.0-6ubuntu2~24.04.1) ...
+20:49:08.736 - Info: 
+20:49:08.753 - Info: Setting up g++-13-aarch64-linux-gnu (13.3.0-6ubuntu2~24.04.1) ...
+20:49:08.753 - Info: 
+20:49:08.778 - Info: Setting up g++-13 (13.3.0-6ubuntu2~24.04.1) ...
+20:49:08.778 - Info: 
+20:49:08.793 - Info: Setting up g++-aarch64-linux-gnu (4:13.2.0-7ubuntu1) ...
+20:49:08.793 - Info: 
+20:49:08.813 - Info: Setting up cmake (3.28.3-1build7) ...
+20:49:08.813 - Info: 
+20:49:08.831 - Info: Setting up g++ (4:13.2.0-7ubuntu1) ...
+20:49:08.831 - Info: 
+20:49:08.855 - Info: update-alternatives: using /usr/bin/g++ to provide /usr/bin/c++ (c++) in auto mode
+20:49:08.855 - Info: 
+20:49:08.855 - Info: update-alternatives: warning: skip creation of /usr/share/man/man1/c++.1.gz because associated file /usr/share/man/man1/g++.1.gz (of link group c++) doesn't exist
+20:49:08.855 - Info: 
+20:49:08.873 - Info: Processing triggers for man-db (2.12.0-4build2) ...
+20:49:08.873 - Info: 
+20:49:09.056 - Info: Processing triggers for libc-bin (2.39-0ubuntu8.7) ...
+20:49:09.056 - Info: 
+20:49:14.929 - Info: [ Package PreInstall Finished Successfully ]20:49:14.929 - Info: [ Package Install Started ]20:49:14.929 - Info: target deb installer start to install20:49:14.930 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+sudo mkdir -p /opt/nvidia/deb_repos
+sudo chmod 777 /opt/nvidia/deb_repos
+sudo rm -f /opt/nvidia/deb_repos/vpi-dev-4.1.3-aarch64-l4t.deb
+**********************20:49:16.451 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+
+exec 3>&1
+exec 1>&2
+exec 2>&3
+function safe_apt_install {
+    export DEBIAN_FRONTEND=noninteractive
+    echo "*begin $1, $2"
+    tmp_log=/tmp/sdkm_apt_install_log.ckw.txt
+    sudo rm -f $tmp_log
+    set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+    MAX_RETRY=3
+    TIMES=1
+    while [ ${CMD_STATUS} -ne 0 ]; do
+        cat $tmp_log > /dev/stderr
+        if [ $TIMES -gt $MAX_RETRY ]; then
+            echo "Unhandled error when running $1: `tr '\n' '; ' <$tmp_log`" 1>&2; exit 1
+        fi
+        if grep -q -e "is locked by another process" -e "E: Could not get lock /var/" -e "Could not open lock" $tmp_log; then
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting $2 seconds for apt to be available"; sleep ${2}
+        elif grep -q -e "apt --fix-broken install" $tmp_log; then
+            echo "safe apt install failed, need to run apt --fix-broken install"
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; sudo apt-get -f -y --allow-downgrades install 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting 5 seconds for apt"; sleep 5
+        else
+            echo "safe apt install failed: $1, exit code: $CMD_STATUS, retry number: $TIMES"
+            echo "will sleep $[ $TIMES*10 ] seconds before next attempt"
+            sleep $[ $TIMES*10 ]
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+        fi
+    done
+    if [ $CMD_STATUS -eq 0 ] && [ $TIMES -ne 1 ]; then
+        echo "safe apt install succeed. retry number: $TIMES."
+    fi
+}
+safe_apt_install "sudo apt-get -y update" 5
+sleep 0.5
+safe_apt_install "sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/vpi-dev-4.1.3-aarch64-l4t.deb" 5
+sleep 5
+sudo rm -f /opt/nvidia/deb_repos/vpi-dev-4.1.3-aarch64-l4t.deb
+**********************20:49:17.236 - Info: *begin sudo apt-get -y update, 5
+20:49:17.236 - Info: 
+20:49:17.503 - Info: 
+20:49:17.574 - Info: 0% [Working]
+20:49:17.574 - Info:             
+20:49:17.574 - Info: Hit:1 https://download.docker.com/linux/ubuntu noble InRelease
+20:49:17.574 - Info: 
+20:49:17.574 - Info: 
+20:49:17.587 - Info: 0% [Connected to repo.download.nvidia.com (23.205.151.162)] [Connecting to ports.ubuntu.com (91.189.91.102)]
+20:49:17.587 - Info:                                                                                                             
+20:49:17.587 - Info: Hit:2 https://repo.download.nvidia.com/jetson/common r39.2 InRelease
+20:49:17.587 - Info: 
+20:49:17.587 - Info: 
+20:49:17.653 - Info: 0% [Connecting to repo.download.nvidia.com (23.205.151.162)] [Connecting to ports.ubuntu.com (91.189.91.102)]
+20:49:17.653 - Info:                                                                                                              
+20:49:17.653 - Info: Hit:3 https://repo.download.nvidia.com/jetson/som r39.2 InRelease
+20:49:17.653 - Info: 
+20:49:17.653 - Info: 
+20:49:17.715 - Info: 0% [Connecting to repo.download.nvidia.com (23.205.151.162)] [Connecting to ports.ubuntu.com (91.189.91.102)]
+20:49:17.715 - Info:                                                                                                              
+20:49:17.747 - Info: 0% [Waiting for headers] [Connecting to ports.ubuntu.com (91.189.91.102)]
+20:49:17.747 - Info:                                                                          
+20:49:17.747 - Info: Hit:4 https://repo.download.nvidia.com/jetson/ffmpeg r39.2 InRelease
+20:49:17.747 - Info: 
+20:49:17.747 - Info: 
+20:49:17.747 - Info:                                                                          
+20:49:17.905 - Info: 0% [Connecting to ports.ubuntu.com (91.189.91.102)]
+20:49:17.905 - Info:                                                    
+20:49:17.994 - Info: 0% [Waiting for headers]
+20:49:17.994 - Info:                         
+20:49:17.994 - Info: Hit:5 http://ports.ubuntu.com/ubuntu-ports noble InRelease
+20:49:17.994 - Info: 
+20:49:17.994 - Info: 
+20:49:17.994 - Info:                         
+20:49:18.078 - Info: 0% [Working]
+20:49:18.235 - Info: 0% [Waiting for headers]
+20:49:18.235 - Info:                         
+20:49:18.235 - Info: Hit:6 http://ports.ubuntu.com/ubuntu-ports noble-updates InRelease
+20:49:18.235 - Info: 
+20:49:18.235 - Info: 
+20:49:18.235 - Info:                         
+20:49:18.246 - Info: 0% [Working]
+20:49:18.375 - Info: 0% [Waiting for headers]
+20:49:18.475 - Info:                         
+20:49:18.475 - Info: Hit:7 http://ports.ubuntu.com/ubuntu-ports noble-backports InRelease
+20:49:18.475 - Info: 
+20:49:18.475 - Info: 
+20:49:18.489 - Info: 0% [Waiting for headers]
+20:49:19.350 - Info:                         
+20:49:19.350 - Info: Hit:8 http://ports.ubuntu.com/ubuntu-ports noble-security InRelease
+20:49:19.350 - Info: 
+20:49:19.350 - Info: 
+20:49:19.350 - Info:                         
+20:49:19.462 - Info: 0% [Working]
+20:49:19.462 - Info: 20% [Working]
+20:49:19.462 - Info:              
+20:49:19.697 - Info: 
+20:49:19.697 - Info: Reading package lists... 0%
+20:49:19.714 - Info: 
+20:49:19.714 - Info: Reading package lists... 0%
+20:49:19.718 - Info: 
+20:49:19.718 - Info: Reading package lists... 0%
+20:49:19.718 - Info: 
+20:49:19.718 - Info: Reading package lists... 0%
+20:49:19.722 - Info: 
+20:49:19.722 - Info: Reading package lists... 0%
+20:49:19.722 - Info: 
+20:49:19.722 - Info: Reading package lists... 0%
+20:49:19.723 - Info: 
+20:49:19.723 - Info: Reading package lists... 0%
+20:49:19.723 - Info: 
+20:49:19.723 - Info: Reading package lists... 0%
+20:49:19.724 - Info: 
+20:49:19.724 - Info: Reading package lists... 0%
+20:49:19.724 - Info: 
+20:49:19.724 - Info: Reading package lists... 0%
+20:49:19.729 - Info: 
+20:49:19.729 - Info: Reading package lists... 0%
+20:49:19.797 - Info: 
+20:49:19.797 - Info: Reading package lists... 3%
+20:49:19.797 - Info: 
+20:49:19.797 - Info: Reading package lists... 3%
+20:49:19.809 - Info: 
+20:49:19.809 - Info: Reading package lists... 5%
+20:49:19.809 - Info: 
+20:49:19.809 - Info: Reading package lists... 5%
+20:49:20.443 - Info: 
+20:49:20.443 - Info: Reading package lists... 27%
+20:49:20.917 - Info: 
+20:49:20.917 - Info: Reading package lists... 41%
+20:49:20.917 - Info: 
+20:49:20.917 - Info: Reading package lists... 41%
+20:49:21.093 - Info: 
+20:49:21.093 - Info: Reading package lists... 57%
+20:49:21.093 - Info: 
+20:49:21.093 - Info: Reading package lists... 57%
+20:49:21.098 - Info: 
+20:49:21.098 - Info: Reading package lists... 58%
+20:49:21.098 - Info: 
+20:49:21.098 - Info: Reading package lists... 58%
+20:49:21.100 - Info: 
+20:49:21.100 - Info: Reading package lists... 58%
+20:49:21.100 - Info: 
+20:49:21.100 - Info: Reading package lists... 58%
+20:49:21.120 - Info: 
+20:49:21.120 - Info: Reading package lists... 58%
+20:49:21.120 - Info: 
+20:49:21.120 - Info: Reading package lists... 58%
+20:49:21.124 - Info: 
+20:49:21.124 - Info: Reading package lists... 59%
+20:49:21.124 - Info: 
+20:49:21.124 - Info: Reading package lists... 59%
+20:49:21.164 - Info: 
+20:49:21.164 - Info: Reading package lists... 60%
+20:49:21.224 - Info: 
+20:49:21.224 - Info: Reading package lists... 62%
+20:49:21.224 - Info: 
+20:49:21.224 - Info: Reading package lists... 62%
+20:49:21.244 - Info: 
+20:49:21.244 - Info: Reading package lists... 64%
+20:49:21.244 - Info: 
+20:49:21.244 - Info: Reading package lists... 64%
+20:49:21.393 - Info: 
+20:49:21.393 - Info: Reading package lists... 69%
+20:49:21.393 - Info: 
+20:49:21.393 - Info: Reading package lists... 69%
+20:49:21.416 - Info: 
+20:49:21.416 - Info: Reading package lists... 71%
+20:49:21.416 - Info: 
+20:49:21.416 - Info: Reading package lists... 71%
+20:49:21.546 - Info: 
+20:49:21.546 - Info: Reading package lists... 77%
+20:49:21.546 - Info: 
+20:49:21.546 - Info: Reading package lists... 77%
+20:49:21.580 - Info: 
+20:49:21.580 - Info: Reading package lists... 80%
+20:49:21.580 - Info: 
+20:49:21.580 - Info: Reading package lists... 80%
+20:49:21.586 - Info: 
+20:49:21.586 - Info: Reading package lists... 80%
+20:49:21.586 - Info: 
+20:49:21.586 - Info: Reading package lists... 80%
+20:49:21.588 - Info: 
+20:49:21.588 - Info: Reading package lists... 80%
+20:49:21.588 - Info: 
+20:49:21.588 - Info: Reading package lists... 80%
+20:49:21.593 - Info: 
+20:49:21.593 - Info: Reading package lists... 80%
+20:49:21.593 - Info: 
+20:49:21.593 - Info: Reading package lists... 80%
+20:49:21.593 - Info: 
+20:49:21.593 - Info: Reading package lists... 80%
+20:49:21.593 - Info: 
+20:49:21.593 - Info: Reading package lists... 80%
+20:49:21.598 - Info: 
+20:49:21.598 - Info: Reading package lists... 80%
+20:49:21.598 - Info: 
+20:49:21.598 - Info: Reading package lists... 80%
+20:49:21.599 - Info: 
+20:49:21.599 - Info: Reading package lists... 80%
+20:49:21.599 - Info: 
+20:49:21.599 - Info: Reading package lists... 80%
+20:49:21.599 - Info: 
+20:49:21.599 - Info: Reading package lists... 80%
+20:49:21.599 - Info: 
+20:49:21.599 - Info: Reading package lists... 80%
+20:49:21.600 - Info: 
+20:49:21.600 - Info: Reading package lists... 80%
+20:49:21.600 - Info: 
+20:49:21.600 - Info: Reading package lists... 80%
+20:49:21.631 - Info: 
+20:49:21.631 - Info: Reading package lists... 83%
+20:49:21.631 - Info: 
+20:49:21.631 - Info: Reading package lists... 83%
+20:49:21.646 - Info: 
+20:49:21.646 - Info: Reading package lists... 84%
+20:49:21.646 - Info: 
+20:49:21.646 - Info: Reading package lists... 84%
+20:49:21.690 - Info: 
+20:49:21.690 - Info: Reading package lists... 88%
+20:49:21.690 - Info: 
+20:49:21.690 - Info: Reading package lists... 88%
+20:49:21.707 - Info: 
+20:49:21.707 - Info: Reading package lists... 90%
+20:49:21.707 - Info: 
+20:49:21.707 - Info: Reading package lists... 90%
+20:49:21.770 - Info: 
+20:49:21.770 - Info: Reading package lists... 95%
+20:49:21.770 - Info: 
+20:49:21.770 - Info: Reading package lists... 95%
+20:49:21.802 - Info: 
+20:49:21.802 - Info: Reading package lists... 98%
+20:49:21.802 - Info: 
+20:49:21.802 - Info: Reading package lists... 98%
+20:49:21.805 - Info: 
+20:49:21.805 - Info: Reading package lists... 98%
+20:49:21.805 - Info: 
+20:49:21.805 - Info: Reading package lists... 98%
+20:49:21.890 - Info: 
+20:49:21.890 - Info: Reading package lists... 98%
+20:49:21.890 - Info: 
+20:49:21.890 - Info: Reading package lists... 98%
+20:49:21.901 - Info: 
+20:49:21.901 - Info: Reading package lists... 99%
+20:49:22.012 - Info: 
+20:49:22.012 - Info: Reading package lists... Done
+20:49:22.012 - Info: 
+20:49:22.012 - Info: 
+20:49:22.580 - Info: *begin sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/vpi-dev-4.1.3-aarch64-l4t.deb, 5
+20:49:22.580 - Info: 
+20:49:22.753 - Info: 
+20:49:22.753 - Info: Reading package lists... 0%
+20:49:22.853 - Info: 
+20:49:22.853 - Info: Reading package lists... 0%
+20:49:22.865 - Info: 
+20:49:22.865 - Info: Reading package lists... Done
+20:49:22.865 - Info: 
+20:49:22.865 - Info: 
+20:49:22.888 - Info: 
+20:49:22.888 - Info: Building dependency tree... 0%
+20:49:22.888 - Info: 
+20:49:22.888 - Info: Building dependency tree... 0%
+20:49:22.890 - Info: 
+20:49:22.890 - Info: Building dependency tree... 0%
+20:49:23.110 - Info: 
+20:49:23.111 - Info: Building dependency tree... 50%
+20:49:23.111 - Info: 
+20:49:23.111 - Info: Building dependency tree... 50%
+20:49:23.593 - Info: 
+20:49:23.593 - Info: Building dependency tree... 86%
+20:49:23.767 - Info: 
+20:49:23.767 - Info: Building dependency tree... Done
+20:49:23.767 - Info: 
+20:49:23.767 - Info: 
+20:49:23.767 - Info: 
+20:49:23.767 - Info: Reading state information... 0% 
+20:49:23.767 - Info: 
+20:49:23.767 - Info: Reading state information... 0%
+20:49:23.772 - Info: 
+20:49:23.772 - Info: Reading state information... Done
+20:49:23.772 - Info: 
+20:49:23.772 - Info: 
+20:49:23.908 - Info: Note, selecting 'vpi4-dev' instead of '/opt/nvidia/deb_repos/vpi-dev-4.1.3-aarch64-l4t.deb'
+20:49:23.908 - Info: 
+20:49:25.532 - Info: The following NEW packages will be installed:
+20:49:25.532 - Info: 
+20:49:25.532 - Info:   vpi4-dev
+20:49:25.532 - Info: 
+20:49:25.602 - Info: 0 upgraded, 1 newly installed, 0 to remove and 285 not upgraded.
+20:49:25.602 - Info: 
+20:49:25.608 - Info: Need to get 94.3 kB of archives.
+20:49:25.608 - Info: 
+20:49:25.608 - Info: After this operation, 918 kB of additional disk space will be used.
+20:49:25.608 - Info: 
+20:49:25.621 - Info: 
+20:49:25.689 - Info: 0% [Working]
+20:49:25.689 - Info:             
+20:49:25.689 - Info: Get:1 https://repo.download.nvidia.com/jetson/common r39.2/main arm64 vpi4-dev arm64 4.1.3 [94.3 kB]
+20:49:25.689 - Info: 
+20:49:25.689 - Info: 
+20:49:25.697 - Info: 13% [1 vpi4-dev 15.7 kB/94.3 kB 17%]
+20:49:25.697 - Info:                                     
+20:49:25.697 - Info: 100% [Working]
+20:49:25.697 - Info:               
+20:49:25.697 - Info: Fetched 94.3 kB in 0s (1,061 kB/s)
+20:49:25.697 - Info: 
+20:49:27.148 - Info: Selecting previously unselected package vpi4-dev.
+20:49:27.148 - Info: 
+20:49:27.148 - Info: (Reading database ... 
+20:49:27.176 - Info: (Reading database ... 5%
+20:49:27.176 - Info: (Reading database ... 10%
+20:49:27.176 - Info: (Reading database ... 15%
+20:49:27.176 - Info: (Reading database ... 20%
+20:49:27.176 - Info: (Reading database ... 25%
+20:49:27.176 - Info: (Reading database ... 30%
+20:49:27.176 - Info: (Reading database ... 35%
+20:49:27.176 - Info: (Reading database ... 40%
+20:49:27.176 - Info: (Reading database ... 45%
+20:49:27.176 - Info: (Reading database ... 50%
+20:49:27.184 - Info: (Reading database ... 55%
+20:49:27.196 - Info: (Reading database ... 60%
+20:49:27.207 - Info: (Reading database ... 65%
+20:49:27.223 - Info: (Reading database ... 70%
+20:49:27.260 - Info: (Reading database ... 75%
+20:49:27.272 - Info: (Reading database ... 80%
+20:49:27.289 - Info: (Reading database ... 85%
+20:49:27.306 - Info: (Reading database ... 90%
+20:49:27.316 - Info: (Reading database ... 95%
+20:49:27.372 - Info: (Reading database ... 100%
+20:49:27.372 - Info: (Reading database ... 194742 files and directories currently installed.)
+20:49:27.372 - Info: 
+20:49:27.391 - Info: Preparing to unpack .../vpi4-dev_4.1.3_arm64.deb ...
+20:49:27.391 - Info: 
+20:49:27.396 - Info: Unpacking vpi4-dev (4.1.3) ...
+20:49:27.396 - Info: 
+20:49:27.646 - Info: Setting up vpi4-dev (4.1.3) ...
+20:49:27.646 - Info: 
+20:49:27.676 - Info: update-alternatives: using /opt/nvidia/vpi4/include/vpi to provide /usr/include/vpi (vpi-dev) in auto mode
+20:49:27.676 - Info: 
+20:49:38.565 - Info: change working directory to /tmp20:49:38.566 - Info: exec_command: ssh jetson@192.168.55.1 "dpkg-query -W -f='\${db:Status-abbrev} \${Version}' vpi4-dev"20:49:39.015 - Info: [ Package Install Finished Successfully ]20:49:39.015 - Info: [ Package Install Started ]20:49:39.015 - Info: target deb installer start to install20:49:39.015 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+sudo mkdir -p /opt/nvidia/deb_repos
+sudo chmod 777 /opt/nvidia/deb_repos
+sudo rm -f /opt/nvidia/deb_repos/vpi-samples-4.1.3-aarch64-l4t.deb
+**********************20:49:42.946 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+
+exec 3>&1
+exec 1>&2
+exec 2>&3
+function safe_apt_install {
+    export DEBIAN_FRONTEND=noninteractive
+    echo "*begin $1, $2"
+    tmp_log=/tmp/sdkm_apt_install_log.ckw.txt
+    sudo rm -f $tmp_log
+    set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+    MAX_RETRY=3
+    TIMES=1
+    while [ ${CMD_STATUS} -ne 0 ]; do
+        cat $tmp_log > /dev/stderr
+        if [ $TIMES -gt $MAX_RETRY ]; then
+            echo "Unhandled error when running $1: `tr '\n' '; ' <$tmp_log`" 1>&2; exit 1
+        fi
+        if grep -q -e "is locked by another process" -e "E: Could not get lock /var/" -e "Could not open lock" $tmp_log; then
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting $2 seconds for apt to be available"; sleep ${2}
+        elif grep -q -e "apt --fix-broken install" $tmp_log; then
+            echo "safe apt install failed, need to run apt --fix-broken install"
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; sudo apt-get -f -y --allow-downgrades install 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting 5 seconds for apt"; sleep 5
+        else
+            echo "safe apt install failed: $1, exit code: $CMD_STATUS, retry number: $TIMES"
+            echo "will sleep $[ $TIMES*10 ] seconds before next attempt"
+            sleep $[ $TIMES*10 ]
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+        fi
+    done
+    if [ $CMD_STATUS -eq 0 ] && [ $TIMES -ne 1 ]; then
+        echo "safe apt install succeed. retry number: $TIMES."
+    fi
+}
+safe_apt_install "sudo apt-get -y update" 5
+sleep 0.5
+safe_apt_install "sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/vpi-samples-4.1.3-aarch64-l4t.deb" 5
+sleep 5
+sudo rm -f /opt/nvidia/deb_repos/vpi-samples-4.1.3-aarch64-l4t.deb
+**********************20:49:43.771 - Info: *begin sudo apt-get -y update, 5
+20:49:43.771 - Info: 
+20:49:44.060 - Info: 
+20:49:44.126 - Info: 0% [Working]
+20:49:44.126 - Info:             
+20:49:44.126 - Info: Hit:1 https://download.docker.com/linux/ubuntu noble InRelease
+20:49:44.126 - Info: 
+20:49:44.126 - Info: 
+20:49:44.172 - Info: 0% [Connected to repo.download.nvidia.com (23.205.151.162)] [Connecting to ports.ubuntu.com (91.189.92.19)]
+20:49:44.172 - Info:                                                                                                            
+20:49:44.172 - Info: Hit:2 https://repo.download.nvidia.com/jetson/common r39.2 InRelease
+20:49:44.172 - Info: 
+20:49:44.172 - Info: 
+20:49:44.232 - Info: 0% [Connecting to repo.download.nvidia.com (23.205.151.162)] [Connecting to ports.ubuntu.com (91.189.92.19)]
+20:49:44.232 - Info:                                                                                                             
+20:49:44.232 - Info: Hit:3 https://repo.download.nvidia.com/jetson/som r39.2 InRelease
+20:49:44.232 - Info: 
+20:49:44.232 - Info: 
+20:49:44.256 - Info: 0% [Connecting to repo.download.nvidia.com (23.205.151.162)] [Connecting to ports.ubuntu.com (91.189.92.19)]
+20:49:44.256 - Info:                                                                                                             
+20:49:44.289 - Info: 0% [Connected to repo.download.nvidia.com (23.205.151.162)] [Connecting to ports.ubuntu.com (91.189.92.19)]
+20:49:44.290 - Info:                                                                                                            
+20:49:44.290 - Info: Hit:4 https://repo.download.nvidia.com/jetson/ffmpeg r39.2 InRelease
+20:49:44.290 - Info: 
+20:49:44.290 - Info: 
+20:49:44.290 - Info:                                                                                                            
+20:49:44.443 - Info: 0% [Waiting for headers]
+20:49:44.498 - Info:                         
+20:49:44.498 - Info: Hit:5 http://ports.ubuntu.com/ubuntu-ports noble InRelease
+20:49:44.498 - Info: 
+20:49:44.498 - Info: 
+20:49:44.498 - Info:                         
+20:49:44.614 - Info: 0% [Working]
+20:49:44.712 - Info: 0% [Waiting for headers]
+20:49:44.712 - Info:                         
+20:49:44.712 - Info: Hit:6 http://ports.ubuntu.com/ubuntu-ports noble-updates InRelease
+20:49:44.712 - Info: 
+20:49:44.712 - Info: 
+20:49:44.712 - Info:                         
+20:49:44.798 - Info: 0% [Working]
+20:49:44.919 - Info: 0% [Waiting for headers]
+20:49:44.926 - Info:                         
+20:49:44.926 - Info: Hit:7 http://ports.ubuntu.com/ubuntu-ports noble-backports InRelease
+20:49:44.926 - Info: 
+20:49:44.927 - Info: 
+20:49:45.040 - Info: 0% [Waiting for headers]
+20:49:45.139 - Info:                         
+20:49:45.139 - Info: Hit:8 http://ports.ubuntu.com/ubuntu-ports noble-security InRelease
+20:49:45.139 - Info: 
+20:49:45.139 - Info: 
+20:49:45.139 - Info:                         
+20:49:45.162 - Info: 0% [Working]
+20:49:45.281 - Info: 20% [Working]
+20:49:45.281 - Info:              
+20:49:45.512 - Info: 
+20:49:45.512 - Info: Reading package lists... 0%
+20:49:45.530 - Info: 
+20:49:45.530 - Info: Reading package lists... 0%
+20:49:45.534 - Info: 
+20:49:45.534 - Info: Reading package lists... 0%
+20:49:45.534 - Info: 
+20:49:45.534 - Info: Reading package lists... 0%
+20:49:45.538 - Info: 
+20:49:45.538 - Info: Reading package lists... 0%
+20:49:45.538 - Info: 
+20:49:45.538 - Info: Reading package lists... 0%
+20:49:45.539 - Info: 
+20:49:45.539 - Info: Reading package lists... 0%
+20:49:45.539 - Info: 
+20:49:45.539 - Info: Reading package lists... 0%
+20:49:45.541 - Info: 
+20:49:45.541 - Info: Reading package lists... 0%
+20:49:45.541 - Info: 
+20:49:45.541 - Info: Reading package lists... 0%
+20:49:45.546 - Info: 
+20:49:45.546 - Info: Reading package lists... 0%
+20:49:45.617 - Info: 
+20:49:45.617 - Info: Reading package lists... 3%
+20:49:45.617 - Info: 
+20:49:45.617 - Info: Reading package lists... 3%
+20:49:45.631 - Info: 
+20:49:45.631 - Info: Reading package lists... 5%
+20:49:45.631 - Info: 
+20:49:45.631 - Info: Reading package lists... 5%
+20:49:46.304 - Info: 
+20:49:46.304 - Info: Reading package lists... 27%
+20:49:46.762 - Info: 
+20:49:46.762 - Info: Reading package lists... 41%
+20:49:46.762 - Info: 
+20:49:46.762 - Info: Reading package lists... 41%
+20:49:46.928 - Info: 
+20:49:46.928 - Info: Reading package lists... 57%
+20:49:46.928 - Info: 
+20:49:46.928 - Info: Reading package lists... 57%
+20:49:46.934 - Info: 
+20:49:46.934 - Info: Reading package lists... 58%
+20:49:46.934 - Info: 
+20:49:46.934 - Info: Reading package lists... 58%
+20:49:46.935 - Info: 
+20:49:46.935 - Info: Reading package lists... 58%
+20:49:46.935 - Info: 
+20:49:46.935 - Info: Reading package lists... 58%
+20:49:46.955 - Info: 
+20:49:46.955 - Info: Reading package lists... 58%
+20:49:46.955 - Info: 
+20:49:46.955 - Info: Reading package lists... 58%
+20:49:46.958 - Info: 
+20:49:46.958 - Info: Reading package lists... 59%
+20:49:46.958 - Info: 
+20:49:46.958 - Info: Reading package lists... 59%
+20:49:47.026 - Info: 
+20:49:47.026 - Info: Reading package lists... 61%
+20:49:47.053 - Info: 
+20:49:47.053 - Info: Reading package lists... 62%
+20:49:47.053 - Info: 
+20:49:47.053 - Info: Reading package lists... 62%
+20:49:47.070 - Info: 
+20:49:47.070 - Info: Reading package lists... 64%
+20:49:47.070 - Info: 
+20:49:47.070 - Info: Reading package lists... 64%
+20:49:47.215 - Info: 
+20:49:47.215 - Info: Reading package lists... 69%
+20:49:47.215 - Info: 
+20:49:47.215 - Info: Reading package lists... 69%
+20:49:47.238 - Info: 
+20:49:47.238 - Info: Reading package lists... 71%
+20:49:47.239 - Info: 
+20:49:47.239 - Info: Reading package lists... 71%
+20:49:47.365 - Info: 
+20:49:47.365 - Info: Reading package lists... 77%
+20:49:47.365 - Info: 
+20:49:47.365 - Info: Reading package lists... 77%
+20:49:47.399 - Info: 
+20:49:47.399 - Info: Reading package lists... 80%
+20:49:47.399 - Info: 
+20:49:47.399 - Info: Reading package lists... 80%
+20:49:47.404 - Info: 
+20:49:47.404 - Info: Reading package lists... 80%
+20:49:47.404 - Info: 
+20:49:47.404 - Info: Reading package lists... 80%
+20:49:47.406 - Info: 
+20:49:47.406 - Info: Reading package lists... 80%
+20:49:47.406 - Info: 
+20:49:47.406 - Info: Reading package lists... 80%
+20:49:47.410 - Info: 
+20:49:47.410 - Info: Reading package lists... 80%
+20:49:47.410 - Info: 
+20:49:47.410 - Info: Reading package lists... 80%
+20:49:47.411 - Info: 
+20:49:47.411 - Info: Reading package lists... 80%
+20:49:47.411 - Info: 
+20:49:47.411 - Info: Reading package lists... 80%
+20:49:47.415 - Info: 
+20:49:47.415 - Info: Reading package lists... 80%
+20:49:47.415 - Info: 
+20:49:47.415 - Info: Reading package lists... 80%
+20:49:47.415 - Info: 
+20:49:47.415 - Info: Reading package lists... 80%
+20:49:47.415 - Info: 
+20:49:47.415 - Info: Reading package lists... 80%
+20:49:47.415 - Info: 
+20:49:47.415 - Info: Reading package lists... 80%
+20:49:47.415 - Info: 
+20:49:47.415 - Info: Reading package lists... 80%
+20:49:47.417 - Info: 
+20:49:47.417 - Info: Reading package lists... 80%
+20:49:47.417 - Info: 
+20:49:47.417 - Info: Reading package lists... 80%
+20:49:47.447 - Info: 
+20:49:47.447 - Info: Reading package lists... 83%
+20:49:47.448 - Info: 
+20:49:47.448 - Info: Reading package lists... 83%
+20:49:47.462 - Info: 
+20:49:47.462 - Info: Reading package lists... 84%
+20:49:47.462 - Info: 
+20:49:47.462 - Info: Reading package lists... 84%
+20:49:47.505 - Info: 
+20:49:47.505 - Info: Reading package lists... 88%
+20:49:47.505 - Info: 
+20:49:47.505 - Info: Reading package lists... 88%
+20:49:47.521 - Info: 
+20:49:47.521 - Info: Reading package lists... 90%
+20:49:47.521 - Info: 
+20:49:47.521 - Info: Reading package lists... 90%
+20:49:47.582 - Info: 
+20:49:47.582 - Info: Reading package lists... 95%
+20:49:47.582 - Info: 
+20:49:47.582 - Info: Reading package lists... 95%
+20:49:47.613 - Info: 
+20:49:47.614 - Info: Reading package lists... 98%
+20:49:47.614 - Info: 
+20:49:47.614 - Info: Reading package lists... 98%
+20:49:47.616 - Info: 
+20:49:47.616 - Info: Reading package lists... 98%
+20:49:47.616 - Info: 
+20:49:47.616 - Info: Reading package lists... 98%
+20:49:47.698 - Info: 
+20:49:47.698 - Info: Reading package lists... 98%
+20:49:47.698 - Info: 
+20:49:47.698 - Info: Reading package lists... 98%
+20:49:47.820 - Info: 
+20:49:47.820 - Info: Reading package lists... Done
+20:49:47.820 - Info: 
+20:49:47.820 - Info: 
+20:49:48.390 - Info: *begin sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/vpi-samples-4.1.3-aarch64-l4t.deb, 5
+20:49:48.390 - Info: 
+20:49:48.550 - Info: 
+20:49:48.550 - Info: Reading package lists... 0%
+20:49:48.658 - Info: 
+20:49:48.658 - Info: Reading package lists... 0%
+20:49:48.671 - Info: 
+20:49:48.671 - Info: Reading package lists... Done
+20:49:48.671 - Info: 
+20:49:48.671 - Info: 
+20:49:48.695 - Info: 
+20:49:48.696 - Info: Building dependency tree... 0%
+20:49:48.696 - Info: 
+20:49:48.696 - Info: Building dependency tree... 0%
+20:49:48.700 - Info: 
+20:49:48.700 - Info: Building dependency tree... 0%
+20:49:48.920 - Info: 
+20:49:48.920 - Info: Building dependency tree... 50%
+20:49:48.920 - Info: 
+20:49:48.920 - Info: Building dependency tree... 50%
+20:49:49.410 - Info: 
+20:49:49.410 - Info: Building dependency tree... 84%
+20:49:49.610 - Info: 
+20:49:49.610 - Info: Building dependency tree... Done
+20:49:49.610 - Info: 
+20:49:49.610 - Info: 
+20:49:49.610 - Info: 
+20:49:49.610 - Info: Reading state information... 0% 
+20:49:49.610 - Info: 
+20:49:49.610 - Info: Reading state information... 0%
+20:49:49.614 - Info: 
+20:49:49.614 - Info: Reading state information... Done
+20:49:49.614 - Info: 
+20:49:49.614 - Info: 
+20:49:49.749 - Info: Note, selecting 'vpi4-samples' instead of '/opt/nvidia/deb_repos/vpi-samples-4.1.3-aarch64-l4t.deb'
+20:49:49.749 - Info: 
+20:49:51.313 - Info: The following NEW packages will be installed:
+20:49:51.313 - Info: 
+20:49:51.313 - Info:   vpi4-samples
+20:49:51.313 - Info: 
+20:49:51.384 - Info: 0 upgraded, 1 newly installed, 0 to remove and 285 not upgraded.
+20:49:51.384 - Info: 
+20:49:51.390 - Info: Need to get 39.9 MB of archives.
+20:49:51.390 - Info: 
+20:49:51.390 - Info: After this operation, 63.1 MB of additional disk space will be used.
+20:49:51.390 - Info: 
+20:49:51.403 - Info: 
+20:49:51.505 - Info: 0% [Working]
+20:49:51.505 - Info:             
+20:49:51.505 - Info: Get:1 https://repo.download.nvidia.com/jetson/common r39.2/main arm64 vpi4-samples arm64 4.1.3 [39.9 MB]
+20:49:51.505 - Info: 
+20:49:51.505 - Info: 
+20:49:52.006 - Info: 0% [1 vpi4-samples 15.7 kB/39.9 MB 0%]
+20:49:52.400 - Info: 71% [1 vpi4-samples 35.3 MB/39.9 MB 88%]
+20:49:52.400 - Info:                                         
+20:49:52.400 - Info: 100% [Working]
+20:49:52.400 - Info:               
+20:49:52.400 - Info: Fetched 39.9 MB in 1s (39.6 MB/s)
+20:49:52.400 - Info: 
+20:49:53.874 - Info: Selecting previously unselected package vpi4-samples.
+20:49:53.874 - Info: 
+20:49:53.874 - Info: (Reading database ... 
+20:49:53.900 - Info: (Reading database ... 5%
+20:49:53.900 - Info: (Reading database ... 10%
+20:49:53.900 - Info: (Reading database ... 15%
+20:49:53.900 - Info: (Reading database ... 20%
+20:49:53.900 - Info: (Reading database ... 25%
+20:49:53.900 - Info: (Reading database ... 30%
+20:49:53.900 - Info: (Reading database ... 35%
+20:49:53.900 - Info: (Reading database ... 40%
+20:49:53.900 - Info: (Reading database ... 45%
+20:49:53.900 - Info: (Reading database ... 50%
+20:49:53.910 - Info: (Reading database ... 55%
+20:49:53.923 - Info: (Reading database ... 60%
+20:49:53.935 - Info: (Reading database ... 65%
+20:49:53.953 - Info: (Reading database ... 70%
+20:49:53.992 - Info: (Reading database ... 75%
+20:49:54.003 - Info: (Reading database ... 80%
+20:49:54.019 - Info: (Reading database ... 85%
+20:49:54.038 - Info: (Reading database ... 90%
+20:49:54.046 - Info: (Reading database ... 95%
+20:49:54.101 - Info: (Reading database ... 100%
+20:49:54.101 - Info: (Reading database ... 194823 files and directories currently installed.)
+20:49:54.101 - Info: 
+20:49:54.119 - Info: Preparing to unpack .../vpi4-samples_4.1.3_arm64.deb ...
+20:49:54.119 - Info: 
+20:49:54.127 - Info: Unpacking vpi4-samples (4.1.3) ...
+20:49:54.127 - Info: 
+20:49:57.071 - Info: Setting up vpi4-samples (4.1.3) ...
+20:49:57.072 - Info: 
+20:50:08.021 - Info: change working directory to /tmp20:50:08.021 - Info: exec_command: ssh jetson@192.168.55.1 "dpkg-query -W -f='\${db:Status-abbrev} \${Version}' vpi4-samples"20:50:08.442 - Info: [ Package Install Finished Successfully ]20:50:08.442 - Info: [ Package Install Started ]20:50:08.442 - Info: target deb installer start to install20:50:08.443 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+sudo mkdir -p /opt/nvidia/deb_repos
+sudo chmod 777 /opt/nvidia/deb_repos
+sudo rm -f /opt/nvidia/deb_repos/vpi-python-src-4.1.3-aarch64-l4t.deb
+**********************20:50:09.970 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+
+exec 3>&1
+exec 1>&2
+exec 2>&3
+function safe_apt_install {
+    export DEBIAN_FRONTEND=noninteractive
+    echo "*begin $1, $2"
+    tmp_log=/tmp/sdkm_apt_install_log.ckw.txt
+    sudo rm -f $tmp_log
+    set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+    MAX_RETRY=3
+    TIMES=1
+    while [ ${CMD_STATUS} -ne 0 ]; do
+        cat $tmp_log > /dev/stderr
+        if [ $TIMES -gt $MAX_RETRY ]; then
+            echo "Unhandled error when running $1: `tr '\n' '; ' <$tmp_log`" 1>&2; exit 1
+        fi
+        if grep -q -e "is locked by another process" -e "E: Could not get lock /var/" -e "Could not open lock" $tmp_log; then
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting $2 seconds for apt to be available"; sleep ${2}
+        elif grep -q -e "apt --fix-broken install" $tmp_log; then
+            echo "safe apt install failed, need to run apt --fix-broken install"
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; sudo apt-get -f -y --allow-downgrades install 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting 5 seconds for apt"; sleep 5
+        else
+            echo "safe apt install failed: $1, exit code: $CMD_STATUS, retry number: $TIMES"
+            echo "will sleep $[ $TIMES*10 ] seconds before next attempt"
+            sleep $[ $TIMES*10 ]
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+        fi
+    done
+    if [ $CMD_STATUS -eq 0 ] && [ $TIMES -ne 1 ]; then
+        echo "safe apt install succeed. retry number: $TIMES."
+    fi
+}
+safe_apt_install "sudo apt-get -y update" 5
+sleep 0.5
+safe_apt_install "sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/vpi-python-src-4.1.3-aarch64-l4t.deb" 5
+sleep 5
+sudo rm -f /opt/nvidia/deb_repos/vpi-python-src-4.1.3-aarch64-l4t.deb
+**********************20:50:10.758 - Info: *begin sudo apt-get -y update, 5
+20:50:10.758 - Info: 
+20:50:11.035 - Info: 
+20:50:11.112 - Info: 0% [Working]
+20:50:11.112 - Info:             
+20:50:11.112 - Info: Hit:1 https://download.docker.com/linux/ubuntu noble InRelease
+20:50:11.112 - Info: 
+20:50:11.112 - Info: 
+20:50:11.137 - Info: 0% [Waiting for headers] [Connecting to ports.ubuntu.com]
+20:50:11.138 - Info:                                                          
+20:50:11.138 - Info: Hit:2 https://repo.download.nvidia.com/jetson/common r39.2 InRelease
+20:50:11.138 - Info: 
+20:50:11.138 - Info: 
+20:50:11.138 - Info:                                                          
+20:50:11.195 - Info: 0% [Connecting to ports.ubuntu.com]
+20:50:11.195 - Info:                                    
+20:50:11.195 - Info: Hit:3 https://repo.download.nvidia.com/jetson/som r39.2 InRelease
+20:50:11.195 - Info: 
+20:50:11.195 - Info: 
+20:50:11.234 - Info: 0% [Connecting to ports.ubuntu.com]
+20:50:11.259 - Info: 0% [Connected to repo.download.nvidia.com (23.205.151.162)] [Connecting to ports.ubuntu.com]
+20:50:11.259 - Info:                                                                                             
+20:50:11.259 - Info: Hit:4 https://repo.download.nvidia.com/jetson/ffmpeg r39.2 InRelease
+20:50:11.259 - Info: 
+20:50:11.259 - Info: 
+20:50:11.259 - Info:                                                                                             
+20:50:11.416 - Info: 0% [Connecting to ports.ubuntu.com]
+20:50:11.583 - Info: 0% [Connecting to ports.ubuntu.com (91.189.92.19)]
+20:50:11.583 - Info:                                                   
+20:50:11.749 - Info: 0% [Waiting for headers]
+20:50:11.749 - Info:                         
+20:50:11.749 - Info: Hit:5 http://ports.ubuntu.com/ubuntu-ports noble InRelease
+20:50:11.749 - Info: 
+20:50:11.749 - Info: 
+20:50:11.749 - Info:                         
+20:50:11.754 - Info: 0% [Working]
+20:50:11.877 - Info: 0% [Waiting for headers]
+20:50:11.960 - Info:                         
+20:50:11.960 - Info: Hit:6 http://ports.ubuntu.com/ubuntu-ports noble-updates InRelease
+20:50:11.960 - Info: 
+20:50:11.960 - Info: 
+20:50:11.960 - Info:                         
+20:50:12.082 - Info: 0% [Working]
+20:50:12.167 - Info: 0% [Waiting for headers]
+20:50:12.167 - Info:                         
+20:50:12.167 - Info: Hit:7 http://ports.ubuntu.com/ubuntu-ports noble-backports InRelease
+20:50:12.167 - Info: 
+20:50:12.167 - Info: 
+20:50:12.167 - Info:                         
+20:50:12.293 - Info: 0% [Working]
+20:50:12.376 - Info: 0% [Waiting for headers]
+20:50:12.376 - Info:                         
+20:50:12.376 - Info: Hit:8 http://ports.ubuntu.com/ubuntu-ports noble-security InRelease
+20:50:12.376 - Info: 
+20:50:12.376 - Info: 
+20:50:12.376 - Info:                         
+20:50:12.494 - Info: 0% [Working]
+20:50:12.494 - Info: 20% [Working]
+20:50:12.494 - Info:              
+20:50:12.751 - Info: 
+20:50:12.751 - Info: Reading package lists... 0%
+20:50:12.768 - Info: 
+20:50:12.768 - Info: Reading package lists... 0%
+20:50:12.772 - Info: 
+20:50:12.772 - Info: Reading package lists... 0%
+20:50:12.772 - Info: 
+20:50:12.772 - Info: Reading package lists... 0%
+20:50:12.776 - Info: 
+20:50:12.776 - Info: Reading package lists... 0%
+20:50:12.776 - Info: 
+20:50:12.776 - Info: Reading package lists... 0%
+20:50:12.776 - Info: 
+20:50:12.776 - Info: Reading package lists... 0%
+20:50:12.776 - Info: 
+20:50:12.776 - Info: Reading package lists... 0%
+20:50:12.779 - Info: 
+20:50:12.779 - Info: Reading package lists... 0%
+20:50:12.779 - Info: 
+20:50:12.779 - Info: Reading package lists... 0%
+20:50:12.783 - Info: 
+20:50:12.783 - Info: Reading package lists... 0%
+20:50:12.852 - Info: 
+20:50:12.852 - Info: Reading package lists... 3%
+20:50:12.852 - Info: 
+20:50:12.852 - Info: Reading package lists... 3%
+20:50:12.865 - Info: 
+20:50:12.865 - Info: Reading package lists... 5%
+20:50:12.865 - Info: 
+20:50:12.865 - Info: Reading package lists... 5%
+20:50:13.499 - Info: 
+20:50:13.499 - Info: Reading package lists... 26%
+20:50:14.024 - Info: 
+20:50:14.024 - Info: Reading package lists... 41%
+20:50:14.024 - Info: 
+20:50:14.024 - Info: Reading package lists... 41%
+20:50:14.191 - Info: 
+20:50:14.191 - Info: Reading package lists... 57%
+20:50:14.191 - Info: 
+20:50:14.191 - Info: Reading package lists... 57%
+20:50:14.198 - Info: 
+20:50:14.198 - Info: Reading package lists... 58%
+20:50:14.198 - Info: 
+20:50:14.198 - Info: Reading package lists... 58%
+20:50:14.198 - Info: 
+20:50:14.198 - Info: Reading package lists... 58%
+20:50:14.198 - Info: 
+20:50:14.198 - Info: Reading package lists... 58%
+20:50:14.207 - Info: 
+20:50:14.207 - Info: Reading package lists... 58%
+20:50:14.217 - Info: 
+20:50:14.217 - Info: Reading package lists... 58%
+20:50:14.217 - Info: 
+20:50:14.217 - Info: Reading package lists... 58%
+20:50:14.222 - Info: 
+20:50:14.222 - Info: Reading package lists... 59%
+20:50:14.222 - Info: 
+20:50:14.222 - Info: Reading package lists... 59%
+20:50:14.317 - Info: 
+20:50:14.317 - Info: Reading package lists... 62%
+20:50:14.317 - Info: 
+20:50:14.317 - Info: Reading package lists... 62%
+20:50:14.335 - Info: 
+20:50:14.335 - Info: Reading package lists... 64%
+20:50:14.335 - Info: 
+20:50:14.335 - Info: Reading package lists... 64%
+20:50:14.479 - Info: 
+20:50:14.479 - Info: Reading package lists... 69%
+20:50:14.479 - Info: 
+20:50:14.479 - Info: Reading package lists... 69%
+20:50:14.502 - Info: 
+20:50:14.502 - Info: Reading package lists... 71%
+20:50:14.502 - Info: 
+20:50:14.502 - Info: Reading package lists... 71%
+20:50:14.630 - Info: 
+20:50:14.630 - Info: Reading package lists... 77%
+20:50:14.630 - Info: 
+20:50:14.630 - Info: Reading package lists... 77%
+20:50:14.664 - Info: 
+20:50:14.665 - Info: Reading package lists... 80%
+20:50:14.665 - Info: 
+20:50:14.665 - Info: Reading package lists... 80%
+20:50:14.670 - Info: 
+20:50:14.670 - Info: Reading package lists... 80%
+20:50:14.670 - Info: 
+20:50:14.670 - Info: Reading package lists... 80%
+20:50:14.671 - Info: 
+20:50:14.671 - Info: Reading package lists... 80%
+20:50:14.671 - Info: 
+20:50:14.671 - Info: Reading package lists... 80%
+20:50:14.676 - Info: 
+20:50:14.676 - Info: Reading package lists... 80%
+20:50:14.676 - Info: 
+20:50:14.676 - Info: Reading package lists... 80%
+20:50:14.677 - Info: 
+20:50:14.677 - Info: Reading package lists... 80%
+20:50:14.677 - Info: 
+20:50:14.677 - Info: Reading package lists... 80%
+20:50:14.681 - Info: 
+20:50:14.681 - Info: Reading package lists... 80%
+20:50:14.681 - Info: 
+20:50:14.681 - Info: Reading package lists... 80%
+20:50:14.681 - Info: 
+20:50:14.681 - Info: Reading package lists... 80%
+20:50:14.681 - Info: 
+20:50:14.681 - Info: Reading package lists... 80%
+20:50:14.681 - Info: 
+20:50:14.681 - Info: Reading package lists... 80%
+20:50:14.681 - Info: 
+20:50:14.681 - Info: Reading package lists... 80%
+20:50:14.682 - Info: 
+20:50:14.682 - Info: Reading package lists... 80%
+20:50:14.682 - Info: 
+20:50:14.682 - Info: Reading package lists... 80%
+20:50:14.728 - Info: 
+20:50:14.729 - Info: Reading package lists... 83%
+20:50:14.729 - Info: 
+20:50:14.729 - Info: Reading package lists... 83%
+20:50:14.729 - Info: 
+20:50:14.729 - Info: Reading package lists... 84%
+20:50:14.729 - Info: 
+20:50:14.729 - Info: Reading package lists... 84%
+20:50:14.769 - Info: 
+20:50:14.769 - Info: Reading package lists... 88%
+20:50:14.769 - Info: 
+20:50:14.769 - Info: Reading package lists... 88%
+20:50:14.785 - Info: 
+20:50:14.785 - Info: Reading package lists... 90%
+20:50:14.785 - Info: 
+20:50:14.785 - Info: Reading package lists... 90%
+20:50:14.846 - Info: 
+20:50:14.846 - Info: Reading package lists... 95%
+20:50:14.846 - Info: 
+20:50:14.846 - Info: Reading package lists... 95%
+20:50:14.878 - Info: 
+20:50:14.878 - Info: Reading package lists... 98%
+20:50:14.878 - Info: 
+20:50:14.878 - Info: Reading package lists... 98%
+20:50:14.881 - Info: 
+20:50:14.881 - Info: Reading package lists... 98%
+20:50:14.881 - Info: 
+20:50:14.881 - Info: Reading package lists... 98%
+20:50:14.965 - Info: 
+20:50:14.965 - Info: Reading package lists... 98%
+20:50:14.965 - Info: 
+20:50:14.965 - Info: Reading package lists... 98%
+20:50:14.975 - Info: 
+20:50:14.975 - Info: Reading package lists... 99%
+20:50:15.089 - Info: 
+20:50:15.089 - Info: Reading package lists... Done
+20:50:15.089 - Info: 
+20:50:15.089 - Info: 
+20:50:15.657 - Info: *begin sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/vpi-python-src-4.1.3-aarch64-l4t.deb, 5
+20:50:15.657 - Info: 
+20:50:15.821 - Info: 
+20:50:15.821 - Info: Reading package lists... 0%
+20:50:15.943 - Info: 
+20:50:15.943 - Info: Reading package lists... 0%
+20:50:15.955 - Info: 
+20:50:15.955 - Info: Reading package lists... Done
+20:50:15.955 - Info: 
+20:50:15.955 - Info: 
+20:50:15.978 - Info: 
+20:50:15.978 - Info: Building dependency tree... 0%
+20:50:15.978 - Info: 
+20:50:15.978 - Info: Building dependency tree... 0%
+20:50:15.980 - Info: 
+20:50:15.980 - Info: Building dependency tree... 0%
+20:50:16.221 - Info: 
+20:50:16.221 - Info: Building dependency tree... 50%
+20:50:16.221 - Info: 
+20:50:16.221 - Info: Building dependency tree... 50%
+20:50:16.681 - Info: 
+20:50:16.681 - Info: Building dependency tree... 78%
+20:50:16.972 - Info: 
+20:50:16.972 - Info: Building dependency tree... Done
+20:50:16.972 - Info: 
+20:50:16.972 - Info: 
+20:50:16.972 - Info: 
+20:50:16.972 - Info: Reading state information... 0% 
+20:50:16.972 - Info: 
+20:50:16.972 - Info: Reading state information... 0%
+20:50:16.976 - Info: 
+20:50:16.976 - Info: Reading state information... Done
+20:50:16.976 - Info: 
+20:50:16.976 - Info: 
+20:50:17.107 - Info: Note, selecting 'vpi4-python-src' instead of '/opt/nvidia/deb_repos/vpi-python-src-4.1.3-aarch64-l4t.deb'
+20:50:17.107 - Info: 
+20:50:18.583 - Info: The following additional packages will be installed:
+20:50:18.583 - Info: 
+20:50:18.590 - Info:   javascript-common libexpat1-dev libjs-sphinxdoc libjs-underscore libpython3-dev libpython3.12-dev libpython3.12-minimal libpython3.12-stdlib libpython3.12t64 python3-dev python3.12 python3.12-dev python3.12-minimal
+20:50:18.590 - Info: 
+20:50:18.598 - Info: Suggested packages:
+20:50:18.598 - Info: 
+20:50:18.598 - Info:   apache2 | lighttpd | httpd python3.12-venv python3.12-doc binfmt-support
+20:50:18.598 - Info: 
+20:50:18.726 - Info: The following NEW packages will be installed:
+20:50:18.727 - Info: 
+20:50:18.734 - Info:   javascript-common libexpat1-dev libjs-sphinxdoc libjs-underscore libpython3-dev libpython3.12-dev python3-dev python3.12-dev vpi4-python-src
+20:50:18.734 - Info: 
+20:50:18.740 - Info: The following packages will be upgraded:
+20:50:18.740 - Info: 
+20:50:18.745 - Info:   libpython3.12-minimal libpython3.12-stdlib libpython3.12t64 python3.12 python3.12-minimal
+20:50:18.745 - Info: 
+20:50:18.806 - Info: 5 upgraded, 9 newly installed, 0 to remove and 280 not upgraded.
+20:50:18.806 - Info: 
+20:50:18.812 - Info: Need to get 15.2 MB of archives.
+20:50:18.812 - Info: 
+20:50:18.812 - Info: After this operation, 33.8 MB of additional disk space will be used.
+20:50:18.812 - Info: 
+20:50:18.837 - Info: 
+20:50:18.945 - Info: 0% [Working]
+20:50:18.945 - Info:             
+20:50:18.945 - Info: Get:1 https://repo.download.nvidia.com/jetson/common r39.2/main arm64 vpi4-python-src arm64 4.1.3 [706 kB]
+20:50:18.945 - Info: 
+20:50:18.945 - Info: 
+20:50:18.973 - Info: 0% [Connecting to ports.ubuntu.com (91.189.91.103)] [1 vpi4-python-src 15.7 kB/706 kB 2%]
+20:50:18.973 - Info:                                                                                          
+20:50:19.311 - Info: 5% [Connecting to ports.ubuntu.com (91.189.91.103)]
+20:50:19.311 - Info:                                                    
+20:50:19.311 - Info: Get:2 http://ports.ubuntu.com/ubuntu-ports noble-updates/main arm64 libpython3.12t64 arm64 3.12.3-1ubuntu0.15 [2,280 kB]
+20:50:19.311 - Info: 
+20:50:19.311 - Info: 
+20:50:19.311 - Info:                                                    
+20:50:19.810 - Info: 5% [2 libpython3.12t64 8,394 B/2,280 kB 0%]
+20:50:20.312 - Info: 5% [2 libpython3.12t64 33.0 kB/2,280 kB 1%]
+20:50:20.312 - Info:                                            
+20:50:20.813 - Info: 6% [2 libpython3.12t64 133 kB/2,280 kB 6%]
+20:50:21.314 - Info: 7% [2 libpython3.12t64 350 kB/2,280 kB 15%]
+20:50:21.814 - Info: 9% [2 libpython3.12t64 816 kB/2,280 kB 36%]
+20:50:22.315 - Info: 15% [2 libpython3.12t64 1,907 kB/2,280 kB 84%]
+20:50:22.370 - Info: 17% [2 libpython3.12t64 2,280 kB/2,280 kB 100%]
+20:50:22.370 - Info:                                                
+20:50:22.601 - Info: 19% [Working]
+20:50:22.601 - Info:              
+20:50:22.601 - Info: Get:3 http://ports.ubuntu.com/ubuntu-ports noble-updates/main arm64 python3.12 arm64 3.12.3-1ubuntu0.15 [651 kB]
+20:50:22.601 - Info: 
+20:50:22.601 - Info: 
+20:50:22.894 - Info: 19% [3 python3.12 9,844 B/651 kB 2%]
+20:50:22.894 - Info:                                     
+20:50:22.894 - Info: Get:4 http://ports.ubuntu.com/ubuntu-ports noble-updates/main arm64 libpython3.12-stdlib arm64 3.12.3-1ubuntu0.15 [2,040 kB]
+20:50:22.894 - Info: 
+20:50:22.894 - Info: 
+20:50:23.393 - Info: 24% [4 libpython3.12-stdlib 36.5 kB/2,040 kB 2%]
+20:50:23.393 - Info:                                                 
+20:50:23.393 - Info: 36% [Working]
+20:50:23.393 - Info:              
+20:50:23.394 - Info: Get:5 http://ports.ubuntu.com/ubuntu-ports noble-updates/main arm64 python3.12-minimal arm64 3.12.3-1ubuntu0.15 [2,253 kB]
+20:50:23.394 - Info: 
+20:50:23.394 - Info: 
+20:50:23.877 - Info: 36% [5 python3.12-minimal 70.7 kB/2,253 kB 3%]
+20:50:23.877 - Info:                                               
+20:50:23.877 - Info: Get:6 http://ports.ubuntu.com/ubuntu-ports noble-updates/main arm64 libpython3.12-minimal arm64 3.12.3-1ubuntu0.15 [835 kB]
+20:50:23.877 - Info: 
+20:50:23.877 - Info: 
+20:50:24.132 - Info: 49% [6 libpython3.12-minimal 115 kB/835 kB 14%]
+20:50:24.132 - Info:                                                
+20:50:24.132 - Info: 55% [Waiting for headers]
+20:50:24.132 - Info:                          
+20:50:24.132 - Info: Get:7 http://ports.ubuntu.com/ubuntu-ports noble/main arm64 javascript-common all 11+nmu1 [5,936 B]
+20:50:24.132 - Info: 
+20:50:24.132 - Info: 
+20:50:24.132 - Info:                          
+20:50:24.132 - Info: Get:8 http://ports.ubuntu.com/ubuntu-ports noble-updates/main arm64 libexpat1-dev arm64 2.6.1-2ubuntu0.4 [128 kB]
+20:50:24.132 - Info: 
+20:50:24.132 - Info: 
+20:50:24.136 - Info: 56% [8 libexpat1-dev 59.5 kB/128 kB 46%]
+20:50:24.136 - Info:                                         
+20:50:24.136 - Info: 58% [Working]
+20:50:24.136 - Info:              
+20:50:24.136 - Info: Get:9 http://ports.ubuntu.com/ubuntu-ports noble/main arm64 libjs-underscore all 1.13.4~dfsg+~1.11.4-3 [118 kB]
+20:50:24.136 - Info: 
+20:50:24.136 - Info: 
+20:50:24.139 - Info: 58% [9 libjs-underscore 45.1 kB/118 kB 38%]
+20:50:24.139 - Info:                                            
+20:50:24.139 - Info: 60% [Working]
+20:50:24.139 - Info:              
+20:50:24.139 - Info: Get:10 http://ports.ubuntu.com/ubuntu-ports noble/main arm64 libjs-sphinxdoc all 7.2.6-6 [149 kB]
+20:50:24.139 - Info: 
+20:50:24.139 - Info: 
+20:50:24.143 - Info: 60% [10 libjs-sphinxdoc 9,173 B/149 kB 6%]
+20:50:24.143 - Info:                                           
+20:50:24.143 - Info: 62% [Working]
+20:50:24.143 - Info:              
+20:50:24.144 - Info: Get:11 http://ports.ubuntu.com/ubuntu-ports noble-updates/main arm64 libpython3.12-dev arm64 3.12.3-1ubuntu0.15 [5,538 kB]
+20:50:24.144 - Info: 
+20:50:24.144 - Info: 
+20:50:24.646 - Info: 63% [11 libpython3.12-dev 41.0 kB/5,538 kB 1%]
+20:50:25.094 - Info: 79% [11 libpython3.12-dev 3,089 kB/5,538 kB 56%]
+20:50:25.094 - Info: 93% [Waiting for headers]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         2,342 kB/s 0s
+20:50:25.094 - Info:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+20:50:25.094 - Info: Get:12 http://ports.ubuntu.com/ubuntu-ports noble-updates/main arm64 libpython3-dev arm64 3.12.3-0ubuntu2.1 [10.4 kB]
+20:50:25.094 - Info: 
+20:50:25.094 - Info: 
+20:50:25.094 - Info: 94% [Waiting for headers]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         2,342 kB/s 0s
+20:50:25.094 - Info:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+20:50:25.094 - Info: Get:13 http://ports.ubuntu.com/ubuntu-ports noble-updates/main arm64 python3.12-dev arm64 3.12.3-1ubuntu0.15 [498 kB]
+20:50:25.094 - Info: 
+20:50:25.094 - Info: 
+20:50:25.107 - Info: 95% [13 python3.12-dev 65.2 kB/498 kB 13%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        2,342 kB/s 0s
+20:50:25.107 - Info: 98% [Working]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     2,342 kB/s 0s
+20:50:25.107 - Info:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+20:50:25.107 - Info: Get:14 http://ports.ubuntu.com/ubuntu-ports noble-updates/main arm64 python3-dev arm64 3.12.3-0ubuntu2.1 [26.7 kB]
+20:50:25.107 - Info: 
+20:50:25.107 - Info: 
+20:50:25.109 - Info: 99% [14 python3-dev 25.8 kB/26.7 kB 97%]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          2,342 kB/s 0s
+20:50:25.109 - Info: 100% [Working]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    2,342 kB/s 0s
+20:50:25.109 - Info:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+20:50:25.109 - Info: Fetched 15.2 MB in 6s (2,421 kB/s)
+20:50:25.109 - Info: 
+20:50:26.600 - Info: (Reading database ... 
+20:50:26.627 - Info: (Reading database ... 5%
+20:50:26.627 - Info: (Reading database ... 10%
+20:50:26.628 - Info: (Reading database ... 15%
+20:50:26.628 - Info: (Reading database ... 20%
+20:50:26.628 - Info: (Reading database ... 25%
+20:50:26.628 - Info: (Reading database ... 30%
+20:50:26.628 - Info: (Reading database ... 35%
+20:50:26.628 - Info: (Reading database ... 40%
+20:50:26.628 - Info: (Reading database ... 45%
+20:50:26.628 - Info: (Reading database ... 50%
+20:50:26.634 - Info: (Reading database ... 55%
+20:50:26.647 - Info: (Reading database ... 60%
+20:50:26.660 - Info: (Reading database ... 65%
+20:50:26.678 - Info: (Reading database ... 70%
+20:50:26.716 - Info: (Reading database ... 75%
+20:50:26.727 - Info: (Reading database ... 80%
+20:50:26.744 - Info: (Reading database ... 85%
+20:50:26.761 - Info: (Reading database ... 90%
+20:50:26.772 - Info: (Reading database ... 95%
+20:50:26.826 - Info: (Reading database ... 100%
+20:50:26.826 - Info: (Reading database ... 194952 files and directories currently installed.)
+20:50:26.826 - Info: 
+20:50:26.844 - Info: Preparing to unpack .../00-libpython3.12t64_3.12.3-1ubuntu0.15_arm64.deb ...
+20:50:26.845 - Info: 
+20:50:26.880 - Info: Unpacking libpython3.12t64:arm64 (3.12.3-1ubuntu0.15) over (3.12.3-1ubuntu0.13) ...
+20:50:26.880 - Info: 
+20:50:27.204 - Info: Preparing to unpack .../01-python3.12_3.12.3-1ubuntu0.15_arm64.deb ...
+20:50:27.204 - Info: 
+20:50:27.361 - Info: Unpacking python3.12 (3.12.3-1ubuntu0.15) over (3.12.3-1ubuntu0.13) ...
+20:50:27.361 - Info: 
+20:50:27.584 - Info: Preparing to unpack .../02-libpython3.12-stdlib_3.12.3-1ubuntu0.15_arm64.deb ...
+20:50:27.584 - Info: 
+20:50:27.709 - Info: Unpacking libpython3.12-stdlib:arm64 (3.12.3-1ubuntu0.15) over (3.12.3-1ubuntu0.13) ...
+20:50:27.709 - Info: 
+20:50:28.320 - Info: Preparing to unpack .../03-python3.12-minimal_3.12.3-1ubuntu0.15_arm64.deb ...
+20:50:28.320 - Info: 
+20:50:28.357 - Info: Unpacking python3.12-minimal (3.12.3-1ubuntu0.15) over (3.12.3-1ubuntu0.13) ...
+20:50:28.357 - Info: 
+20:50:28.762 - Info: Preparing to unpack .../04-libpython3.12-minimal_3.12.3-1ubuntu0.15_arm64.deb ...
+20:50:28.762 - Info: 
+20:50:28.903 - Info: Unpacking libpython3.12-minimal:arm64 (3.12.3-1ubuntu0.15) over (3.12.3-1ubuntu0.13) ...
+20:50:28.903 - Info: 
+20:50:29.256 - Info: Selecting previously unselected package javascript-common.
+20:50:29.256 - Info: 
+20:50:29.317 - Info: Preparing to unpack .../05-javascript-common_11+nmu1_all.deb ...
+20:50:29.317 - Info: 
+20:50:29.344 - Info: Unpacking javascript-common (11+nmu1) ...
+20:50:29.344 - Info: 
+20:50:29.445 - Info: Selecting previously unselected package libexpat1-dev:arm64.
+20:50:29.445 - Info: 
+20:50:29.513 - Info: Preparing to unpack .../06-libexpat1-dev_2.6.1-2ubuntu0.4_arm64.deb ...
+20:50:29.513 - Info: 
+20:50:29.524 - Info: Unpacking libexpat1-dev:arm64 (2.6.1-2ubuntu0.4) ...
+20:50:29.524 - Info: 
+20:50:29.648 - Info: Selecting previously unselected package libjs-underscore.
+20:50:29.648 - Info: 
+20:50:29.716 - Info: Preparing to unpack .../07-libjs-underscore_1.13.4~dfsg+~1.11.4-3_all.deb ...
+20:50:29.716 - Info: 
+20:50:29.724 - Info: Unpacking libjs-underscore (1.13.4~dfsg+~1.11.4-3) ...
+20:50:29.724 - Info: 
+20:50:29.853 - Info: Selecting previously unselected package libjs-sphinxdoc.
+20:50:29.853 - Info: 
+20:50:29.924 - Info: Preparing to unpack .../08-libjs-sphinxdoc_7.2.6-6_all.deb ...
+20:50:29.924 - Info: 
+20:50:29.928 - Info: Unpacking libjs-sphinxdoc (7.2.6-6) ...
+20:50:29.928 - Info: 
+20:50:30.049 - Info: Selecting previously unselected package libpython3.12-dev:arm64.
+20:50:30.049 - Info: 
+20:50:30.106 - Info: Preparing to unpack .../09-libpython3.12-dev_3.12.3-1ubuntu0.15_arm64.deb ...
+20:50:30.106 - Info: 
+20:50:30.110 - Info: Unpacking libpython3.12-dev:arm64 (3.12.3-1ubuntu0.15) ...
+20:50:30.110 - Info: 
+20:50:30.826 - Info: Selecting previously unselected package libpython3-dev:arm64.
+20:50:30.826 - Info: 
+20:50:30.879 - Info: Preparing to unpack .../10-libpython3-dev_3.12.3-0ubuntu2.1_arm64.deb ...
+20:50:30.879 - Info: 
+20:50:30.884 - Info: Unpacking libpython3-dev:arm64 (3.12.3-0ubuntu2.1) ...
+20:50:30.884 - Info: 
+20:50:31.169 - Info: Selecting previously unselected package python3.12-dev.
+20:50:31.169 - Info: 
+20:50:31.245 - Info: Preparing to unpack .../11-python3.12-dev_3.12.3-1ubuntu0.15_arm64.deb ...
+20:50:31.245 - Info: 
+20:50:31.253 - Info: Unpacking python3.12-dev (3.12.3-1ubuntu0.15) ...
+20:50:31.253 - Info: 
+20:50:31.371 - Info: Selecting previously unselected package python3-dev.
+20:50:31.371 - Info: 
+20:50:31.441 - Info: Preparing to unpack .../12-python3-dev_3.12.3-0ubuntu2.1_arm64.deb ...
+20:50:31.441 - Info: 
+20:50:31.446 - Info: Unpacking python3-dev (3.12.3-0ubuntu2.1) ...
+20:50:31.446 - Info: 
+20:50:31.553 - Info: Selecting previously unselected package vpi4-python-src.
+20:50:31.553 - Info: 
+20:50:31.622 - Info: Preparing to unpack .../13-vpi4-python-src_4.1.3_arm64.deb ...
+20:50:31.622 - Info: 
+20:50:31.634 - Info: Unpacking vpi4-python-src (4.1.3) ...
+20:50:31.634 - Info: 
+20:50:32.025 - Info: Setting up javascript-common (11+nmu1) ...
+20:50:32.025 - Info: 
+20:50:33.596 - Info: Setting up libpython3.12-minimal:arm64 (3.12.3-1ubuntu0.15) ...
+20:50:33.596 - Info: 
+20:50:33.633 - Info: Setting up libexpat1-dev:arm64 (2.6.1-2ubuntu0.4) ...
+20:50:33.633 - Info: 
+20:50:33.655 - Info: Setting up libjs-underscore (1.13.4~dfsg+~1.11.4-3) ...
+20:50:33.655 - Info: 
+20:50:33.673 - Info: Setting up python3.12-minimal (3.12.3-1ubuntu0.15) ...
+20:50:33.674 - Info: 
+20:50:35.449 - Info: Setting up libpython3.12-stdlib:arm64 (3.12.3-1ubuntu0.15) ...
+20:50:35.449 - Info: 
+20:50:35.470 - Info: Setting up python3.12 (3.12.3-1ubuntu0.15) ...
+20:50:35.470 - Info: 
+20:50:37.431 - Info: Setting up libpython3.12t64:arm64 (3.12.3-1ubuntu0.15) ...
+20:50:37.431 - Info: 
+20:50:37.452 - Info: Setting up libjs-sphinxdoc (7.2.6-6) ...
+20:50:37.452 - Info: 
+20:50:37.474 - Info: Setting up libpython3.12-dev:arm64 (3.12.3-1ubuntu0.15) ...
+20:50:37.474 - Info: 
+20:50:37.492 - Info: Setting up python3.12-dev (3.12.3-1ubuntu0.15) ...
+20:50:37.492 - Info: 
+20:50:37.514 - Info: Setting up libpython3-dev:arm64 (3.12.3-0ubuntu2.1) ...
+20:50:37.514 - Info: 
+20:50:37.533 - Info: Setting up python3-dev (3.12.3-0ubuntu2.1) ...
+20:50:37.533 - Info: 
+20:50:37.557 - Info: Setting up vpi4-python-src (4.1.3) ...
+20:50:37.557 - Info: 
+20:50:37.582 - Info: Processing triggers for gnome-menus (3.36.0-1.1ubuntu3) ...
+20:50:37.582 - Info: 
+20:50:37.608 - Info: Processing triggers for libc-bin (2.39-0ubuntu8.7) ...
+20:50:37.608 - Info: 
+20:50:37.721 - Info: Processing triggers for systemd (255.4-1ubuntu8.15) ...
+20:50:37.721 - Info: 
+20:50:37.868 - Info: Processing triggers for man-db (2.12.0-4build2) ...
+20:50:37.868 - Info: 
+20:50:38.043 - Info: Processing triggers for desktop-file-utils (0.27-2build1) ...
+20:50:38.044 - Info: 
+20:50:48.997 - Info: change working directory to /tmp20:50:48.997 - Info: exec_command: ssh jetson@192.168.55.1 "dpkg-query -W -f='\${db:Status-abbrev} \${Version}' vpi4-python-src"20:50:49.431 - Info: [ Package Install Finished Successfully ]20:50:49.431 - Info: exec_command: ssh   jetson@192.168.55.1 "df -B1 / | tail -1 | awk '{ printf \$4 }'"20:50:49.852 - Info: [target] [ 283.27 MB used. Disk Avail: 204.31 GB ]20:50:49.853 - Info: [ NV_L4T_VPI_SBSA_TARGET_POST_INSTALL_COMP Install took 2m5s ]

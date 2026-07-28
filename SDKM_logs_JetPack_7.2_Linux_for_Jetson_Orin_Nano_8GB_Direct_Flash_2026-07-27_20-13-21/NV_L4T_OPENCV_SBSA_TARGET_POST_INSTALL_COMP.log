@@ -1,0 +1,1819 @@
+------ 2026-07-27 11:13:12 ------
+------ SDK: JetPack_7.2_Linux ------
+11:13:12.519 - Info: exec_command: ssh   jetson@192.168.55.1 "df -B1 / | tail -1 | awk '{ printf \$4 }'"11:13:12.924 - Info: NV_L4T_OPENCV_SBSA_TARGET_POST_INSTALL_COMP include 5 package11:13:12.924 - Info: [ Package Install Started ]11:13:12.924 - Info: target deb installer start to install11:13:12.924 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+sudo mkdir -p /opt/nvidia/deb_repos
+sudo chmod 777 /opt/nvidia/deb_repos
+sudo rm -f /opt/nvidia/deb_repos/OpenCV-4.8.0-3-g6ef37b4-aarch64-dev.deb
+**********************11:13:14.471 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+
+exec 3>&1
+exec 1>&2
+exec 2>&3
+function safe_apt_install {
+    export DEBIAN_FRONTEND=noninteractive
+    echo "*begin $1, $2"
+    tmp_log=/tmp/sdkm_apt_install_log.ckw.txt
+    sudo rm -f $tmp_log
+    set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+    MAX_RETRY=3
+    TIMES=1
+    while [ ${CMD_STATUS} -ne 0 ]; do
+        cat $tmp_log > /dev/stderr
+        if [ $TIMES -gt $MAX_RETRY ]; then
+            echo "Unhandled error when running $1: `tr '\n' '; ' <$tmp_log`" 1>&2; exit 1
+        fi
+        if grep -q -e "is locked by another process" -e "E: Could not get lock /var/" -e "Could not open lock" $tmp_log; then
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting $2 seconds for apt to be available"; sleep ${2}
+        elif grep -q -e "apt --fix-broken install" $tmp_log; then
+            echo "safe apt install failed, need to run apt --fix-broken install"
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; sudo apt-get -f -y --allow-downgrades install 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting 5 seconds for apt"; sleep 5
+        else
+            echo "safe apt install failed: $1, exit code: $CMD_STATUS, retry number: $TIMES"
+            echo "will sleep $[ $TIMES*10 ] seconds before next attempt"
+            sleep $[ $TIMES*10 ]
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+        fi
+    done
+    if [ $CMD_STATUS -eq 0 ] && [ $TIMES -ne 1 ]; then
+        echo "safe apt install succeed. retry number: $TIMES."
+    fi
+}
+safe_apt_install "sudo apt-get -y update" 5
+sleep 0.5
+safe_apt_install "sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/OpenCV-4.8.0-3-g6ef37b4-aarch64-dev.deb" 5
+sleep 5
+sudo rm -f /opt/nvidia/deb_repos/OpenCV-4.8.0-3-g6ef37b4-aarch64-dev.deb
+**********************11:13:15.247 - Info: *begin sudo apt-get -y update, 5
+11:13:15.247 - Info: 
+11:13:15.536 - Info: 
+11:13:15.608 - Info: 0% [Working]
+11:13:15.608 - Info:             
+11:13:15.608 - Info: Hit:1 https://download.docker.com/linux/ubuntu noble InRelease
+11:13:15.608 - Info: 
+11:13:15.608 - Info: 
+11:13:15.608 - Info: 0% [Connected to repo.download.nvidia.com (23.205.151.162)] [Connecting to ports.ubuntu.com (91.189.92.21)]
+11:13:15.608 - Info:                                                                                                            
+11:13:15.608 - Info: Hit:2 https://repo.download.nvidia.com/jetson/common r39.2 InRelease
+11:13:15.608 - Info: 
+11:13:15.608 - Info: 
+11:13:15.662 - Info: 0% [Connecting to repo.download.nvidia.com (23.205.151.162)] [Connecting to ports.ubuntu.com (91.189.92.21)]
+11:13:15.662 - Info:                                                                                                             
+11:13:15.662 - Info: Hit:3 https://repo.download.nvidia.com/jetson/som r39.2 InRelease
+11:13:15.662 - Info: 
+11:13:15.662 - Info: 
+11:13:15.720 - Info: 0% [Connecting to repo.download.nvidia.com (23.205.151.162)] [Connecting to ports.ubuntu.com (91.189.92.21)]
+11:13:15.720 - Info:                                                                                                             
+11:13:15.720 - Info: Hit:4 https://repo.download.nvidia.com/jetson/ffmpeg r39.2 InRelease
+11:13:15.720 - Info: 
+11:13:15.720 - Info: 
+11:13:15.720 - Info:                                                                                                             
+11:13:15.738 - Info: 0% [Connecting to ports.ubuntu.com (91.189.92.21)]
+11:13:15.925 - Info:                                                   
+11:13:15.960 - Info: 0% [Waiting for headers]
+11:13:15.960 - Info:                         
+11:13:15.960 - Info: Hit:5 http://ports.ubuntu.com/ubuntu-ports noble InRelease
+11:13:15.960 - Info: 
+11:13:15.960 - Info: 
+11:13:15.960 - Info:                         
+11:13:16.083 - Info: 0% [Working]
+11:13:16.164 - Info: 0% [Waiting for headers]
+11:13:16.164 - Info:                         
+11:13:16.164 - Info: Hit:6 http://ports.ubuntu.com/ubuntu-ports noble-updates InRelease
+11:13:16.164 - Info: 
+11:13:16.164 - Info: 
+11:13:16.164 - Info:                         
+11:13:16.254 - Info: 0% [Working]
+11:13:16.381 - Info: 0% [Waiting for headers]
+11:13:16.381 - Info:                         
+11:13:16.381 - Info: Hit:7 http://ports.ubuntu.com/ubuntu-ports noble-backports InRelease
+11:13:16.381 - Info: 
+11:13:16.381 - Info: 
+11:13:16.503 - Info: 0% [Waiting for headers]
+11:13:16.577 - Info:                         
+11:13:16.577 - Info: Hit:8 http://ports.ubuntu.com/ubuntu-ports noble-security InRelease
+11:13:16.577 - Info: 
+11:13:16.577 - Info: 
+11:13:16.577 - Info:                         
+11:13:16.624 - Info: 0% [Working]
+11:13:16.741 - Info: 20% [Working]
+11:13:16.741 - Info:              
+11:13:17.003 - Info: 
+11:13:17.003 - Info: Reading package lists... 0%
+11:13:17.019 - Info: 
+11:13:17.019 - Info: Reading package lists... 0%
+11:13:17.024 - Info: 
+11:13:17.024 - Info: Reading package lists... 0%
+11:13:17.024 - Info: 
+11:13:17.024 - Info: Reading package lists... 0%
+11:13:17.027 - Info: 
+11:13:17.027 - Info: Reading package lists... 0%
+11:13:17.027 - Info: 
+11:13:17.027 - Info: Reading package lists... 0%
+11:13:17.029 - Info: 
+11:13:17.029 - Info: Reading package lists... 0%
+11:13:17.029 - Info: 
+11:13:17.029 - Info: Reading package lists... 0%
+11:13:17.031 - Info: 
+11:13:17.031 - Info: Reading package lists... 0%
+11:13:17.031 - Info: 
+11:13:17.031 - Info: Reading package lists... 0%
+11:13:17.036 - Info: 
+11:13:17.036 - Info: Reading package lists... 0%
+11:13:17.104 - Info: 
+11:13:17.104 - Info: Reading package lists... 3%
+11:13:17.104 - Info: 
+11:13:17.104 - Info: Reading package lists... 3%
+11:13:17.115 - Info: 
+11:13:17.115 - Info: Reading package lists... 5%
+11:13:17.115 - Info: 
+11:13:17.115 - Info: Reading package lists... 5%
+11:13:17.746 - Info: 
+11:13:17.746 - Info: Reading package lists... 26%
+11:13:18.277 - Info: 
+11:13:18.277 - Info: Reading package lists... 41%
+11:13:18.277 - Info: 
+11:13:18.277 - Info: Reading package lists... 41%
+11:13:18.440 - Info: 
+11:13:18.441 - Info: Reading package lists... 58%
+11:13:18.441 - Info: 
+11:13:18.441 - Info: Reading package lists... 58%
+11:13:18.447 - Info: 
+11:13:18.447 - Info: Reading package lists... 58%
+11:13:18.447 - Info: 
+11:13:18.447 - Info: Reading package lists... 58%
+11:13:18.448 - Info: 
+11:13:18.448 - Info: Reading package lists... 58%
+11:13:18.448 - Info: 
+11:13:18.448 - Info: Reading package lists... 58%
+11:13:18.448 - Info: 
+11:13:18.448 - Info: Reading package lists... 58%
+11:13:18.468 - Info: 
+11:13:18.468 - Info: Reading package lists... 59%
+11:13:18.468 - Info: 
+11:13:18.468 - Info: Reading package lists... 59%
+11:13:18.472 - Info: 
+11:13:18.472 - Info: Reading package lists... 59%
+11:13:18.472 - Info: 
+11:13:18.472 - Info: Reading package lists... 59%
+11:13:18.566 - Info: 
+11:13:18.566 - Info: Reading package lists... 62%
+11:13:18.566 - Info: 
+11:13:18.566 - Info: Reading package lists... 62%
+11:13:18.585 - Info: 
+11:13:18.585 - Info: Reading package lists... 64%
+11:13:18.585 - Info: 
+11:13:18.585 - Info: Reading package lists... 64%
+11:13:18.729 - Info: 
+11:13:18.729 - Info: Reading package lists... 69%
+11:13:18.729 - Info: 
+11:13:18.729 - Info: Reading package lists... 69%
+11:13:18.752 - Info: 
+11:13:18.752 - Info: Reading package lists... 71%
+11:13:18.752 - Info: 
+11:13:18.752 - Info: Reading package lists... 71%
+11:13:18.878 - Info: 
+11:13:18.878 - Info: Reading package lists... 77%
+11:13:18.878 - Info: 
+11:13:18.878 - Info: Reading package lists... 77%
+11:13:18.912 - Info: 
+11:13:18.912 - Info: Reading package lists... 80%
+11:13:18.912 - Info: 
+11:13:18.913 - Info: Reading package lists... 80%
+11:13:18.918 - Info: 
+11:13:18.918 - Info: Reading package lists... 80%
+11:13:18.918 - Info: 
+11:13:18.918 - Info: Reading package lists... 80%
+11:13:18.919 - Info: 
+11:13:18.919 - Info: Reading package lists... 80%
+11:13:18.919 - Info: 
+11:13:18.919 - Info: Reading package lists... 80%
+11:13:18.924 - Info: 
+11:13:18.924 - Info: Reading package lists... 80%
+11:13:18.924 - Info: 
+11:13:18.924 - Info: Reading package lists... 80%
+11:13:18.924 - Info: 
+11:13:18.924 - Info: Reading package lists... 80%
+11:13:18.924 - Info: 
+11:13:18.924 - Info: Reading package lists... 80%
+11:13:18.928 - Info: 
+11:13:18.928 - Info: Reading package lists... 80%
+11:13:18.928 - Info: 
+11:13:18.928 - Info: Reading package lists... 80%
+11:13:18.929 - Info: 
+11:13:18.929 - Info: Reading package lists... 80%
+11:13:18.929 - Info: 
+11:13:18.929 - Info: Reading package lists... 80%
+11:13:18.929 - Info: 
+11:13:18.929 - Info: Reading package lists... 80%
+11:13:18.929 - Info: 
+11:13:18.929 - Info: Reading package lists... 80%
+11:13:18.930 - Info: 
+11:13:18.931 - Info: Reading package lists... 80%
+11:13:18.931 - Info: 
+11:13:18.931 - Info: Reading package lists... 80%
+11:13:18.960 - Info: 
+11:13:18.960 - Info: Reading package lists... 83%
+11:13:18.960 - Info: 
+11:13:18.960 - Info: Reading package lists... 83%
+11:13:18.976 - Info: 
+11:13:18.976 - Info: Reading package lists... 84%
+11:13:18.976 - Info: 
+11:13:18.976 - Info: Reading package lists... 84%
+11:13:19.018 - Info: 
+11:13:19.018 - Info: Reading package lists... 88%
+11:13:19.018 - Info: 
+11:13:19.018 - Info: Reading package lists... 88%
+11:13:19.035 - Info: 
+11:13:19.035 - Info: Reading package lists... 90%
+11:13:19.035 - Info: 
+11:13:19.035 - Info: Reading package lists... 90%
+11:13:19.096 - Info: 
+11:13:19.096 - Info: Reading package lists... 95%
+11:13:19.096 - Info: 
+11:13:19.096 - Info: Reading package lists... 95%
+11:13:19.127 - Info: 
+11:13:19.127 - Info: Reading package lists... 98%
+11:13:19.127 - Info: 
+11:13:19.127 - Info: Reading package lists... 98%
+11:13:19.130 - Info: 
+11:13:19.130 - Info: Reading package lists... 98%
+11:13:19.130 - Info: 
+11:13:19.130 - Info: Reading package lists... 98%
+11:13:19.216 - Info: 
+11:13:19.216 - Info: Reading package lists... 98%
+11:13:19.216 - Info: 
+11:13:19.216 - Info: Reading package lists... 98%
+11:13:19.227 - Info: 
+11:13:19.227 - Info: Reading package lists... 99%
+11:13:19.339 - Info: 
+11:13:19.339 - Info: Reading package lists... Done
+11:13:19.339 - Info: 
+11:13:19.339 - Info: 
+11:13:19.907 - Info: *begin sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/OpenCV-4.8.0-3-g6ef37b4-aarch64-dev.deb, 5
+11:13:19.907 - Info: 
+11:13:20.079 - Info: 
+11:13:20.079 - Info: Reading package lists... 0%
+11:13:20.193 - Info: 
+11:13:20.193 - Info: Reading package lists... 0%
+11:13:20.204 - Info: 
+11:13:20.204 - Info: Reading package lists... Done
+11:13:20.204 - Info: 
+11:13:20.204 - Info: 
+11:13:20.227 - Info: 
+11:13:20.227 - Info: Building dependency tree... 0%
+11:13:20.227 - Info: 
+11:13:20.227 - Info: Building dependency tree... 0%
+11:13:20.230 - Info: 
+11:13:20.230 - Info: Building dependency tree... 0%
+11:13:20.451 - Info: 
+11:13:20.451 - Info: Building dependency tree... 50%
+11:13:20.451 - Info: 
+11:13:20.452 - Info: Building dependency tree... 50%
+11:13:20.942 - Info: 
+11:13:20.942 - Info: Building dependency tree... 86%
+11:13:21.112 - Info: 
+11:13:21.112 - Info: Building dependency tree... Done
+11:13:21.112 - Info: 
+11:13:21.112 - Info: 
+11:13:21.112 - Info: 
+11:13:21.112 - Info: Reading state information... 0% 
+11:13:21.112 - Info: 
+11:13:21.112 - Info: Reading state information... 0%
+11:13:21.117 - Info: 
+11:13:21.117 - Info: Reading state information... Done
+11:13:21.117 - Info: 
+11:13:21.117 - Info: 
+11:13:21.250 - Info: Note, selecting 'libopencv-dev' instead of '/opt/nvidia/deb_repos/OpenCV-4.8.0-3-g6ef37b4-aarch64-dev.deb'
+11:13:21.250 - Info: 
+11:13:22.808 - Info: The following packages will be REMOVED:
+11:13:22.808 - Info: 
+11:13:22.812 - Info:   libopencv-core-dev libopencv-dnn-dev libopencv-flann-dev libopencv-imgcodecs-dev libopencv-imgproc-dev libopencv-ml-dev libopencv-photo-dev libopencv-shape-dev libopencv-video-dev libopencv-viz-dev
+11:13:22.812 - Info: 
+11:13:22.816 - Info: The following NEW packages will be installed:
+11:13:22.816 - Info: 
+11:13:22.821 - Info:   libopencv-dev
+11:13:22.821 - Info: 
+11:13:22.893 - Info: 0 upgraded, 1 newly installed, 10 to remove and 285 not upgraded.
+11:13:22.893 - Info: 
+11:13:22.898 - Info: Need to get 1,483 kB of archives.
+11:13:22.898 - Info: 
+11:13:22.898 - Info: After this operation, 35.7 MB disk space will be freed.
+11:13:22.898 - Info: 
+11:13:22.910 - Info: 
+11:13:22.977 - Info: 0% [Working]
+11:13:22.977 - Info:             
+11:13:22.977 - Info: Get:1 https://repo.download.nvidia.com/jetson/common r39.2/main arm64 libopencv-dev arm64 4.8.0-3-g6ef37b4 [1,483 kB]
+11:13:22.977 - Info: 
+11:13:22.977 - Info: 
+11:13:23.040 - Info: 1% [1 libopencv-dev 15.7 kB/1,483 kB 1%]
+11:13:23.040 - Info:                                         
+11:13:23.040 - Info: 100% [Working]
+11:13:23.040 - Info:               
+11:13:23.040 - Info: Fetched 1,483 kB in 0s (10.5 MB/s)
+11:13:23.040 - Info: 
+11:13:24.566 - Info: (Reading database ... 
+11:13:24.580 - Info: (Reading database ... 5%
+11:13:24.580 - Info: (Reading database ... 10%
+11:13:24.580 - Info: (Reading database ... 15%
+11:13:24.580 - Info: (Reading database ... 20%
+11:13:24.580 - Info: (Reading database ... 25%
+11:13:24.580 - Info: (Reading database ... 30%
+11:13:24.580 - Info: (Reading database ... 35%
+11:13:24.580 - Info: (Reading database ... 40%
+11:13:24.580 - Info: (Reading database ... 45%
+11:13:24.580 - Info: (Reading database ... 50%
+11:13:24.586 - Info: (Reading database ... 55%
+11:13:24.603 - Info: (Reading database ... 60%
+11:13:24.614 - Info: (Reading database ... 65%
+11:13:24.623 - Info: (Reading database ... 70%
+11:13:24.641 - Info: (Reading database ... 75%
+11:13:24.652 - Info: (Reading database ... 80%
+11:13:24.671 - Info: (Reading database ... 85%
+11:13:24.686 - Info: (Reading database ... 90%
+11:13:24.733 - Info: (Reading database ... 95%
+11:13:24.773 - Info: (Reading database ... 100%
+11:13:24.773 - Info: (Reading database ... 190490 files and directories currently installed.)
+11:13:24.773 - Info: 
+11:13:24.791 - Info: Removing libopencv-viz-dev:arm64 (4.6.0+dfsg-13.1ubuntu1) ...
+11:13:24.791 - Info: 
+11:13:24.929 - Info: Removing libopencv-ml-dev:arm64 (4.6.0+dfsg-13.1ubuntu1) ...
+11:13:24.929 - Info: 
+11:13:25.086 - Info: Removing libopencv-dnn-dev:arm64 (4.6.0+dfsg-13.1ubuntu1) ...
+11:13:25.086 - Info: 
+11:13:25.227 - Info: Removing libopencv-flann-dev:arm64 (4.6.0+dfsg-13.1ubuntu1) ...
+11:13:25.227 - Info: 
+11:13:25.379 - Info: Removing libopencv-imgcodecs-dev:arm64 (4.6.0+dfsg-13.1ubuntu1) ...
+11:13:25.379 - Info: 
+11:13:25.518 - Info: Removing libopencv-shape-dev:arm64 (4.6.0+dfsg-13.1ubuntu1) ...
+11:13:25.518 - Info: 
+11:13:25.652 - Info: Removing libopencv-video-dev:arm64 (4.6.0+dfsg-13.1ubuntu1) ...
+11:13:25.652 - Info: 
+11:13:25.789 - Info: Removing libopencv-photo-dev:arm64 (4.6.0+dfsg-13.1ubuntu1) ...
+11:13:25.789 - Info: 
+11:13:25.929 - Info: Removing libopencv-imgproc-dev:arm64 (4.6.0+dfsg-13.1ubuntu1) ...
+11:13:25.929 - Info: 
+11:13:26.068 - Info: Removing libopencv-core-dev:arm64 (4.6.0+dfsg-13.1ubuntu1) ...
+11:13:26.068 - Info: 
+11:13:26.338 - Info: Selecting previously unselected package libopencv-dev.
+11:13:26.338 - Info: 
+11:13:26.338 - Info: (Reading database ... 
+11:13:26.355 - Info: (Reading database ... 5%
+11:13:26.355 - Info: (Reading database ... 10%
+11:13:26.355 - Info: (Reading database ... 15%
+11:13:26.355 - Info: (Reading database ... 20%
+11:13:26.355 - Info: (Reading database ... 25%
+11:13:26.355 - Info: (Reading database ... 30%
+11:13:26.355 - Info: (Reading database ... 35%
+11:13:26.355 - Info: (Reading database ... 40%
+11:13:26.355 - Info: (Reading database ... 45%
+11:13:26.355 - Info: (Reading database ... 50%
+11:13:26.361 - Info: (Reading database ... 55%
+11:13:26.382 - Info: (Reading database ... 60%
+11:13:26.394 - Info: (Reading database ... 65%
+11:13:26.405 - Info: (Reading database ... 70%
+11:13:26.422 - Info: (Reading database ... 75%
+11:13:26.432 - Info: (Reading database ... 80%
+11:13:26.449 - Info: (Reading database ... 85%
+11:13:26.467 - Info: (Reading database ... 90%
+11:13:26.512 - Info: (Reading database ... 95%
+11:13:26.551 - Info: (Reading database ... 100%
+11:13:26.551 - Info: (Reading database ... 190183 files and directories currently installed.)
+11:13:26.551 - Info: 
+11:13:26.568 - Info: Preparing to unpack .../libopencv-dev_4.8.0-3-g6ef37b4_arm64.deb ...
+11:13:26.568 - Info: 
+11:13:26.574 - Info: Unpacking libopencv-dev (4.8.0-3-g6ef37b4) ...
+11:13:26.574 - Info: 
+11:13:27.100 - Info: Setting up libopencv-dev (4.8.0-3-g6ef37b4) ...
+11:13:27.100 - Info: 
+11:13:37.967 - Info: change working directory to /tmp11:13:37.967 - Info: exec_command: ssh jetson@192.168.55.1 "dpkg-query -W -f='\${db:Status-abbrev} \${Version}' libopencv-dev"11:13:38.396 - Info: [ Package Install Finished Successfully ]11:13:38.396 - Info: [ Package Install Started ]11:13:38.396 - Info: target deb installer start to install11:13:38.396 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+sudo mkdir -p /opt/nvidia/deb_repos
+sudo chmod 777 /opt/nvidia/deb_repos
+sudo rm -f /opt/nvidia/deb_repos/OpenCV-4.8.0-3-g6ef37b4-aarch64-licenses.deb
+**********************11:13:39.833 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+
+exec 3>&1
+exec 1>&2
+exec 2>&3
+function safe_apt_install {
+    export DEBIAN_FRONTEND=noninteractive
+    echo "*begin $1, $2"
+    tmp_log=/tmp/sdkm_apt_install_log.ckw.txt
+    sudo rm -f $tmp_log
+    set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+    MAX_RETRY=3
+    TIMES=1
+    while [ ${CMD_STATUS} -ne 0 ]; do
+        cat $tmp_log > /dev/stderr
+        if [ $TIMES -gt $MAX_RETRY ]; then
+            echo "Unhandled error when running $1: `tr '\n' '; ' <$tmp_log`" 1>&2; exit 1
+        fi
+        if grep -q -e "is locked by another process" -e "E: Could not get lock /var/" -e "Could not open lock" $tmp_log; then
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting $2 seconds for apt to be available"; sleep ${2}
+        elif grep -q -e "apt --fix-broken install" $tmp_log; then
+            echo "safe apt install failed, need to run apt --fix-broken install"
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; sudo apt-get -f -y --allow-downgrades install 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting 5 seconds for apt"; sleep 5
+        else
+            echo "safe apt install failed: $1, exit code: $CMD_STATUS, retry number: $TIMES"
+            echo "will sleep $[ $TIMES*10 ] seconds before next attempt"
+            sleep $[ $TIMES*10 ]
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+        fi
+    done
+    if [ $CMD_STATUS -eq 0 ] && [ $TIMES -ne 1 ]; then
+        echo "safe apt install succeed. retry number: $TIMES."
+    fi
+}
+safe_apt_install "sudo apt-get -y update" 5
+sleep 0.5
+safe_apt_install "sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/OpenCV-4.8.0-3-g6ef37b4-aarch64-licenses.deb" 5
+sleep 5
+sudo rm -f /opt/nvidia/deb_repos/OpenCV-4.8.0-3-g6ef37b4-aarch64-licenses.deb
+**********************11:13:40.596 - Info: *begin sudo apt-get -y update, 5
+11:13:40.596 - Info: 
+11:13:40.902 - Info: 
+11:13:40.968 - Info: 0% [Working]
+11:13:40.968 - Info:             
+11:13:40.968 - Info: Hit:1 https://download.docker.com/linux/ubuntu noble InRelease
+11:13:40.968 - Info: 
+11:13:40.968 - Info: 
+11:13:41.005 - Info: 0% [Connected to repo.download.nvidia.com (23.205.151.162)] [Connecting to ports.ubuntu.com (91.189.91.104)]
+11:13:41.006 - Info:                                                                                                             
+11:13:41.006 - Info: Hit:2 https://repo.download.nvidia.com/jetson/common r39.2 InRelease
+11:13:41.006 - Info: 
+11:13:41.006 - Info: 
+11:13:41.065 - Info: 0% [Connecting to repo.download.nvidia.com (23.205.151.162)] [Connecting to ports.ubuntu.com (91.189.91.104)]
+11:13:41.065 - Info:                                                                                                              
+11:13:41.065 - Info: Hit:3 https://repo.download.nvidia.com/jetson/som r39.2 InRelease
+11:13:41.065 - Info: 
+11:13:41.065 - Info: 
+11:13:41.065 - Info:                                                                                                              
+11:13:41.102 - Info: 0% [Connecting to ports.ubuntu.com (91.189.91.104)]
+11:13:41.154 - Info: 0% [Connected to repo.download.nvidia.com (23.205.151.162)] [Connecting to ports.ubuntu.com (91.189.91.104)]
+11:13:41.154 - Info:                                                                                                             
+11:13:41.154 - Info: Hit:4 https://repo.download.nvidia.com/jetson/ffmpeg r39.2 InRelease
+11:13:41.154 - Info: 
+11:13:41.154 - Info: 
+11:13:41.154 - Info:                                                                                                             
+11:13:41.299 - Info: 0% [Waiting for headers]
+11:13:41.370 - Info:                         
+11:13:41.370 - Info: Hit:5 http://ports.ubuntu.com/ubuntu-ports noble InRelease
+11:13:41.370 - Info: 
+11:13:41.370 - Info: 
+11:13:41.370 - Info:                         
+11:13:41.466 - Info: 0% [Working]
+11:13:41.599 - Info: 0% [Waiting for headers]
+11:13:41.599 - Info:                         
+11:13:41.599 - Info: Hit:6 http://ports.ubuntu.com/ubuntu-ports noble-updates InRelease
+11:13:41.599 - Info: 
+11:13:41.599 - Info: 
+11:13:41.599 - Info:                         
+11:13:41.646 - Info: 0% [Working]
+11:13:41.776 - Info: 0% [Waiting for headers]
+11:13:41.829 - Info:                         
+11:13:41.829 - Info: Hit:7 http://ports.ubuntu.com/ubuntu-ports noble-backports InRelease
+11:13:41.829 - Info: 
+11:13:41.829 - Info: 
+11:13:41.829 - Info:                         
+11:13:41.889 - Info: 0% [Working]
+11:13:42.006 - Info: 0% [Waiting for headers]
+11:13:42.058 - Info:                         
+11:13:42.058 - Info: Hit:8 http://ports.ubuntu.com/ubuntu-ports noble-security InRelease
+11:13:42.058 - Info: 
+11:13:42.058 - Info: 
+11:13:42.058 - Info:                         
+11:13:42.174 - Info: 0% [Working]
+11:13:42.174 - Info: 20% [Working]
+11:13:42.174 - Info:              
+11:13:42.421 - Info: 
+11:13:42.421 - Info: Reading package lists... 0%
+11:13:42.437 - Info: 
+11:13:42.437 - Info: Reading package lists... 0%
+11:13:42.442 - Info: 
+11:13:42.442 - Info: Reading package lists... 0%
+11:13:42.442 - Info: 
+11:13:42.442 - Info: Reading package lists... 0%
+11:13:42.445 - Info: 
+11:13:42.445 - Info: Reading package lists... 0%
+11:13:42.445 - Info: 
+11:13:42.445 - Info: Reading package lists... 0%
+11:13:42.447 - Info: 
+11:13:42.447 - Info: Reading package lists... 0%
+11:13:42.447 - Info: 
+11:13:42.447 - Info: Reading package lists... 0%
+11:13:42.449 - Info: 
+11:13:42.449 - Info: Reading package lists... 0%
+11:13:42.449 - Info: 
+11:13:42.449 - Info: Reading package lists... 0%
+11:13:42.454 - Info: 
+11:13:42.454 - Info: Reading package lists... 0%
+11:13:42.535 - Info: 
+11:13:42.535 - Info: Reading package lists... 3%
+11:13:42.535 - Info: 
+11:13:42.535 - Info: Reading package lists... 3%
+11:13:42.547 - Info: 
+11:13:42.547 - Info: Reading package lists... 5%
+11:13:42.547 - Info: 
+11:13:42.547 - Info: Reading package lists... 5%
+11:13:43.168 - Info: 
+11:13:43.168 - Info: Reading package lists... 26%
+11:13:43.695 - Info: 
+11:13:43.695 - Info: Reading package lists... 41%
+11:13:43.695 - Info: 
+11:13:43.695 - Info: Reading package lists... 41%
+11:13:43.861 - Info: 
+11:13:43.862 - Info: Reading package lists... 58%
+11:13:43.862 - Info: 
+11:13:43.862 - Info: Reading package lists... 58%
+11:13:43.867 - Info: 
+11:13:43.867 - Info: Reading package lists... 58%
+11:13:43.867 - Info: 
+11:13:43.867 - Info: Reading package lists... 58%
+11:13:43.867 - Info: 
+11:13:43.867 - Info: Reading package lists... 58%
+11:13:43.868 - Info: 
+11:13:43.868 - Info: Reading package lists... 58%
+11:13:43.868 - Info: 
+11:13:43.868 - Info: Reading package lists... 58%
+11:13:43.888 - Info: 
+11:13:43.888 - Info: Reading package lists... 59%
+11:13:43.888 - Info: 
+11:13:43.888 - Info: Reading package lists... 59%
+11:13:43.892 - Info: 
+11:13:43.892 - Info: Reading package lists... 59%
+11:13:43.892 - Info: 
+11:13:43.892 - Info: Reading package lists... 59%
+11:13:43.988 - Info: 
+11:13:43.988 - Info: Reading package lists... 62%
+11:13:43.988 - Info: 
+11:13:43.988 - Info: Reading package lists... 62%
+11:13:44.006 - Info: 
+11:13:44.006 - Info: Reading package lists... 64%
+11:13:44.006 - Info: 
+11:13:44.006 - Info: Reading package lists... 64%
+11:13:44.150 - Info: 
+11:13:44.150 - Info: Reading package lists... 69%
+11:13:44.150 - Info: 
+11:13:44.150 - Info: Reading package lists... 69%
+11:13:44.174 - Info: 
+11:13:44.174 - Info: Reading package lists... 71%
+11:13:44.174 - Info: 
+11:13:44.174 - Info: Reading package lists... 71%
+11:13:44.301 - Info: 
+11:13:44.301 - Info: Reading package lists... 77%
+11:13:44.301 - Info: 
+11:13:44.301 - Info: Reading package lists... 77%
+11:13:44.335 - Info: 
+11:13:44.335 - Info: Reading package lists... 80%
+11:13:44.335 - Info: 
+11:13:44.335 - Info: Reading package lists... 80%
+11:13:44.341 - Info: 
+11:13:44.341 - Info: Reading package lists... 80%
+11:13:44.341 - Info: 
+11:13:44.341 - Info: Reading package lists... 80%
+11:13:44.342 - Info: 
+11:13:44.342 - Info: Reading package lists... 80%
+11:13:44.342 - Info: 
+11:13:44.342 - Info: Reading package lists... 80%
+11:13:44.347 - Info: 
+11:13:44.347 - Info: Reading package lists... 80%
+11:13:44.347 - Info: 
+11:13:44.347 - Info: Reading package lists... 80%
+11:13:44.347 - Info: 
+11:13:44.347 - Info: Reading package lists... 80%
+11:13:44.347 - Info: 
+11:13:44.347 - Info: Reading package lists... 80%
+11:13:44.351 - Info: 
+11:13:44.351 - Info: Reading package lists... 80%
+11:13:44.351 - Info: 
+11:13:44.351 - Info: Reading package lists... 80%
+11:13:44.352 - Info: 
+11:13:44.352 - Info: Reading package lists... 81%
+11:13:44.352 - Info: 
+11:13:44.352 - Info: Reading package lists... 81%
+11:13:44.352 - Info: 
+11:13:44.352 - Info: Reading package lists... 81%
+11:13:44.352 - Info: 
+11:13:44.352 - Info: Reading package lists... 81%
+11:13:44.353 - Info: 
+11:13:44.353 - Info: Reading package lists... 81%
+11:13:44.353 - Info: 
+11:13:44.353 - Info: Reading package lists... 81%
+11:13:44.384 - Info: 
+11:13:44.384 - Info: Reading package lists... 83%
+11:13:44.384 - Info: 
+11:13:44.384 - Info: Reading package lists... 83%
+11:13:44.399 - Info: 
+11:13:44.399 - Info: Reading package lists... 84%
+11:13:44.399 - Info: 
+11:13:44.399 - Info: Reading package lists... 84%
+11:13:44.441 - Info: 
+11:13:44.441 - Info: Reading package lists... 88%
+11:13:44.441 - Info: 
+11:13:44.441 - Info: Reading package lists... 88%
+11:13:44.458 - Info: 
+11:13:44.458 - Info: Reading package lists... 90%
+11:13:44.458 - Info: 
+11:13:44.458 - Info: Reading package lists... 90%
+11:13:44.519 - Info: 
+11:13:44.519 - Info: Reading package lists... 95%
+11:13:44.519 - Info: 
+11:13:44.519 - Info: Reading package lists... 95%
+11:13:44.550 - Info: 
+11:13:44.550 - Info: Reading package lists... 98%
+11:13:44.550 - Info: 
+11:13:44.550 - Info: Reading package lists... 98%
+11:13:44.553 - Info: 
+11:13:44.553 - Info: Reading package lists... 98%
+11:13:44.553 - Info: 
+11:13:44.553 - Info: Reading package lists... 98%
+11:13:44.636 - Info: 
+11:13:44.636 - Info: Reading package lists... 98%
+11:13:44.637 - Info: 
+11:13:44.637 - Info: Reading package lists... 98%
+11:13:44.648 - Info: 
+11:13:44.648 - Info: Reading package lists... 99%
+11:13:44.761 - Info: 
+11:13:44.761 - Info: Reading package lists... Done
+11:13:44.761 - Info: 
+11:13:44.761 - Info: 
+11:13:45.337 - Info: *begin sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/OpenCV-4.8.0-3-g6ef37b4-aarch64-licenses.deb, 5
+11:13:45.337 - Info: 
+11:13:45.501 - Info: 
+11:13:45.501 - Info: Reading package lists... 0%
+11:13:45.606 - Info: 
+11:13:45.606 - Info: Reading package lists... 0%
+11:13:45.617 - Info: 
+11:13:45.617 - Info: Reading package lists... Done
+11:13:45.617 - Info: 
+11:13:45.617 - Info: 
+11:13:45.642 - Info: 
+11:13:45.642 - Info: Building dependency tree... 0%
+11:13:45.642 - Info: 
+11:13:45.642 - Info: Building dependency tree... 0%
+11:13:45.643 - Info: 
+11:13:45.643 - Info: Building dependency tree... 0%
+11:13:45.865 - Info: 
+11:13:45.865 - Info: Building dependency tree... 50%
+11:13:45.865 - Info: 
+11:13:45.865 - Info: Building dependency tree... 50%
+11:13:46.351 - Info: 
+11:13:46.351 - Info: Building dependency tree... 86%
+11:13:46.528 - Info: 
+11:13:46.528 - Info: Building dependency tree... Done
+11:13:46.528 - Info: 
+11:13:46.528 - Info: 
+11:13:46.528 - Info: 
+11:13:46.528 - Info: Reading state information... 0% 
+11:13:46.528 - Info: 
+11:13:46.528 - Info: Reading state information... 0%
+11:13:46.531 - Info: 
+11:13:46.532 - Info: Reading state information... Done
+11:13:46.532 - Info: 
+11:13:46.532 - Info: 
+11:13:46.668 - Info: Note, selecting 'opencv-licenses' instead of '/opt/nvidia/deb_repos/OpenCV-4.8.0-3-g6ef37b4-aarch64-licenses.deb'
+11:13:46.668 - Info: 
+11:13:48.221 - Info: The following NEW packages will be installed:
+11:13:48.221 - Info: 
+11:13:48.223 - Info:   opencv-licenses
+11:13:48.223 - Info: 
+11:13:48.293 - Info: 0 upgraded, 1 newly installed, 0 to remove and 285 not upgraded.
+11:13:48.293 - Info: 
+11:13:48.299 - Info: Need to get 15.1 kB of archives.
+11:13:48.299 - Info: 
+11:13:48.299 - Info: After this operation, 70.7 kB of additional disk space will be used.
+11:13:48.299 - Info: 
+11:13:48.312 - Info: 
+11:13:48.412 - Info: 0% [Working]
+11:13:48.412 - Info:             
+11:13:48.412 - Info: Get:1 https://repo.download.nvidia.com/jetson/common r39.2/main arm64 opencv-licenses arm64 4.8.0-3-g6ef37b4 [15.1 kB]
+11:13:48.412 - Info: 
+11:13:48.412 - Info: 
+11:13:48.412 - Info: 80% [1 opencv-licenses 15.1 kB/15.1 kB 100%]
+11:13:48.412 - Info:                                             
+11:13:48.412 - Info: 100% [Working]
+11:13:48.412 - Info:               
+11:13:48.412 - Info: Fetched 15.1 kB in 0s (133 kB/s)
+11:13:48.412 - Info: 
+11:13:49.842 - Info: Selecting previously unselected package opencv-licenses.
+11:13:49.842 - Info: 
+11:13:49.842 - Info: (Reading database ... 
+11:13:49.858 - Info: (Reading database ... 5%
+11:13:49.858 - Info: (Reading database ... 10%
+11:13:49.858 - Info: (Reading database ... 15%
+11:13:49.858 - Info: (Reading database ... 20%
+11:13:49.858 - Info: (Reading database ... 25%
+11:13:49.858 - Info: (Reading database ... 30%
+11:13:49.858 - Info: (Reading database ... 35%
+11:13:49.858 - Info: (Reading database ... 40%
+11:13:49.858 - Info: (Reading database ... 45%
+11:13:49.858 - Info: (Reading database ... 50%
+11:13:49.864 - Info: (Reading database ... 55%
+11:13:49.881 - Info: (Reading database ... 60%
+11:13:49.891 - Info: (Reading database ... 65%
+11:13:49.901 - Info: (Reading database ... 70%
+11:13:49.917 - Info: (Reading database ... 75%
+11:13:49.929 - Info: (Reading database ... 80%
+11:13:49.944 - Info: (Reading database ... 85%
+11:13:49.963 - Info: (Reading database ... 90%
+11:13:50.007 - Info: (Reading database ... 95%
+11:13:50.046 - Info: (Reading database ... 100%
+11:13:50.046 - Info: (Reading database ... 190610 files and directories currently installed.)
+11:13:50.046 - Info: 
+11:13:50.064 - Info: Preparing to unpack .../opencv-licenses_4.8.0-3-g6ef37b4_arm64.deb ...
+11:13:50.064 - Info: 
+11:13:50.070 - Info: Unpacking opencv-licenses (4.8.0-3-g6ef37b4) ...
+11:13:50.070 - Info: 
+11:13:50.293 - Info: Setting up opencv-licenses (4.8.0-3-g6ef37b4) ...
+11:13:50.293 - Info: 
+11:14:01.163 - Info: change working directory to /tmp11:14:01.163 - Info: exec_command: ssh jetson@192.168.55.1 "dpkg-query -W -f='\${db:Status-abbrev} \${Version}' opencv-licenses"11:14:01.594 - Info: [ Package Install Finished Successfully ]11:14:01.594 - Info: [ Package Install Started ]11:14:01.594 - Info: target deb installer start to install11:14:01.595 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+sudo mkdir -p /opt/nvidia/deb_repos
+sudo chmod 777 /opt/nvidia/deb_repos
+sudo rm -f /opt/nvidia/deb_repos/OpenCV-4.8.0-3-g6ef37b4-aarch64-python.deb
+**********************11:14:03.179 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+
+exec 3>&1
+exec 1>&2
+exec 2>&3
+function safe_apt_install {
+    export DEBIAN_FRONTEND=noninteractive
+    echo "*begin $1, $2"
+    tmp_log=/tmp/sdkm_apt_install_log.ckw.txt
+    sudo rm -f $tmp_log
+    set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+    MAX_RETRY=3
+    TIMES=1
+    while [ ${CMD_STATUS} -ne 0 ]; do
+        cat $tmp_log > /dev/stderr
+        if [ $TIMES -gt $MAX_RETRY ]; then
+            echo "Unhandled error when running $1: `tr '\n' '; ' <$tmp_log`" 1>&2; exit 1
+        fi
+        if grep -q -e "is locked by another process" -e "E: Could not get lock /var/" -e "Could not open lock" $tmp_log; then
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting $2 seconds for apt to be available"; sleep ${2}
+        elif grep -q -e "apt --fix-broken install" $tmp_log; then
+            echo "safe apt install failed, need to run apt --fix-broken install"
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; sudo apt-get -f -y --allow-downgrades install 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting 5 seconds for apt"; sleep 5
+        else
+            echo "safe apt install failed: $1, exit code: $CMD_STATUS, retry number: $TIMES"
+            echo "will sleep $[ $TIMES*10 ] seconds before next attempt"
+            sleep $[ $TIMES*10 ]
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+        fi
+    done
+    if [ $CMD_STATUS -eq 0 ] && [ $TIMES -ne 1 ]; then
+        echo "safe apt install succeed. retry number: $TIMES."
+    fi
+}
+safe_apt_install "sudo apt-get -y update" 5
+sleep 0.5
+safe_apt_install "sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/OpenCV-4.8.0-3-g6ef37b4-aarch64-python.deb" 5
+sleep 5
+sudo rm -f /opt/nvidia/deb_repos/OpenCV-4.8.0-3-g6ef37b4-aarch64-python.deb
+**********************11:14:03.931 - Info: *begin sudo apt-get -y update, 5
+11:14:03.932 - Info: 
+11:14:04.223 - Info: 
+11:14:04.284 - Info: 0% [Working]
+11:14:04.284 - Info:             
+11:14:04.284 - Info: Hit:1 https://download.docker.com/linux/ubuntu noble InRelease
+11:14:04.284 - Info: 
+11:14:04.284 - Info: 
+11:14:04.323 - Info: 0% [Connected to repo.download.nvidia.com (23.205.151.185)] [Connecting to ports.ubuntu.com]
+11:14:04.324 - Info:                                                                                             
+11:14:04.324 - Info: Hit:2 https://repo.download.nvidia.com/jetson/common r39.2 InRelease
+11:14:04.324 - Info: 
+11:14:04.324 - Info: 
+11:14:04.324 - Info:                                                                                             
+11:14:04.379 - Info: 0% [Connecting to ports.ubuntu.com]
+11:14:04.379 - Info:                                    
+11:14:04.379 - Info: Hit:3 https://repo.download.nvidia.com/jetson/som r39.2 InRelease
+11:14:04.379 - Info: 
+11:14:04.379 - Info: 
+11:14:04.404 - Info: 0% [Connecting to ports.ubuntu.com]
+11:14:04.468 - Info: 0% [Connected to repo.download.nvidia.com (23.205.151.185)] [Connecting to ports.ubuntu.com]
+11:14:04.468 - Info:                                                                                             
+11:14:04.468 - Info: Hit:4 https://repo.download.nvidia.com/jetson/ffmpeg r39.2 InRelease
+11:14:04.468 - Info: 
+11:14:04.468 - Info: 
+11:14:04.468 - Info:                                                                                             
+11:14:04.586 - Info: 0% [Connecting to ports.ubuntu.com]
+11:14:04.750 - Info: 0% [Connecting to ports.ubuntu.com (91.189.91.103)]
+11:14:04.750 - Info:                                                    
+11:14:04.918 - Info: 0% [Waiting for headers]
+11:14:04.980 - Info:                         
+11:14:04.980 - Info: Hit:5 http://ports.ubuntu.com/ubuntu-ports noble InRelease
+11:14:04.980 - Info: 
+11:14:04.980 - Info: 
+11:14:04.980 - Info:                         
+11:14:05.107 - Info: 0% [Working]
+11:14:05.213 - Info: 0% [Waiting for headers]
+11:14:05.213 - Info:                         
+11:14:05.213 - Info: Hit:6 http://ports.ubuntu.com/ubuntu-ports noble-updates InRelease
+11:14:05.213 - Info: 
+11:14:05.213 - Info: 
+11:14:05.213 - Info:                         
+11:14:05.334 - Info: 0% [Working]
+11:14:05.446 - Info: 0% [Waiting for headers]
+11:14:05.446 - Info:                         
+11:14:05.446 - Info: Hit:7 http://ports.ubuntu.com/ubuntu-ports noble-backports InRelease
+11:14:05.446 - Info: 
+11:14:05.446 - Info: 
+11:14:05.446 - Info:                         
+11:14:05.565 - Info: 0% [Working]
+11:14:05.679 - Info: 0% [Waiting for headers]
+11:14:05.679 - Info:                         
+11:14:05.679 - Info: Hit:8 http://ports.ubuntu.com/ubuntu-ports noble-security InRelease
+11:14:05.679 - Info: 
+11:14:05.679 - Info: 
+11:14:05.679 - Info:                         
+11:14:05.795 - Info: 0% [Working]
+11:14:05.795 - Info: 20% [Working]
+11:14:05.795 - Info:              
+11:14:06.030 - Info: 
+11:14:06.030 - Info: Reading package lists... 0%
+11:14:06.048 - Info: 
+11:14:06.048 - Info: Reading package lists... 0%
+11:14:06.052 - Info: 
+11:14:06.052 - Info: Reading package lists... 0%
+11:14:06.052 - Info: 
+11:14:06.052 - Info: Reading package lists... 0%
+11:14:06.055 - Info: 
+11:14:06.055 - Info: Reading package lists... 0%
+11:14:06.057 - Info: 
+11:14:06.057 - Info: Reading package lists... 0%
+11:14:06.057 - Info: 
+11:14:06.057 - Info: Reading package lists... 0%
+11:14:06.057 - Info: 
+11:14:06.057 - Info: Reading package lists... 0%
+11:14:06.059 - Info: 
+11:14:06.059 - Info: Reading package lists... 0%
+11:14:06.059 - Info: 
+11:14:06.059 - Info: Reading package lists... 0%
+11:14:06.063 - Info: 
+11:14:06.063 - Info: Reading package lists... 0%
+11:14:06.133 - Info: 
+11:14:06.133 - Info: Reading package lists... 3%
+11:14:06.133 - Info: 
+11:14:06.133 - Info: Reading package lists... 3%
+11:14:06.144 - Info: 
+11:14:06.145 - Info: Reading package lists... 5%
+11:14:06.145 - Info: 
+11:14:06.145 - Info: Reading package lists... 5%
+11:14:06.776 - Info: 
+11:14:06.777 - Info: Reading package lists... 27%
+11:14:07.240 - Info: 
+11:14:07.240 - Info: Reading package lists... 41%
+11:14:07.240 - Info: 
+11:14:07.240 - Info: Reading package lists... 41%
+11:14:07.401 - Info: 
+11:14:07.402 - Info: Reading package lists... 58%
+11:14:07.402 - Info: 
+11:14:07.402 - Info: Reading package lists... 58%
+11:14:07.407 - Info: 
+11:14:07.407 - Info: Reading package lists... 58%
+11:14:07.407 - Info: 
+11:14:07.407 - Info: Reading package lists... 58%
+11:14:07.408 - Info: 
+11:14:07.408 - Info: Reading package lists... 58%
+11:14:07.408 - Info: 
+11:14:07.408 - Info: Reading package lists... 58%
+11:14:07.428 - Info: 
+11:14:07.428 - Info: Reading package lists... 59%
+11:14:07.428 - Info: 
+11:14:07.428 - Info: Reading package lists... 59%
+11:14:07.431 - Info: 
+11:14:07.431 - Info: Reading package lists... 59%
+11:14:07.431 - Info: 
+11:14:07.431 - Info: Reading package lists... 59%
+11:14:07.493 - Info: 
+11:14:07.493 - Info: Reading package lists... 61%
+11:14:07.525 - Info: 
+11:14:07.525 - Info: Reading package lists... 62%
+11:14:07.525 - Info: 
+11:14:07.525 - Info: Reading package lists... 62%
+11:14:07.544 - Info: 
+11:14:07.544 - Info: Reading package lists... 64%
+11:14:07.544 - Info: 
+11:14:07.544 - Info: Reading package lists... 64%
+11:14:07.687 - Info: 
+11:14:07.687 - Info: Reading package lists... 69%
+11:14:07.687 - Info: 
+11:14:07.687 - Info: Reading package lists... 69%
+11:14:07.710 - Info: 
+11:14:07.711 - Info: Reading package lists... 71%
+11:14:07.711 - Info: 
+11:14:07.711 - Info: Reading package lists... 71%
+11:14:07.837 - Info: 
+11:14:07.837 - Info: Reading package lists... 77%
+11:14:07.837 - Info: 
+11:14:07.837 - Info: Reading package lists... 77%
+11:14:07.868 - Info: 
+11:14:07.868 - Info: Reading package lists... 80%
+11:14:07.868 - Info: 
+11:14:07.868 - Info: Reading package lists... 80%
+11:14:07.873 - Info: 
+11:14:07.873 - Info: Reading package lists... 80%
+11:14:07.873 - Info: 
+11:14:07.873 - Info: Reading package lists... 80%
+11:14:07.878 - Info: 
+11:14:07.878 - Info: Reading package lists... 80%
+11:14:07.878 - Info: 
+11:14:07.878 - Info: Reading package lists... 80%
+11:14:07.882 - Info: 
+11:14:07.882 - Info: Reading package lists... 80%
+11:14:07.882 - Info: 
+11:14:07.882 - Info: Reading package lists... 80%
+11:14:07.882 - Info: 
+11:14:07.882 - Info: Reading package lists... 80%
+11:14:07.882 - Info: 
+11:14:07.882 - Info: Reading package lists... 80%
+11:14:07.885 - Info: 
+11:14:07.885 - Info: Reading package lists... 80%
+11:14:07.885 - Info: 
+11:14:07.885 - Info: Reading package lists... 80%
+11:14:07.885 - Info: 
+11:14:07.885 - Info: Reading package lists... 81%
+11:14:07.885 - Info: 
+11:14:07.885 - Info: Reading package lists... 81%
+11:14:07.885 - Info: 
+11:14:07.885 - Info: Reading package lists... 81%
+11:14:07.885 - Info: 
+11:14:07.885 - Info: Reading package lists... 81%
+11:14:07.885 - Info: 
+11:14:07.885 - Info: Reading package lists... 81%
+11:14:07.885 - Info: 
+11:14:07.885 - Info: Reading package lists... 81%
+11:14:07.916 - Info: 
+11:14:07.916 - Info: Reading package lists... 83%
+11:14:07.916 - Info: 
+11:14:07.916 - Info: Reading package lists... 83%
+11:14:07.929 - Info: 
+11:14:07.929 - Info: Reading package lists... 84%
+11:14:07.929 - Info: 
+11:14:07.929 - Info: Reading package lists... 84%
+11:14:07.972 - Info: 
+11:14:07.972 - Info: Reading package lists... 88%
+11:14:07.972 - Info: 
+11:14:07.972 - Info: Reading package lists... 88%
+11:14:07.987 - Info: 
+11:14:07.987 - Info: Reading package lists... 90%
+11:14:07.987 - Info: 
+11:14:07.987 - Info: Reading package lists... 90%
+11:14:08.047 - Info: 
+11:14:08.047 - Info: Reading package lists... 95%
+11:14:08.047 - Info: 
+11:14:08.047 - Info: Reading package lists... 95%
+11:14:08.078 - Info: 
+11:14:08.078 - Info: Reading package lists... 98%
+11:14:08.078 - Info: 
+11:14:08.078 - Info: Reading package lists... 98%
+11:14:08.080 - Info: 
+11:14:08.081 - Info: Reading package lists... 98%
+11:14:08.081 - Info: 
+11:14:08.081 - Info: Reading package lists... 98%
+11:14:08.163 - Info: 
+11:14:08.163 - Info: Reading package lists... 98%
+11:14:08.163 - Info: 
+11:14:08.163 - Info: Reading package lists... 98%
+11:14:08.288 - Info: 
+11:14:08.288 - Info: Reading package lists... Done
+11:14:08.288 - Info: 
+11:14:08.288 - Info: 
+11:14:08.857 - Info: *begin sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/OpenCV-4.8.0-3-g6ef37b4-aarch64-python.deb, 5
+11:14:08.858 - Info: 
+11:14:09.032 - Info: 
+11:14:09.032 - Info: Reading package lists... 0%
+11:14:09.139 - Info: 
+11:14:09.139 - Info: Reading package lists... 0%
+11:14:09.151 - Info: 
+11:14:09.152 - Info: Reading package lists... Done
+11:14:09.152 - Info: 
+11:14:09.152 - Info: 
+11:14:09.175 - Info: 
+11:14:09.175 - Info: Building dependency tree... 0%
+11:14:09.175 - Info: 
+11:14:09.175 - Info: Building dependency tree... 0%
+11:14:09.176 - Info: 
+11:14:09.176 - Info: Building dependency tree... 0%
+11:14:09.395 - Info: 
+11:14:09.395 - Info: Building dependency tree... 50%
+11:14:09.395 - Info: 
+11:14:09.395 - Info: Building dependency tree... 50%
+11:14:09.878 - Info: 
+11:14:09.878 - Info: Building dependency tree... 85%
+11:14:10.069 - Info: 
+11:14:10.069 - Info: Building dependency tree... Done
+11:14:10.069 - Info: 
+11:14:10.069 - Info: 
+11:14:10.069 - Info: 
+11:14:10.069 - Info: Reading state information... 0% 
+11:14:10.069 - Info: 
+11:14:10.069 - Info: Reading state information... 0%
+11:14:10.073 - Info: 
+11:14:10.073 - Info: Reading state information... Done
+11:14:10.073 - Info: 
+11:14:10.073 - Info: 
+11:14:10.209 - Info: Note, selecting 'libopencv-python' instead of '/opt/nvidia/deb_repos/OpenCV-4.8.0-3-g6ef37b4-aarch64-python.deb'
+11:14:10.209 - Info: 
+11:14:11.761 - Info: The following NEW packages will be installed:
+11:14:11.761 - Info: 
+11:14:11.766 - Info:   libopencv-python
+11:14:11.766 - Info: 
+11:14:11.838 - Info: 0 upgraded, 1 newly installed, 0 to remove and 285 not upgraded.
+11:14:11.839 - Info: 
+11:14:11.844 - Info: Need to get 1,920 kB of archives.
+11:14:11.844 - Info: 
+11:14:11.844 - Info: After this operation, 7,788 kB of additional disk space will be used.
+11:14:11.844 - Info: 
+11:14:11.857 - Info: 
+11:14:11.927 - Info: 0% [Working]
+11:14:11.927 - Info:             
+11:14:11.927 - Info: Get:1 https://repo.download.nvidia.com/jetson/common r39.2/main arm64 libopencv-python arm64 4.8.0-3-g6ef37b4 [1,920 kB]
+11:14:11.927 - Info: 
+11:14:11.927 - Info: 
+11:14:11.982 - Info: 0% [1 libopencv-python 8,192 B/1,920 kB 0%]
+11:14:11.982 - Info:                                            
+11:14:11.982 - Info: 100% [Working]
+11:14:11.982 - Info:               
+11:14:11.982 - Info: Fetched 1,920 kB in 0s (14.0 MB/s)
+11:14:11.982 - Info: 
+11:14:13.581 - Info: Selecting previously unselected package libopencv-python.
+11:14:13.581 - Info: 
+11:14:13.581 - Info: (Reading database ... 
+11:14:13.613 - Info: (Reading database ... 5%
+11:14:13.613 - Info: (Reading database ... 10%
+11:14:13.613 - Info: (Reading database ... 15%
+11:14:13.613 - Info: (Reading database ... 20%
+11:14:13.613 - Info: (Reading database ... 25%
+11:14:13.613 - Info: (Reading database ... 30%
+11:14:13.613 - Info: (Reading database ... 35%
+11:14:13.613 - Info: (Reading database ... 40%
+11:14:13.613 - Info: (Reading database ... 45%
+11:14:13.613 - Info: (Reading database ... 50%
+11:14:13.624 - Info: (Reading database ... 55%
+11:14:13.654 - Info: (Reading database ... 60%
+11:14:13.664 - Info: (Reading database ... 65%
+11:14:13.673 - Info: (Reading database ... 70%
+11:14:13.689 - Info: (Reading database ... 75%
+11:14:13.700 - Info: (Reading database ... 80%
+11:14:13.716 - Info: (Reading database ... 85%
+11:14:13.733 - Info: (Reading database ... 90%
+11:14:13.777 - Info: (Reading database ... 95%
+11:14:13.817 - Info: (Reading database ... 100%
+11:14:13.817 - Info: (Reading database ... 190622 files and directories currently installed.)
+11:14:13.817 - Info: 
+11:14:13.834 - Info: Preparing to unpack .../libopencv-python_4.8.0-3-g6ef37b4_arm64.deb ...
+11:14:13.834 - Info: 
+11:14:13.941 - Info: Unpacking libopencv-python (4.8.0-3-g6ef37b4) ...
+11:14:13.941 - Info: 
+11:14:14.518 - Info: Setting up libopencv-python (4.8.0-3-g6ef37b4) ...
+11:14:14.518 - Info: 
+11:14:25.360 - Info: change working directory to /tmp11:14:25.360 - Info: exec_command: ssh jetson@192.168.55.1 "dpkg-query -W -f='\${db:Status-abbrev} \${Version}' libopencv-python"11:14:25.792 - Info: [ Package Install Finished Successfully ]11:14:25.792 - Info: [ Package Install Started ]11:14:25.792 - Info: target deb installer start to install11:14:25.792 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+sudo mkdir -p /opt/nvidia/deb_repos
+sudo chmod 777 /opt/nvidia/deb_repos
+sudo rm -f /opt/nvidia/deb_repos/OpenCV-4.8.0-3-g6ef37b4-aarch64-samples.deb
+**********************11:14:27.309 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+
+exec 3>&1
+exec 1>&2
+exec 2>&3
+function safe_apt_install {
+    export DEBIAN_FRONTEND=noninteractive
+    echo "*begin $1, $2"
+    tmp_log=/tmp/sdkm_apt_install_log.ckw.txt
+    sudo rm -f $tmp_log
+    set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+    MAX_RETRY=3
+    TIMES=1
+    while [ ${CMD_STATUS} -ne 0 ]; do
+        cat $tmp_log > /dev/stderr
+        if [ $TIMES -gt $MAX_RETRY ]; then
+            echo "Unhandled error when running $1: `tr '\n' '; ' <$tmp_log`" 1>&2; exit 1
+        fi
+        if grep -q -e "is locked by another process" -e "E: Could not get lock /var/" -e "Could not open lock" $tmp_log; then
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting $2 seconds for apt to be available"; sleep ${2}
+        elif grep -q -e "apt --fix-broken install" $tmp_log; then
+            echo "safe apt install failed, need to run apt --fix-broken install"
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; sudo apt-get -f -y --allow-downgrades install 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting 5 seconds for apt"; sleep 5
+        else
+            echo "safe apt install failed: $1, exit code: $CMD_STATUS, retry number: $TIMES"
+            echo "will sleep $[ $TIMES*10 ] seconds before next attempt"
+            sleep $[ $TIMES*10 ]
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+        fi
+    done
+    if [ $CMD_STATUS -eq 0 ] && [ $TIMES -ne 1 ]; then
+        echo "safe apt install succeed. retry number: $TIMES."
+    fi
+}
+safe_apt_install "sudo apt-get -y update" 5
+sleep 0.5
+safe_apt_install "sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/OpenCV-4.8.0-3-g6ef37b4-aarch64-samples.deb" 5
+sleep 5
+sudo rm -f /opt/nvidia/deb_repos/OpenCV-4.8.0-3-g6ef37b4-aarch64-samples.deb
+**********************11:14:28.119 - Info: *begin sudo apt-get -y update, 5
+11:14:28.119 - Info: 
+11:14:28.410 - Info: 
+11:14:28.473 - Info: 0% [Working]
+11:14:28.473 - Info:             
+11:14:28.473 - Info: Hit:1 https://download.docker.com/linux/ubuntu noble InRelease
+11:14:28.473 - Info: 
+11:14:28.473 - Info: 
+11:14:28.516 - Info: 0% [Waiting for headers] [Connecting to ports.ubuntu.com (91.189.91.103)]
+11:14:28.516 - Info:                                                                          
+11:14:28.516 - Info: Hit:2 https://repo.download.nvidia.com/jetson/common r39.2 InRelease
+11:14:28.516 - Info: 
+11:14:28.516 - Info: 
+11:14:28.516 - Info:                                                                          
+11:14:28.591 - Info: 0% [Connecting to ports.ubuntu.com (91.189.91.103)]
+11:14:28.604 - Info: 0% [Waiting for headers] [Connecting to ports.ubuntu.com (91.189.91.103)]
+11:14:28.604 - Info:                                                                          
+11:14:28.604 - Info: Hit:3 https://repo.download.nvidia.com/jetson/som r39.2 InRelease
+11:14:28.604 - Info: 
+11:14:28.604 - Info: 
+11:14:28.604 - Info:                                                                          
+11:14:28.691 - Info: 0% [Connecting to ports.ubuntu.com (91.189.91.103)]
+11:14:28.692 - Info:                                                    
+11:14:28.692 - Info: Hit:4 https://repo.download.nvidia.com/jetson/ffmpeg r39.2 InRelease
+11:14:28.692 - Info: 
+11:14:28.692 - Info: 
+11:14:28.692 - Info:                                                    
+11:14:28.773 - Info: 0% [Waiting for headers]
+11:14:28.871 - Info:                         
+11:14:28.871 - Info: Hit:5 http://ports.ubuntu.com/ubuntu-ports noble InRelease
+11:14:28.871 - Info: 
+11:14:28.871 - Info: 
+11:14:28.871 - Info:                         
+11:14:28.945 - Info: 0% [Working]
+11:14:29.100 - Info: 0% [Waiting for headers]
+11:14:29.100 - Info:                         
+11:14:29.100 - Info: Hit:6 http://ports.ubuntu.com/ubuntu-ports noble-updates InRelease
+11:14:29.100 - Info: 
+11:14:29.100 - Info: 
+11:14:29.100 - Info:                         
+11:14:29.113 - Info: 0% [Working]
+11:14:29.238 - Info: 0% [Waiting for headers]
+11:14:29.330 - Info:                         
+11:14:29.330 - Info: Hit:7 http://ports.ubuntu.com/ubuntu-ports noble-backports InRelease
+11:14:29.330 - Info: 
+11:14:29.330 - Info: 
+11:14:29.330 - Info:                         
+11:14:29.363 - Info: 0% [Working]
+11:14:29.478 - Info: 0% [Waiting for headers]
+11:14:29.560 - Info:                         
+11:14:29.560 - Info: Hit:8 http://ports.ubuntu.com/ubuntu-ports noble-security InRelease
+11:14:29.560 - Info: 
+11:14:29.560 - Info: 
+11:14:29.560 - Info:                         
+11:14:29.671 - Info: 0% [Working]
+11:14:29.671 - Info: 20% [Working]
+11:14:29.671 - Info:              
+11:14:29.891 - Info: 
+11:14:29.891 - Info: Reading package lists... 0%
+11:14:29.907 - Info: 
+11:14:29.907 - Info: Reading package lists... 0%
+11:14:29.912 - Info: 
+11:14:29.912 - Info: Reading package lists... 0%
+11:14:29.912 - Info: 
+11:14:29.912 - Info: Reading package lists... 0%
+11:14:29.916 - Info: 
+11:14:29.916 - Info: Reading package lists... 0%
+11:14:29.916 - Info: 
+11:14:29.916 - Info: Reading package lists... 0%
+11:14:29.917 - Info: 
+11:14:29.917 - Info: Reading package lists... 0%
+11:14:29.917 - Info: 
+11:14:29.917 - Info: Reading package lists... 0%
+11:14:29.918 - Info: 
+11:14:29.918 - Info: Reading package lists... 0%
+11:14:29.918 - Info: 
+11:14:29.918 - Info: Reading package lists... 0%
+11:14:29.924 - Info: 
+11:14:29.924 - Info: Reading package lists... 0%
+11:14:29.996 - Info: 
+11:14:29.996 - Info: Reading package lists... 3%
+11:14:29.996 - Info: 
+11:14:29.996 - Info: Reading package lists... 3%
+11:14:30.009 - Info: 
+11:14:30.009 - Info: Reading package lists... 5%
+11:14:30.009 - Info: 
+11:14:30.009 - Info: Reading package lists... 5%
+11:14:30.639 - Info: 
+11:14:30.639 - Info: Reading package lists... 26%
+11:14:31.169 - Info: 
+11:14:31.169 - Info: Reading package lists... 41%
+11:14:31.169 - Info: 
+11:14:31.169 - Info: Reading package lists... 41%
+11:14:31.331 - Info: 
+11:14:31.331 - Info: Reading package lists... 58%
+11:14:31.331 - Info: 
+11:14:31.331 - Info: Reading package lists... 58%
+11:14:31.337 - Info: 
+11:14:31.337 - Info: Reading package lists... 58%
+11:14:31.337 - Info: 
+11:14:31.337 - Info: Reading package lists... 58%
+11:14:31.339 - Info: 
+11:14:31.339 - Info: Reading package lists... 58%
+11:14:31.339 - Info: 
+11:14:31.339 - Info: Reading package lists... 58%
+11:14:31.358 - Info: 
+11:14:31.358 - Info: Reading package lists... 59%
+11:14:31.358 - Info: 
+11:14:31.358 - Info: Reading package lists... 59%
+11:14:31.362 - Info: 
+11:14:31.362 - Info: Reading package lists... 59%
+11:14:31.362 - Info: 
+11:14:31.362 - Info: Reading package lists... 59%
+11:14:31.369 - Info: 
+11:14:31.370 - Info: Reading package lists... 59%
+11:14:31.458 - Info: 
+11:14:31.458 - Info: Reading package lists... 62%
+11:14:31.458 - Info: 
+11:14:31.458 - Info: Reading package lists... 62%
+11:14:31.475 - Info: 
+11:14:31.475 - Info: Reading package lists... 64%
+11:14:31.475 - Info: 
+11:14:31.475 - Info: Reading package lists... 64%
+11:14:31.619 - Info: 
+11:14:31.619 - Info: Reading package lists... 69%
+11:14:31.619 - Info: 
+11:14:31.619 - Info: Reading package lists... 69%
+11:14:31.643 - Info: 
+11:14:31.643 - Info: Reading package lists... 71%
+11:14:31.643 - Info: 
+11:14:31.643 - Info: Reading package lists... 71%
+11:14:31.771 - Info: 
+11:14:31.771 - Info: Reading package lists... 77%
+11:14:31.771 - Info: 
+11:14:31.771 - Info: Reading package lists... 77%
+11:14:31.804 - Info: 
+11:14:31.804 - Info: Reading package lists... 80%
+11:14:31.804 - Info: 
+11:14:31.804 - Info: Reading package lists... 80%
+11:14:31.810 - Info: 
+11:14:31.810 - Info: Reading package lists... 80%
+11:14:31.810 - Info: 
+11:14:31.810 - Info: Reading package lists... 80%
+11:14:31.812 - Info: 
+11:14:31.812 - Info: Reading package lists... 80%
+11:14:31.812 - Info: 
+11:14:31.812 - Info: Reading package lists... 80%
+11:14:31.817 - Info: 
+11:14:31.817 - Info: Reading package lists... 80%
+11:14:31.817 - Info: 
+11:14:31.817 - Info: Reading package lists... 80%
+11:14:31.817 - Info: 
+11:14:31.817 - Info: Reading package lists... 80%
+11:14:31.817 - Info: 
+11:14:31.817 - Info: Reading package lists... 80%
+11:14:31.821 - Info: 
+11:14:31.821 - Info: Reading package lists... 80%
+11:14:31.821 - Info: 
+11:14:31.821 - Info: Reading package lists... 80%
+11:14:31.822 - Info: 
+11:14:31.822 - Info: Reading package lists... 81%
+11:14:31.822 - Info: 
+11:14:31.822 - Info: Reading package lists... 81%
+11:14:31.822 - Info: 
+11:14:31.822 - Info: Reading package lists... 81%
+11:14:31.822 - Info: 
+11:14:31.822 - Info: Reading package lists... 81%
+11:14:31.823 - Info: 
+11:14:31.823 - Info: Reading package lists... 81%
+11:14:31.823 - Info: 
+11:14:31.823 - Info: Reading package lists... 81%
+11:14:31.853 - Info: 
+11:14:31.853 - Info: Reading package lists... 83%
+11:14:31.853 - Info: 
+11:14:31.853 - Info: Reading package lists... 83%
+11:14:31.868 - Info: 
+11:14:31.868 - Info: Reading package lists... 84%
+11:14:31.868 - Info: 
+11:14:31.868 - Info: Reading package lists... 84%
+11:14:31.911 - Info: 
+11:14:31.911 - Info: Reading package lists... 88%
+11:14:31.911 - Info: 
+11:14:31.911 - Info: Reading package lists... 88%
+11:14:31.927 - Info: 
+11:14:31.927 - Info: Reading package lists... 90%
+11:14:31.927 - Info: 
+11:14:31.927 - Info: Reading package lists... 90%
+11:14:31.988 - Info: 
+11:14:31.988 - Info: Reading package lists... 95%
+11:14:31.988 - Info: 
+11:14:31.988 - Info: Reading package lists... 95%
+11:14:32.019 - Info: 
+11:14:32.019 - Info: Reading package lists... 98%
+11:14:32.019 - Info: 
+11:14:32.019 - Info: Reading package lists... 98%
+11:14:32.022 - Info: 
+11:14:32.022 - Info: Reading package lists... 98%
+11:14:32.022 - Info: 
+11:14:32.022 - Info: Reading package lists... 98%
+11:14:32.105 - Info: 
+11:14:32.105 - Info: Reading package lists... 98%
+11:14:32.105 - Info: 
+11:14:32.105 - Info: Reading package lists... 98%
+11:14:32.117 - Info: 
+11:14:32.117 - Info: Reading package lists... 99%
+11:14:32.230 - Info: 
+11:14:32.230 - Info: Reading package lists... Done
+11:14:32.230 - Info: 
+11:14:32.230 - Info: 
+11:14:32.805 - Info: *begin sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/OpenCV-4.8.0-3-g6ef37b4-aarch64-samples.deb, 5
+11:14:32.805 - Info: 
+11:14:32.969 - Info: 
+11:14:32.969 - Info: Reading package lists... 0%
+11:14:33.076 - Info: 
+11:14:33.076 - Info: Reading package lists... 0%
+11:14:33.088 - Info: 
+11:14:33.088 - Info: Reading package lists... Done
+11:14:33.088 - Info: 
+11:14:33.088 - Info: 
+11:14:33.112 - Info: 
+11:14:33.112 - Info: Building dependency tree... 0%
+11:14:33.112 - Info: 
+11:14:33.112 - Info: Building dependency tree... 0%
+11:14:33.114 - Info: 
+11:14:33.114 - Info: Building dependency tree... 0%
+11:14:33.335 - Info: 
+11:14:33.335 - Info: Building dependency tree... 50%
+11:14:33.335 - Info: 
+11:14:33.335 - Info: Building dependency tree... 50%
+11:14:33.817 - Info: 
+11:14:33.817 - Info: Building dependency tree... 85%
+11:14:34.003 - Info: 
+11:14:34.003 - Info: Building dependency tree... Done
+11:14:34.003 - Info: 
+11:14:34.003 - Info: 
+11:14:34.003 - Info: 
+11:14:34.003 - Info: Reading state information... 0% 
+11:14:34.003 - Info: 
+11:14:34.003 - Info: Reading state information... 0%
+11:14:34.006 - Info: 
+11:14:34.006 - Info: Reading state information... Done
+11:14:34.006 - Info: 
+11:14:34.006 - Info: 
+11:14:34.141 - Info: Note, selecting 'libopencv-samples' instead of '/opt/nvidia/deb_repos/OpenCV-4.8.0-3-g6ef37b4-aarch64-samples.deb'
+11:14:34.141 - Info: 
+11:14:35.680 - Info: The following NEW packages will be installed:
+11:14:35.680 - Info: 
+11:14:35.685 - Info:   libopencv-samples
+11:14:35.685 - Info: 
+11:14:35.757 - Info: 0 upgraded, 1 newly installed, 0 to remove and 285 not upgraded.
+11:14:35.757 - Info: 
+11:14:35.761 - Info: Need to get 299 kB of archives.
+11:14:35.762 - Info: 
+11:14:35.762 - Info: After this operation, 1,303 kB of additional disk space will be used.
+11:14:35.762 - Info: 
+11:14:35.775 - Info: 
+11:14:35.876 - Info: 0% [Working]
+11:14:35.876 - Info:             
+11:14:35.876 - Info: Get:1 https://repo.download.nvidia.com/jetson/common r39.2/main arm64 libopencv-samples arm64 4.8.0-3-g6ef37b4 [299 kB]
+11:14:35.876 - Info: 
+11:14:35.876 - Info: 
+11:14:35.892 - Info: 4% [1 libopencv-samples 15.7 kB/299 kB 5%]
+11:14:35.893 - Info:                                           
+11:14:35.893 - Info: 100% [Working]
+11:14:35.893 - Info:               
+11:14:35.893 - Info: Fetched 299 kB in 0s (2,303 kB/s)
+11:14:35.893 - Info: 
+11:14:37.355 - Info: Selecting previously unselected package libopencv-samples.
+11:14:37.356 - Info: 
+11:14:37.356 - Info: (Reading database ... 
+11:14:37.376 - Info: (Reading database ... 5%
+11:14:37.376 - Info: (Reading database ... 10%
+11:14:37.376 - Info: (Reading database ... 15%
+11:14:37.376 - Info: (Reading database ... 20%
+11:14:37.376 - Info: (Reading database ... 25%
+11:14:37.376 - Info: (Reading database ... 30%
+11:14:37.376 - Info: (Reading database ... 35%
+11:14:37.376 - Info: (Reading database ... 40%
+11:14:37.376 - Info: (Reading database ... 45%
+11:14:37.376 - Info: (Reading database ... 50%
+11:14:37.384 - Info: (Reading database ... 55%
+11:14:37.402 - Info: (Reading database ... 60%
+11:14:37.413 - Info: (Reading database ... 65%
+11:14:37.422 - Info: (Reading database ... 70%
+11:14:37.439 - Info: (Reading database ... 75%
+11:14:37.450 - Info: (Reading database ... 80%
+11:14:37.467 - Info: (Reading database ... 85%
+11:14:37.485 - Info: (Reading database ... 90%
+11:14:37.530 - Info: (Reading database ... 95%
+11:14:37.571 - Info: (Reading database ... 100%
+11:14:37.571 - Info: (Reading database ... 190724 files and directories currently installed.)
+11:14:37.571 - Info: 
+11:14:37.588 - Info: Preparing to unpack .../libopencv-samples_4.8.0-3-g6ef37b4_arm64.deb ...
+11:14:37.588 - Info: 
+11:14:37.600 - Info: Unpacking libopencv-samples (4.8.0-3-g6ef37b4) ...
+11:14:37.600 - Info: 
+11:14:37.877 - Info: Setting up libopencv-samples (4.8.0-3-g6ef37b4) ...
+11:14:37.877 - Info: 
+11:14:48.711 - Info: change working directory to /tmp11:14:48.711 - Info: exec_command: ssh jetson@192.168.55.1 "dpkg-query -W -f='\${db:Status-abbrev} \${Version}' libopencv-samples"11:14:49.133 - Info: [ Package Install Finished Successfully ]11:14:49.133 - Info: [ Package Install Started ]11:14:49.133 - Info: target deb installer start to install11:14:49.134 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+sudo mkdir -p /opt/nvidia/deb_repos
+sudo chmod 777 /opt/nvidia/deb_repos
+sudo rm -f /opt/nvidia/deb_repos/OpenCV-4.8.0-3-g6ef37b4-aarch64-samples-data.deb
+**********************11:14:51.949 - Info: exec_command [target]:
+**********************
+#!/bin/bash
+set -e
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+
+exec 3>&1
+exec 1>&2
+exec 2>&3
+function safe_apt_install {
+    export DEBIAN_FRONTEND=noninteractive
+    echo "*begin $1, $2"
+    tmp_log=/tmp/sdkm_apt_install_log.ckw.txt
+    sudo rm -f $tmp_log
+    set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+    MAX_RETRY=3
+    TIMES=1
+    while [ ${CMD_STATUS} -ne 0 ]; do
+        cat $tmp_log > /dev/stderr
+        if [ $TIMES -gt $MAX_RETRY ]; then
+            echo "Unhandled error when running $1: `tr '\n' '; ' <$tmp_log`" 1>&2; exit 1
+        fi
+        if grep -q -e "is locked by another process" -e "E: Could not get lock /var/" -e "Could not open lock" $tmp_log; then
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting $2 seconds for apt to be available"; sleep ${2}
+        elif grep -q -e "apt --fix-broken install" $tmp_log; then
+            echo "safe apt install failed, need to run apt --fix-broken install"
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; sudo apt-get -f -y --allow-downgrades install 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+            echo "Waiting 5 seconds for apt"; sleep 5
+        else
+            echo "safe apt install failed: $1, exit code: $CMD_STATUS, retry number: $TIMES"
+            echo "will sleep $[ $TIMES*10 ] seconds before next attempt"
+            sleep $[ $TIMES*10 ]
+            TIMES=$[ $TIMES + 1 ]
+            sudo rm -f $tmp_log
+            set +e; $1 2>$tmp_log; CMD_STATUS=${PIPESTATUS[0]}; set -e
+        fi
+    done
+    if [ $CMD_STATUS -eq 0 ] && [ $TIMES -ne 1 ]; then
+        echo "safe apt install succeed. retry number: $TIMES."
+    fi
+}
+safe_apt_install "sudo apt-get -y update" 5
+sleep 0.5
+safe_apt_install "sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/OpenCV-4.8.0-3-g6ef37b4-aarch64-samples-data.deb" 5
+sleep 5
+sudo rm -f /opt/nvidia/deb_repos/OpenCV-4.8.0-3-g6ef37b4-aarch64-samples-data.deb
+**********************11:14:52.748 - Info: *begin sudo apt-get -y update, 5
+11:14:52.748 - Info: 
+11:14:53.032 - Info: 
+11:14:53.097 - Info: 0% [Working]
+11:14:53.097 - Info:             
+11:14:53.097 - Info: Hit:1 https://download.docker.com/linux/ubuntu noble InRelease
+11:14:53.097 - Info: 
+11:14:53.097 - Info: 
+11:14:53.226 - Info: 0% [Connecting to repo.download.nvidia.com (23.205.151.162)] [Connecting to ports.ubuntu.com (91.189.92.20)]
+11:14:53.387 - Info:                                                                                                             
+11:14:53.387 - Info: Hit:2 https://repo.download.nvidia.com/jetson/common r39.2 InRelease
+11:14:53.387 - Info: 
+11:14:53.387 - Info: 
+11:14:53.387 - Info:                                                                                                             
+11:14:53.444 - Info: 0% [Waiting for headers]
+11:14:53.444 - Info:                         
+11:14:53.444 - Info: Hit:3 http://ports.ubuntu.com/ubuntu-ports noble InRelease
+11:14:53.444 - Info: 
+11:14:53.444 - Info: 
+11:14:53.481 - Info: 0% [Waiting for headers]
+11:14:53.481 - Info:                         
+11:14:53.481 - Info: Hit:4 https://repo.download.nvidia.com/jetson/som r39.2 InRelease
+11:14:53.481 - Info: 
+11:14:53.481 - Info: 
+11:14:53.545 - Info: 0% [Waiting for headers]
+11:14:53.546 - Info:                         
+11:14:53.546 - Info: Hit:5 https://repo.download.nvidia.com/jetson/ffmpeg r39.2 InRelease
+11:14:53.546 - Info: 
+11:14:53.546 - Info: 
+11:14:53.555 - Info: 0% [Waiting for headers]
+11:14:53.646 - Info:                         
+11:14:53.646 - Info: Hit:6 http://ports.ubuntu.com/ubuntu-ports noble-updates InRelease
+11:14:53.646 - Info: 
+11:14:53.646 - Info: 
+11:14:53.646 - Info:                         
+11:14:53.684 - Info: 0% [Working]
+11:14:53.849 - Info: 0% [Waiting for headers]
+11:14:53.849 - Info:                         
+11:14:53.849 - Info: Hit:7 http://ports.ubuntu.com/ubuntu-ports noble-backports InRelease
+11:14:53.849 - Info: 
+11:14:53.849 - Info: 
+11:14:54.027 - Info: 0% [Waiting for headers]
+11:14:54.051 - Info:                         
+11:14:54.051 - Info: Hit:8 http://ports.ubuntu.com/ubuntu-ports noble-security InRelease
+11:14:54.051 - Info: 
+11:14:54.051 - Info: 
+11:14:54.051 - Info:                         
+11:14:54.146 - Info: 0% [Working]
+11:14:54.384 - Info: 20% [Working]
+11:14:54.384 - Info:              
+11:14:54.637 - Info: 
+11:14:54.637 - Info: Reading package lists... 0%
+11:14:54.653 - Info: 
+11:14:54.653 - Info: Reading package lists... 0%
+11:14:54.658 - Info: 
+11:14:54.658 - Info: Reading package lists... 0%
+11:14:54.658 - Info: 
+11:14:54.658 - Info: Reading package lists... 0%
+11:14:54.662 - Info: 
+11:14:54.662 - Info: Reading package lists... 0%
+11:14:54.662 - Info: 
+11:14:54.662 - Info: Reading package lists... 0%
+11:14:54.664 - Info: 
+11:14:54.664 - Info: Reading package lists... 0%
+11:14:54.664 - Info: 
+11:14:54.664 - Info: Reading package lists... 0%
+11:14:54.665 - Info: 
+11:14:54.665 - Info: Reading package lists... 0%
+11:14:54.665 - Info: 
+11:14:54.665 - Info: Reading package lists... 0%
+11:14:54.671 - Info: 
+11:14:54.671 - Info: Reading package lists... 0%
+11:14:54.751 - Info: 
+11:14:54.751 - Info: Reading package lists... 3%
+11:14:54.751 - Info: 
+11:14:54.751 - Info: Reading package lists... 3%
+11:14:54.763 - Info: 
+11:14:54.763 - Info: Reading package lists... 5%
+11:14:54.763 - Info: 
+11:14:54.763 - Info: Reading package lists... 5%
+11:14:55.379 - Info: 
+11:14:55.379 - Info: Reading package lists... 26%
+11:14:55.904 - Info: 
+11:14:55.904 - Info: Reading package lists... 41%
+11:14:55.904 - Info: 
+11:14:55.904 - Info: Reading package lists... 41%
+11:14:56.068 - Info: 
+11:14:56.068 - Info: Reading package lists... 58%
+11:14:56.068 - Info: 
+11:14:56.068 - Info: Reading package lists... 58%
+11:14:56.074 - Info: 
+11:14:56.074 - Info: Reading package lists... 58%
+11:14:56.074 - Info: 
+11:14:56.074 - Info: Reading package lists... 58%
+11:14:56.075 - Info: 
+11:14:56.075 - Info: Reading package lists... 58%
+11:14:56.075 - Info: 
+11:14:56.075 - Info: Reading package lists... 58%
+11:14:56.095 - Info: 
+11:14:56.095 - Info: Reading package lists... 59%
+11:14:56.095 - Info: 
+11:14:56.095 - Info: Reading package lists... 59%
+11:14:56.099 - Info: 
+11:14:56.099 - Info: Reading package lists... 59%
+11:14:56.099 - Info: 
+11:14:56.099 - Info: Reading package lists... 59%
+11:14:56.106 - Info: 
+11:14:56.106 - Info: Reading package lists... 59%
+11:14:56.194 - Info: 
+11:14:56.194 - Info: Reading package lists... 62%
+11:14:56.194 - Info: 
+11:14:56.194 - Info: Reading package lists... 62%
+11:14:56.211 - Info: 
+11:14:56.211 - Info: Reading package lists... 64%
+11:14:56.211 - Info: 
+11:14:56.211 - Info: Reading package lists... 64%
+11:14:56.355 - Info: 
+11:14:56.355 - Info: Reading package lists... 69%
+11:14:56.355 - Info: 
+11:14:56.355 - Info: Reading package lists... 69%
+11:14:56.378 - Info: 
+11:14:56.378 - Info: Reading package lists... 71%
+11:14:56.378 - Info: 
+11:14:56.378 - Info: Reading package lists... 71%
+11:14:56.506 - Info: 
+11:14:56.506 - Info: Reading package lists... 77%
+11:14:56.506 - Info: 
+11:14:56.506 - Info: Reading package lists... 77%
+11:14:56.539 - Info: 
+11:14:56.539 - Info: Reading package lists... 80%
+11:14:56.539 - Info: 
+11:14:56.539 - Info: Reading package lists... 80%
+11:14:56.543 - Info: 
+11:14:56.543 - Info: Reading package lists... 80%
+11:14:56.543 - Info: 
+11:14:56.543 - Info: Reading package lists... 80%
+11:14:56.546 - Info: 
+11:14:56.546 - Info: Reading package lists... 80%
+11:14:56.546 - Info: 
+11:14:56.546 - Info: Reading package lists... 80%
+11:14:56.550 - Info: 
+11:14:56.550 - Info: Reading package lists... 80%
+11:14:56.550 - Info: 
+11:14:56.550 - Info: Reading package lists... 80%
+11:14:56.551 - Info: 
+11:14:56.551 - Info: Reading package lists... 80%
+11:14:56.551 - Info: 
+11:14:56.551 - Info: Reading package lists... 80%
+11:14:56.555 - Info: 
+11:14:56.555 - Info: Reading package lists... 80%
+11:14:56.555 - Info: 
+11:14:56.555 - Info: Reading package lists... 80%
+11:14:56.555 - Info: 
+11:14:56.555 - Info: Reading package lists... 81%
+11:14:56.555 - Info: 
+11:14:56.555 - Info: Reading package lists... 81%
+11:14:56.555 - Info: 
+11:14:56.555 - Info: Reading package lists... 81%
+11:14:56.555 - Info: 
+11:14:56.555 - Info: Reading package lists... 81%
+11:14:56.556 - Info: 
+11:14:56.556 - Info: Reading package lists... 81%
+11:14:56.556 - Info: 
+11:14:56.556 - Info: Reading package lists... 81%
+11:14:56.587 - Info: 
+11:14:56.587 - Info: Reading package lists... 83%
+11:14:56.587 - Info: 
+11:14:56.587 - Info: Reading package lists... 83%
+11:14:56.602 - Info: 
+11:14:56.602 - Info: Reading package lists... 84%
+11:14:56.602 - Info: 
+11:14:56.602 - Info: Reading package lists... 84%
+11:14:56.643 - Info: 
+11:14:56.643 - Info: Reading package lists... 88%
+11:14:56.643 - Info: 
+11:14:56.643 - Info: Reading package lists... 88%
+11:14:56.659 - Info: 
+11:14:56.659 - Info: Reading package lists... 90%
+11:14:56.659 - Info: 
+11:14:56.659 - Info: Reading package lists... 90%
+11:14:56.721 - Info: 
+11:14:56.721 - Info: Reading package lists... 95%
+11:14:56.721 - Info: 
+11:14:56.721 - Info: Reading package lists... 95%
+11:14:56.750 - Info: 
+11:14:56.750 - Info: Reading package lists... 98%
+11:14:56.750 - Info: 
+11:14:56.750 - Info: Reading package lists... 98%
+11:14:56.752 - Info: 
+11:14:56.752 - Info: Reading package lists... 98%
+11:14:56.752 - Info: 
+11:14:56.752 - Info: Reading package lists... 98%
+11:14:56.835 - Info: 
+11:14:56.835 - Info: Reading package lists... 98%
+11:14:56.835 - Info: 
+11:14:56.835 - Info: Reading package lists... 98%
+11:14:56.846 - Info: 
+11:14:56.846 - Info: Reading package lists... 99%
+11:14:56.959 - Info: 
+11:14:56.959 - Info: Reading package lists... Done
+11:14:56.959 - Info: 
+11:14:56.959 - Info: 
+11:14:57.528 - Info: *begin sudo -E apt-get -y --allow-downgrades  install /opt/nvidia/deb_repos/OpenCV-4.8.0-3-g6ef37b4-aarch64-samples-data.deb, 5
+11:14:57.528 - Info: 
+11:14:57.699 - Info: 
+11:14:57.699 - Info: Reading package lists... 0%
+11:14:57.805 - Info: 
+11:14:57.806 - Info: Reading package lists... 0%
+11:14:57.817 - Info: 
+11:14:57.817 - Info: Reading package lists... Done
+11:14:57.817 - Info: 
+11:14:57.817 - Info: 
+11:14:57.840 - Info: 
+11:14:57.840 - Info: Building dependency tree... 0%
+11:14:57.840 - Info: 
+11:14:57.840 - Info: Building dependency tree... 0%
+11:14:57.842 - Info: 
+11:14:57.842 - Info: Building dependency tree... 0%
+11:14:58.062 - Info: 
+11:14:58.063 - Info: Building dependency tree... 50%
+11:14:58.063 - Info: 
+11:14:58.063 - Info: Building dependency tree... 50%
+11:14:58.551 - Info: 
+11:14:58.551 - Info: Building dependency tree... 86%
+11:14:58.723 - Info: 
+11:14:58.723 - Info: Building dependency tree... Done
+11:14:58.723 - Info: 
+11:14:58.723 - Info: 
+11:14:58.723 - Info: 
+11:14:58.723 - Info: Reading state information... 0% 
+11:14:58.723 - Info: 
+11:14:58.723 - Info: Reading state information... 0%
+11:14:58.728 - Info: 
+11:14:58.728 - Info: Reading state information... Done
+11:14:58.728 - Info: 
+11:14:58.728 - Info: 
+11:14:58.865 - Info: Note, selecting 'opencv-samples-data' instead of '/opt/nvidia/deb_repos/OpenCV-4.8.0-3-g6ef37b4-aarch64-samples-data.deb'
+11:14:58.865 - Info: 
+11:15:00.411 - Info: The following NEW packages will be installed:
+11:15:00.411 - Info: 
+11:15:00.412 - Info:   opencv-samples-data
+11:15:00.412 - Info: 
+11:15:00.484 - Info: 0 upgraded, 1 newly installed, 0 to remove and 285 not upgraded.
+11:15:00.484 - Info: 
+11:15:00.489 - Info: Need to get 21.3 MB of archives.
+11:15:00.489 - Info: 
+11:15:00.490 - Info: After this operation, 22.3 MB of additional disk space will be used.
+11:15:00.490 - Info: 
+11:15:00.502 - Info: 
+11:15:00.625 - Info: 0% [Working]
+11:15:00.625 - Info:             
+11:15:00.625 - Info: Get:1 https://repo.download.nvidia.com/jetson/common r39.2/main arm64 opencv-samples-data arm64 4.8.0-3-g6ef37b4 [21.3 MB]
+11:15:00.625 - Info: 
+11:15:00.625 - Info: 
+11:15:01.084 - Info: 0% [1 opencv-samples-data 15.7 kB/21.3 MB 0%]
+11:15:01.084 - Info:                                              
+11:15:01.084 - Info: 100% [Working]
+11:15:01.084 - Info:               
+11:15:01.084 - Info: Fetched 21.3 MB in 1s (36.0 MB/s)
+11:15:01.084 - Info: 
+11:15:02.541 - Info: Selecting previously unselected package opencv-samples-data.
+11:15:02.541 - Info: 
+11:15:02.541 - Info: (Reading database ... 
+11:15:02.557 - Info: (Reading database ... 5%
+11:15:02.557 - Info: (Reading database ... 10%
+11:15:02.557 - Info: (Reading database ... 15%
+11:15:02.557 - Info: (Reading database ... 20%
+11:15:02.557 - Info: (Reading database ... 25%
+11:15:02.557 - Info: (Reading database ... 30%
+11:15:02.557 - Info: (Reading database ... 35%
+11:15:02.557 - Info: (Reading database ... 40%
+11:15:02.557 - Info: (Reading database ... 45%
+11:15:02.557 - Info: (Reading database ... 50%
+11:15:02.563 - Info: (Reading database ... 55%
+11:15:02.580 - Info: (Reading database ... 60%
+11:15:02.590 - Info: (Reading database ... 65%
+11:15:02.599 - Info: (Reading database ... 70%
+11:15:02.615 - Info: (Reading database ... 75%
+11:15:02.626 - Info: (Reading database ... 80%
+11:15:02.641 - Info: (Reading database ... 85%
+11:15:02.660 - Info: (Reading database ... 90%
+11:15:02.705 - Info: (Reading database ... 95%
+11:15:02.744 - Info: (Reading database ... 100%
+11:15:02.744 - Info: (Reading database ... 190910 files and directories currently installed.)
+11:15:02.744 - Info: 
+11:15:02.761 - Info: Preparing to unpack .../opencv-samples-data_4.8.0-3-g6ef37b4_arm64.deb ...
+11:15:02.761 - Info: 
+11:15:02.778 - Info: Unpacking opencv-samples-data (4.8.0-3-g6ef37b4) ...
+11:15:02.778 - Info: 
+11:15:03.476 - Info: Setting up opencv-samples-data (4.8.0-3-g6ef37b4) ...
+11:15:03.476 - Info: 
+11:15:14.306 - Info: change working directory to /tmp11:15:14.307 - Info: exec_command: ssh jetson@192.168.55.1 "dpkg-query -W -f='\${db:Status-abbrev} \${Version}' opencv-samples-data"11:15:14.730 - Info: [ Package Install Finished Successfully ]11:15:14.730 - Info: exec_command: ssh   jetson@192.168.55.1 "df -B1 / | tail -1 | awk '{ printf \$4 }'"11:15:15.123 - Info: [target] [ 21.26 MB used. Disk Avail: 205.01 GB ]11:15:15.123 - Info: [ NV_L4T_OPENCV_SBSA_TARGET_POST_INSTALL_COMP Install took 2m2s ]
