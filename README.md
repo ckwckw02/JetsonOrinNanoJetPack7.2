@@ -507,6 +507,32 @@ CUDA Devices: 1
 
 This confirms that the installed OpenCV version is `5.1.0-dev` and that OpenCV detects one CUDA-enabled device.
 
+Check that Python can import GStreamer with OpenCV.
+
+Run:
+
+```bash
+python3 -c "import cv2; print(cv2.getBuildInformation())""
+```
+
+Recorded result:
+
+```text
+Video I/O:
+    FFMPEG:                      YES
+      avcodec:                   YES (60.31.102)
+      avformat:                  YES (60.16.100)
+      avutil:                    YES (58.29.100)
+      swscale:                   YES (7.5.100)
+      avdevice:                  NO
+    GStreamer:                   YES (1.24.2)
+    v4l/v4l2:                    YES (linux/videodev2.h)
+    Orbbec:                      YES
+
+```
+
+This confirms that the installed GStreamer version is `1.24.2`.
+
 ---
 
 # STEP 12 — Install PyTorch and Torchvision
@@ -524,8 +550,10 @@ sudo apt install python3.12-venv
 Create a virtual environment:
 
 ```bash
-python -m venv .venv
+python3 -m venv --system-site-packages .venv
 ```
+
+`"--system-site-packages" with System Packages for OpenCV with CUDA or GStreamer...`
 
 Activate the virtual environment:
 
