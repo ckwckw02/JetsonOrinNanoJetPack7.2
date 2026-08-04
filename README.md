@@ -591,8 +591,12 @@ Install the latest Ultralytics YOLO package directly from the `main` branch and 
 Install Ultralytics:
 
 ```bash
-pip install git+https://github.com/ultralytics/ultralytics.git@main
+pip install --no-deps git+https://github.com/ultralytics/ultralytics.git@main
+
+pip install psutil
 ```
+
+`"--no-deps" to avoid OpenCV reinstall without CUDA`
 
 Run the Ultralytics check:
 
