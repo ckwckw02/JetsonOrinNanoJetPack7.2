@@ -594,6 +594,8 @@ Install Ultralytics:
 pip install --no-deps git+https://github.com/ultralytics/ultralytics.git@main
 
 pip install psutil
+
+pip install https://github.com/ultralytics/assets/releases/download/v0.0.0/onnxruntime_gpu-1.24.0-cp312-cp312-linux_aarch64.whl
 ```
 
 `"--no-deps" to avoid OpenCV reinstall without CUDA`
