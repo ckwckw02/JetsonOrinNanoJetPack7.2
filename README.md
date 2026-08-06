@@ -533,6 +533,8 @@ Video I/O:
 
 This confirms that the installed GStreamer version is `1.24.2`.
 
+`cv2.getBuildInformation().txt` for the detail results
+
 ---
 
 # STEP 12 — Install PyTorch and Torchvision
